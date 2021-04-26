@@ -27,7 +27,15 @@ xvarChoices <- c(
   "Tm" = "Tm1",
   "Z Diameter (nm)" = "Z_D",
   "Peak 1 Diameter (nm)" = "peak1_D",
-  "Activity (Rate)" = "act_rate"
+  "Activity (Rate)" = "act_rate",
+  "pH" = "pH",
+  "Salt Conc. (mM)" = "salt_mM",
+  "Additive 1 Conc." = "additive1_conc",
+  "Additive 2 Conc." = "additive2_conc",
+  "DTT (mM)" = "DTT_mM",
+  "TCEP (mM)" = "TCEP_mM",
+  "Glycerol (%)" = "glycerol",
+  "Albumin (mg/mL)" = "albumin_mgml"
 )
 
 yvarChoices <- c(
@@ -37,7 +45,16 @@ yvarChoices <- c(
   "Polydispersity Index" = "PdI",
   "Z Modality" = "mode_Z",
   "Activity (Endpoint)" = "act_endpoint",
-  "Activity (Rate)" = "act_rate"
+  "Activity (Rate)" = "act_rate",
+  "Buffer" = "buffer",
+  "pH" = "pH",
+  "Salt" = "salt",
+  "Additive 1" = "additive1",
+  "Additive 2" = "additive2",
+  "DTT (mM)" = "DTT_mM",
+  "TCEP (mM)" = "TCEP_mM",
+  "Glycerol (%)" = "glycerol",
+  "Albumin (mg/mL)" = "albumin_mgml"
 )
 
 colorvarChoices <- c(

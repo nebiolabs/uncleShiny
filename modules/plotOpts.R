@@ -66,16 +66,16 @@ plotOptsUI <- function(id) {
         icon = icon("sliders")
       ),
       selectInput(
-        ns("xvar1"),
-        "X Variable:",
-        choices = xvarChoices,
-        selected = "Z_D"
-      ),
-      selectInput(
         ns("yvar1"),
         "Y Variable:",
         choices = yvarChoices,
         selected = "PdI"
+      ),
+      selectInput(
+        ns("xvar1"),
+        "X Variable:",
+        choices = xvarChoices,
+        selected = "Z_D"
       ),
       # actionButton(
       #   inputId = ns("updatePlot1"),
@@ -104,16 +104,16 @@ plotOptsUI <- function(id) {
         icon = icon("sliders")
       ),
       selectInput(
-        ns("xvar2"),
-        "X Variable:",
-        choices = xvarChoices,
-        selected = "Tm1"
-      ),
-      selectInput(
         ns("yvar2"),
         "Y Variable:",
         choices = yvarChoices,
         selected = "Tagg266"
+      ),
+      selectInput(
+        ns("xvar2"),
+        "X Variable:",
+        choices = xvarChoices,
+        selected = "Tm1"
       ),
       # actionButton(
       #   inputId = ns("updatePlot2"),
@@ -157,16 +157,16 @@ plotOptsUI <- function(id) {
         selected = "buffer"
       ),
       selectInput(
-        ns("xvar3"),
-        "X Variable:",
-        choices = xvarChoices,
-        selected = "Z_D"
-      ),
-      selectInput(
         ns("yvar3"),
         "Y Variable:",
         choices = yvarChoices,
         selected = "Tagg266"
+      ),
+      selectInput(
+        ns("xvar3"),
+        "X Variable:",
+        choices = xvarChoices,
+        selected = "Z_D"
       ),
       # actionButton(
       #   inputId = ns("updatePlot2"),
