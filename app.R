@@ -371,7 +371,25 @@ ui <- tagList(
             tabPanel(
               "Activity Data",
               value = "activityTab",
-              icon = icon("dna")
+              icon = icon("dna"),
+              fluidRow(
+                column(
+                  width = 6,
+                  h4("Activity Assay Data:"),
+                  helpText("This module is currently under construction."),
+                  br(),
+                  helpText("The goal is to provide a convenient location",
+                           "to view activity assay data which corresponds",
+                           "the the formulations analyzed on the Uncle."),
+                  br(),
+                  helpText("This is more flexible than activity data",
+                           "that is bundled with the Uncle data,",
+                           "and it can also include timecourse studies",
+                           "and user defined controls that do not directly",
+                           "relate back to a screen formulation ",
+                           "(e.g. a previous lot or development formulation).")
+                )
+              )
             )#,
             ##===============================================================
             ##                         Spectra tab                         ==
