@@ -22,7 +22,7 @@
 ##================================================================
 
 library(shiny)
-library(shinythemes)
+# library(shinythemes) # using bootswatch library bslib for theming
 library(bslib)
 library(shinyWidgets)
 library(tidyverse)
@@ -57,6 +57,7 @@ source("modules/printer.R")
 source("modules/plotOpts.R")
 source("modules/specSpark.R")
 source("modules/spectraViewer.R")
+source("modules/activityAssay.R")
 
 
 ##===============================================================
@@ -388,6 +389,12 @@ ui <- tagList(
                            "and user defined controls that do not directly",
                            "relate back to a screen formulation ",
                            "(e.g. a previous lot or development formulation).")
+                )
+              ),
+              fluidRow(
+                column(
+                  width = 12,
+                  activityAssayUI("activityAssay")
                 )
               )
             )#,
@@ -1056,7 +1063,17 @@ server <- function(input, output, session) {
   #   req(zoomySelData())
   #   callModule(spectraViewer, "spectraViewer", zoomySelData(), plotOpts$palette())
   # })
-
+  
+  
+  ##===============================================================
+  ##                    Activity assay module                    ==
+  ##===============================================================
+  
+  observeEvent(data(), {
+    req(data())
+    callModule(activityAssay, "activityAssay", data(), plotOpts$palette())
+  }, ignoreNULL = FALSE)
+  
   
   ##================================================================
   ##                        Raw input data                        ==

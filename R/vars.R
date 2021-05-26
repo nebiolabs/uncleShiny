@@ -70,7 +70,7 @@ colorvarChoices <- c(
   "Activity (Endpoint)" = "act_endpoint",
   "Activity (Rate)" = "act_rate",
   "Z Modality" = "mode_Z",
-  "Timecourse (hr)" = "time_hr",
+  "Timecourse (hr)" = "time_uncle_hr",
   "Plate" = "plate",
   "Comment" = "comment"
 )
