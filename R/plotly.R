@@ -89,6 +89,21 @@ vrect <- function(x0 = 0, x1 = 1, opacity = 0.5, color = "lightgrey") {
   )
 }
 
+prect <- function(x0 = 0, x1 = 1, y0 = 0, y1 = 1, opacity = 0.5, color = "lightgrey") {
+  list(
+    type = "rect",
+    fillcolor = "rgba(0,0,0,0)",
+    line = list(color = "black"),
+    x0 = x0, 
+    x1 = x1, 
+    xref = "paper",
+    y0 = y0, 
+    y1 = y1,
+    # yref = "paper", # extend beyond the limits of the plot view
+    opacity = 0.2
+  )
+}
+
 # Plotly scatter plot function..
 buildplotly <- function(data, x, y, source, color, palette, showlegend = TRUE, legendgroup = NULL, colorbar = TRUE, customdata = NA) {
   if (is.null(legendgroup)) {
