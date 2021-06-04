@@ -574,17 +574,6 @@ server <- function(input, output, session) {
     )
   })
   
-  # this updates the experiment list when the data selection changes..
-  observeEvent(input$loadData, {
-    req(dataList())
-    updateSelectInput(
-      session,
-      "expSelection",
-      choices = names(dataList()),
-      selected = names(dataList())[1]
-    )
-  })
-  
   
   ##===============================================================
   ##                           Load-in                           ==
@@ -633,8 +622,15 @@ server <- function(input, output, session) {
   ##                       Experiment Data                       ==
   ##===============================================================
   
-  
+  # this updates the experiment lists when the data selection changes..
   observeEvent(input$loadData, {
+    req(dataList())
+    updateSelectInput(
+      session,
+      "expSelection",
+      choices = names(dataList()),
+      selected = names(dataList())[1]
+    )
     updateSelectInput(
       session,
       "blendSelectionL",
@@ -701,7 +697,7 @@ server <- function(input, output, session) {
   
   data <- debounce(
     eventReactive(c(input$loadData, input$expSelection, input$modeSelection, input$blendData), {
-      req(dataList(), input$expSelection, input$blendSelectionL, input$blendSelectionR)
+      req(dataList(), input$expSelection, input$blendSelectionL)
       if(input$modeSelection == "blend") {
         expData <- purrr::map_dfr(
           dataList()[c(input$blendSelectionL, input$blendSelectionR)],
@@ -713,7 +709,7 @@ server <- function(input, output, session) {
       }
       return(expData)
     }),
-    millis = 100
+    millis = 500, priority = -100
   )
   
   output$tableOutput <- renderPrint({
