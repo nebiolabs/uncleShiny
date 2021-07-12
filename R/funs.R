@@ -12,15 +12,17 @@ mycolors <- function(palette, n) {
 
 # function to create a spectra sparkline
 ggspark <- function(dfHover, dfClick, hover, title, n, derivedList, alpha = 0.6) {
+  # this grabs the summary value associated with the plotted spectra (see vars.R)
   targetHover <- derivedList[hover]
 
+  
   if (targetHover == "none") {
     ## the "none" is for the correlation plot, which has no derived summary value
     valHover <- NA
     xval <- 0
     yval <- 0
   } else {
-    valHover <- dfHover[[targetHover]][[1]]
+    valHover <- dfHover[[targetHover]][[1]]# in case two points are somehow selected by hover, take the first
     if (is.na(valHover)) {
       xval <- 0
       yval <- 0
