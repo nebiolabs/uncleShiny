@@ -22,6 +22,9 @@
 ##================================================================
 
 library(shiny)
+library(DBI)
+library(pool)
+library(RPostgres)
 # library(shinythemes) # using bootswatch library bslib for theming
 library(bslib)
 library(shinyWidgets)
@@ -67,6 +70,20 @@ source("modules/activityAssay.R")
 source("R/vars.R")
 
 
+##===============================================================
+##                         Connections                         ==
+##===============================================================
+
+ebase_dev <- pool::dbPool(
+  drv = RPostgres::Postgres(),
+  dbname = "ebase_dev",
+  host = "ebase-db-c.neb.com",
+  port = 5432,
+  user = Sys.getenv("ebase_uid"),
+  password = Sys.getenv("ebase_pwd")
+)
+
+
 ############################################################################
 ############################################################################
 ############################################################################
@@ -95,6 +112,77 @@ ui <- tagList(
     # theme = shinytheme("yeti"),
     theme = bslib::bs_theme(version = 4, bootswatch = "yeti"),
     # theme = bslib::bs_theme(version = 4),
+    ##================================================================
+    ##                       Navbar: Database                       ==
+    ##================================================================
+    tabPanel(
+      "Database Connection",
+      icon = icon("database"),
+      value = "database",
+      sidebarLayout(
+        ##================================================================
+        ##                          Side panel                          ==
+        ##================================================================
+        sidebarPanel(
+          width = 3,
+          div(style = "display: inline-block", icon("database")),
+          div(style = "display: inline-block", h4("Database")),
+          helpText("Click refresh to re-establish connection to ebase
+                   and display available protein datasets for analysis."),
+          selectInput(
+            "db_product_sel",
+            NULL,
+            choices = NULL
+          ),
+          actionButton(
+            "db_refresh",
+            "Refresh",
+            icon = icon("sync-alt")
+          ),
+          br(),
+          br(),
+          br(),
+          selectInput(
+            "db_exp_sel",
+            NULL,
+            choices = NULL
+          ),
+          actionButton(
+            "db_load",
+            "Load Data",
+            icon = icon("sync-alt")
+          )
+        ),
+        ##================================================================
+        ##                          Main panel                          ==
+        ##================================================================
+        mainPanel(
+          width = 9,
+          tabsetPanel(
+            ##===============================================================
+            ##                        Selection tab                        ==
+            ##===============================================================
+            tabPanel(
+              "Selection",
+              value = "db_selection",
+              icon = icon("object-group"),
+              h4("Products available on server:"),
+              DTOutput("db_product_table", width = "100%"),
+              h4("Experiments available for selected product:"),
+              DTOutput("db_exp_available", width = "100%")
+            ),
+            ##===============================================================
+            ##                      Visualization tab                      ==
+            ##===============================================================
+            tabPanel(
+              "Visualization",
+              value = "db_visualize",
+              icon = icon("chart-area")
+            )
+          )
+        )
+      )
+    ),
     ##===============================================================
     ##                    Navbar: Data Analysis                    ==
     ##===============================================================
@@ -103,11 +191,14 @@ ui <- tagList(
       icon = icon("chart-bar"),
       value = "analysis",
       sidebarLayout(
+        ##================================================================
+        ##                          Side panel                          ==
+        ##================================================================
         sidebarPanel(
           width = 2,
           # h3("Selections:"),
           # profvis::profvis_ui("profiler"),
-          div(style = "display: inline-block", icon("database")),
+          div(style = "display: inline-block", icon("table")),
           div(style = "display: inline-block", h4("Dataset")),
           helpText("Select a protein and then click the 'Load Dataset' button."),
           selectInput(
@@ -543,15 +634,17 @@ ui <- tagList(
 ###########################################################################
 
 
+
+
 server <- function(input, output, session) {
   # bslib::bs_themer()
   
   # callModule(profvis::profvis_server, "profiler")
   
-  ##================================================================
-  ##                           Database                           ==
-  ##================================================================
   
+  ##================================================================
+  ##                       Local 'Database'                       ==
+  ##================================================================
   
   # watches the data directory for any changes and auto-updates a named path list every ten seconds..
   dataPaths <- reactiveFileReader(
@@ -571,6 +664,129 @@ server <- function(input, output, session) {
       session,
       "dataSelection",
       choices = c(dataPaths())
+    )
+  })
+  
+  
+  ##===============================================================
+  ##                     PostgreSQL Database                     ==
+  ##===============================================================
+  
+  # db connection should be made as a `pool` object on app initiation
+  print(ebase_dev)
+  
+  
+  ##::::::::::::::::::::::::
+  ##  Available Products  ::
+  ##::::::::::::::::::::::::
+  
+  db_product_table <- eventReactive(input$db_refresh, {
+    req(ebase_dev)
+    DBI::dbGetQuery(
+      ebase_dev,
+      "SELECT x.name AS product_name, x.id AS product_id, x.catalog_number
+       FROM products AS x
+       INNER JOIN uncle_experiments AS y
+       on x.id = y.product_id"
+    )
+  })
+
+  output$db_product_table <- renderDT({
+    req(db_product_table())
+    datatable(
+      data = db_product_table(),
+      selection = "none",
+      # extensions = c("FixedColumns"),
+      options = list(
+        dom = "ftip",
+        # f - filter
+        searchHighlight = TRUE,
+        # p - pagination
+        scrollX = TRUE,
+        # scrollY = "250px",
+        paging = TRUE,
+        pageLength = 16,
+        scrollCollapse = TRUE#,
+        # t - table
+        # fixedColumns = list(leftColumns = 5),
+        # order = list(list(3, "asc")),
+        # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
+      )
+    )
+  })
+  
+  db_prod_available <- eventReactive(input$db_refresh, {
+    req(db_product_table())
+    db_product_table() |>
+      dplyr::select(product_name, product_id) |>
+      tibble::deframe()
+  })
+
+  observeEvent(db_prod_available(), {
+    req(db_prod_available())
+    updateSelectInput(
+      session,
+      "db_product_sel",
+      choices = c(" " = 0, db_prod_available()),
+      selected = 0
+    )
+  })
+  
+  
+  ##:::::::::::::::::::::::::::
+  ##  Available Experiments  ::
+  ##:::::::::::::::::::::::::::
+  
+  db_exp_table <- eventReactive(input$db_product_sel, {
+    req(db_product_table())
+    DBI::dbGetQuery(
+      ebase_dev,
+      paste0("SELECT id AS experiment_id, date,
+                 uncle_instrument_id AS instrument_id, product_id, exp_type,
+                 plate_generation, plate_side
+                 FROM uncle_experiments
+                 WHERE product_id = ", input$db_product_sel)
+    )
+  })
+  
+  output$db_exp_available <- renderDT({
+    req(db_exp_table())
+    datatable(
+      data = db_exp_table(),
+      selection = "none",
+      # extensions = c("FixedColumns"),
+      options = list(
+        dom = "ftip",
+        # f - filter
+        searchHighlight = TRUE,
+        # p - pagination
+        scrollX = TRUE,
+        # scrollY = "250px",
+        paging = TRUE,
+        pageLength = 16,
+        scrollCollapse = TRUE#,
+        # t - table
+        # fixedColumns = list(leftColumns = 5),
+        # order = list(list(3, "asc")),
+        # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
+      )
+    )
+  })
+  
+  db_exp_available <- eventReactive(input$db_product_sel, {
+    req(db_exp_table())
+    db_exp_table() |>
+      tidyr::unite(col = "experiment", exp_type, plate_generation, plate_side, sep = "_") |> 
+      dplyr::select(experiment, experiment_id) |> 
+      tibble::deframe()
+  })
+  
+  observeEvent(db_exp_available(), {
+    req(db_exp_available())
+    updateSelectInput(
+      session,
+      "db_exp_sel",
+      choices = c(" " = 0, db_exp_available())
     )
   })
   
@@ -698,7 +914,7 @@ server <- function(input, output, session) {
   data <- debounce(
     eventReactive(c(input$loadData, input$expSelection, input$modeSelection, input$blendData), {
       req(dataList(), input$expSelection, input$blendSelectionL)
-      if(input$modeSelection == "blend") {
+      if (input$modeSelection == "blend") {
         expData <- purrr::map_dfr(
           dataList()[c(input$blendSelectionL, input$blendSelectionR)],
           bind_rows#,
@@ -1122,3 +1338,10 @@ server <- function(input, output, session) {
 
 # Run the application
 shinyApp(ui = ui, server = server)
+# 
+# opens the app in a local, pre-sized RStudio window
+# shiny::runGadget(
+#   ui, server,
+#   viewer = dialogViewer("UncleDashboard", width = 1200, height = 800)
+#   # viewer = browserViewer()
+# )
