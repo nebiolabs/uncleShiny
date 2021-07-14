@@ -1,6 +1,10 @@
 source("R/vars.R")
 
-# Custom color palette from `RColorBrewer`..
+
+##===============================================================
+##                    Custom Color Palettes                    ==
+##===============================================================
+
 mycolors <- function(palette, n) {
   paln <- palnList[[palette]]
   if(palette == "Default") {
@@ -10,7 +14,11 @@ mycolors <- function(palette, n) {
   }
 }
 
-# function to create a spectra sparkline
+
+##================================================================
+##                      Spectra Sparklines                      ==
+##================================================================
+
 ggspark <- function(dfHover, dfClick, hover, title, n, derivedList, alpha = 0.6) {
   # this grabs the summary value associated with the plotted spectra (see vars.R)
   targetHover <- derivedList[hover]
@@ -92,6 +100,113 @@ ggspark <- function(dfHover, dfClick, hover, title, n, derivedList, alpha = 0.6)
   return(p)
 }
 
+
+##================================================================
+##                      Postgres Functions                      ==
+##================================================================
+
+##:::::::::::::::::::::::::
+##  Parsing float8 type  ::
+##:::::::::::::::::::::::::
+
+parse_float8 <- function(s) {
+  readr::parse_double(
+    purrr::simplify(
+      stringr::str_split(
+        stringr::str_replace_all(s, "(^\\{|\\}$)", ""),
+        pattern = ","
+      )
+    )
+  )
+}
+
+
+##:::::::::::::::::::
+##  Trimming data  ::
+##:::::::::::::::::::
+
+drop_unused <- function(df) {
+  df[colSums(!is.na(df)) > 0 & !(names(df) %in% c("created_at", "updated_at", "export_type", "sample"))]
+}
+
+
+##:::::::::::::
+##  Parsers  ::
+##:::::::::::::
+
+parse_summary <- function(df) {
+  if ("sls_266" %in% names(df)) {
+    df |> 
+      dplyr::filter(export_type == "sum") |> 
+      dplyr::rename(sls_id = id) |> 
+      drop_unused()
+  } else {
+    df |> 
+      dplyr::filter(export_type == "sum") |> 
+      dplyr::rename(dls_id = id, specDLS_C_residuals = residuals) |> 
+      dplyr::mutate(
+        specDLS_C_residuals = purrr::map(specDLS_C_residuals, parse_float8)
+      ) |> 
+      drop_unused()
+  }
+}
+
+parse_bundle <- function(df) {
+  dls_vars_to_nest <- rlang::expr(c("time", "hydrodynamic_diameter", "amplitude", "data_id"))
+
+  df_dropped <- df |>
+  dplyr::filter(export_type == "bundle") |>
+  dplyr::rename(data_id = id) |>
+  drop_unused()
+
+  if ("sls_266" %in% names(df_dropped)) {
+    df_nested <- df_dropped |>
+    tidyr::nest(
+      specTm = c("temperature", "bcm", "data_id"),
+      specSLS266 = c("temperature", "sls_266", "data_id"),
+      specSLS473 = c("temperature", "sls_473", "data_id")
+    )
+  } else {
+    df_nested <- df_dropped |>
+    dplyr::select(-any_of(c("residuals"))) |>
+    tidyr::nest(
+      spec_data = tidyselect::any_of(!!dls_vars_to_nest)
+    ) |>
+    dplyr::mutate(
+      spec_data = purrr::map(
+        spec_data,
+        \(df) df[colSums(!is.na(df)) > 0 & names(df) != "id"]
+      )
+    ) |>
+    tidyr::pivot_wider(
+      id_cols = c(uncle_experiment_id, well),
+      names_from = dls_data_type,
+      values_from = spec_data
+    ) |>
+    dplyr::rename(
+      specDLS_I = intensity,
+      specDLS_M = mass,
+      specDLS_C = correlation
+    )
+  }
+  return(df_nested)
+}
+
+join_sls_dls <- function(sls, dls) {
+  join_vars <- c("uncle_experiment_id", "well")
+  purrr::reduce(
+    list(parse_summary(sls), parse_bundle(sls), parse_summary(dls), parse_bundle(dls)),
+    dplyr::full_join,
+    by = join_vars
+  )
+}
+
+
+
+
+##================================================================
+##                       Banner Functions                       ==
+##================================================================
 
 # mainBanner <- function(x, y) {bannerCommenter::banner(x, y, emph = TRUE, upper = FALSE, leftSideHashes = 4, rightSideHashes = 4, numLines = 4)}
 # secBanner <- function(x) {bannerCommenter::banner(x, emph = FALSE, upper = FALSE, bandChar = "=")}
