@@ -18,15 +18,9 @@ plotOptsUI <- function(id) {
     br(),
     br(),
     h5("Global Settings"),
-    dropMenu(
-      actionBttn(
-        inputId = "openGlobal",
-        label = NULL, 
-        style = "bordered",
-        color = "danger",
-        size = "sm",
-        icon = icon("sliders")
-      ),
+    # the dropdown buttons were breaking the UI
+    # so I switched to this more basic dropdown
+    dropdown(
       selectInput(
         ns("color"),
         "Color Points By:",
@@ -44,27 +38,17 @@ plotOptsUI <- function(id) {
       #   label = "Update",
       #   icon = icon("sync-alt")
       # ),
-      padding = "10px",
-      placement = "bottom",
-      trigger = "click",
-      theme = "translucent",
-      hideOnClick = TRUE,
-      maxWidth = "250px"
+      right = TRUE,
+      icon = icon("sliders"),
+      size = "sm",
+      width = "250px"
     ),
     br(),
     ##================================================================
     ##                        Plot 1 options                        ==
     ##================================================================
     h5("Plot1 Settings"),
-    dropMenu(
-      actionBttn(
-        inputId = "openPlot1",
-        label = NULL, 
-        style = "bordered",
-        color = "warning",
-        size = "sm",
-        icon = icon("sliders")
-      ),
+    dropdown(
       selectInput(
         ns("yvar1"),
         "Y Variable:",
@@ -82,27 +66,17 @@ plotOptsUI <- function(id) {
       #   label = "Update",
       #   icon = icon("sync-alt")
       # ),
-      padding = "10px",
-      placement = "bottom",
-      trigger = "click",
-      theme = "translucent",
-      hideOnClick = TRUE,
-      maxWidth = "250px"
+      right = TRUE,
+      icon = icon("sliders"),
+      size = "sm",
+      width = "250px"
     ),
     br(),
     ##================================================================
     ##                        Plot 2 options                        ==
     ##================================================================
     h5("Plot2 Settings"),
-    dropMenu(
-      actionBttn(
-        inputId = "openPlot2",
-        label = NULL, 
-        style = "bordered",
-        color = "warning",
-        size = "sm",
-        icon = icon("sliders")
-      ),
+    dropdown(
       selectInput(
         ns("yvar2"),
         "Y Variable:",
@@ -120,12 +94,10 @@ plotOptsUI <- function(id) {
       #   label = "Update",
       #   icon = icon("sync-alt")
       # ),
-      padding = "10px",
-      placement = "bottom",
-      trigger = "click",
-      theme = "translucent",
-      hideOnClick = TRUE,
-      maxWidth = "250px"
+      right = TRUE,
+      icon = icon("sliders"),
+      size = "sm",
+      width = "250px"
     ),
     br(),
     br(),
@@ -141,15 +113,7 @@ plotOptsUI <- function(id) {
     ##                     Zoomed-Plot options                     ==
     ##===============================================================
     h5("Zoom Settings"),
-    dropMenu(
-      actionBttn(
-        inputId = "openZoom",
-        label = NULL, 
-        style = "bordered",
-        color = "warning",
-        size = "sm",
-        icon = icon("sliders")
-      ),
+    dropdown(
       selectInput(
         ns("zoomycolor"),
         "Color Points By:",
@@ -173,12 +137,11 @@ plotOptsUI <- function(id) {
       #   label = "Update",
       #   icon = icon("sync-alt")
       # ),
-      padding = "10px",
-      placement = "bottom",
-      trigger = "click",
-      theme = "translucent",
-      hideOnClick = TRUE,
-      maxWidth = "250px"
+      up = TRUE,
+      right = TRUE,
+      icon = icon("sliders"),
+      size = "sm",
+      width = "250px"
     )
   )
 }
@@ -187,6 +150,36 @@ plotOptsUI <- function(id) {
 
 # SERVER
 plotOpts <- function(input, output, session) {
+# plotOpts <- function(input, output, session, x_choices, y_choices) {
+  
+  # observe({
+  #   # xvar choices
+  #   updateSelectInput(
+  #     inputId = "xvar1",
+  #     choices = x_choices
+  #   )
+  #   updateSelectInput(
+  #     inputId = "xvar2",
+  #     choices = x_choices
+  #   )
+  #   updateSelectInput(
+  #     inputId = "xvar3",
+  #     choices = x_choices
+  #   )
+  #   # yvar choices
+  #   updateSelectInput(
+  #     inputId = "yvar1",
+  #     choices = y_choices
+  #   )
+  #   updateSelectInput(
+  #     inputId = "yvar2",
+  #     choices = y_choices
+  #   )
+  #   updateSelectInput(
+  #     inputId = "yvar3",
+  #     choices = y_choices
+  #   )
+  # })
   
   # # dynamically updated filters for plots
   # observeEvent(dataList(), {

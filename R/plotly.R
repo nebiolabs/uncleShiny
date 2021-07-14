@@ -188,7 +188,7 @@ db_buildplotly <- function(data, x, y, source, color, palette, showlegend = TRUE
       showlegend = showlegend
     )
   
-  if (x %in% c("z_avg_diameter", "pk_1_mode_diameter")) {
+  if (x %in% c("Z_D", "peak1_D")) {
     p <- p %>%
       layout(
         xaxis = axisList,

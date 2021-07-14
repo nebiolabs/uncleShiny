@@ -125,7 +125,7 @@ ui <- tagList(
         ##                          Side panel                          ==
         ##================================================================
         sidebarPanel(
-          width = 3,
+          width = 2,
           div(style = "display: inline-block", icon("database")),
           div(style = "display: inline-block", h4("Database")),
           helpText("Click refresh to re-establish connection to ebase
@@ -154,7 +154,8 @@ ui <- tagList(
             "db_load",
             "Load Experiment",
             icon = icon("sync-alt")
-          )
+          ),
+          br()
         ),
         ##================================================================
         ##                          Main panel                          ==
@@ -162,6 +163,7 @@ ui <- tagList(
         mainPanel(
           width = 9,
           tabsetPanel(
+            selected = "db_visualization",
             ##===============================================================
             ##                        Selection tab                        ==
             ##===============================================================
@@ -177,12 +179,107 @@ ui <- tagList(
             ##===============================================================
             ##                      Visualization tab                      ==
             ##===============================================================
+            # tabPanel(
+            #   "Simple Visualization",
+            #   value = "db_visualize",
+            #   icon = icon("chart-area"),
+            #   DTOutput("db_data_print"),
+            #   plotlyOutput("db_summydots")
+            # ),
             tabPanel(
               "Visualization",
-              value = "db_visualize",
-              icon = icon("chart-area"),
-              DTOutput("db_data_print"),
-              plotlyOutput("db_summydots")
+              value = "db_visualization",
+              icon = icon("braille"),
+              fluidRow(
+                column(
+                  width = 1,
+                  plotOptsUI("db_summyOpts")
+                ),
+                column(
+                  width = 11,
+                  fluidRow( # HELP TEXT
+                    column(
+                      width = 9,
+                      h4("Summary Data:"),
+                      helpText("These data points are called by the Uncle.",
+                               "Anomalous raw spectra can lead to unreliable values.",
+                               "Thus, please note that not all conditions tested may appear here,",
+                               "and it is good practice to inspect the raw spectra after narrowing conditions of interest.")
+                    ),
+                    column(
+                      width = 3,
+                      h4("Spectra QuickView:"),
+                      helpText("Hover over a point to view sparklines of raw spectra.",
+                               "Click a point to freeze those spectra for comparison.",
+                               "Double-click to un-freeze.")
+                    )
+                  ),
+                  fluidRow( # MAIN PLOTS AND SPARKLINES
+                    column(
+                      width = 9,
+                      plotlyOutput("db_summydots")
+                    ),
+                    column(
+                      width = 3,
+                      div(h1(icon("grav")))
+                      # specSparkUI("db_specSparkHover")
+                      # plotOutput("ggspecspark")
+                    )
+                  ),
+                  fluidRow( # HELP TEXT
+                    column(
+                      width = 6,
+                      h4("Take a Closer Look:"),
+                      helpText("This plot shows a zoomed-in version of the points selected above,",
+                               "which you can further dissect with differnt axis variables using the options to the left.",
+                               "The table below shows the details for the points selected here.",
+                               "This plot and the table are live and interconnected;",
+                               "selecting points here will filter the table.")
+                    ),
+                    column(
+                      width = 6,
+                      h4("Spectra Overlay"),
+                      helpText("This module creates ridgeline overlays of",
+                               "the raw spectra corresponding to the selection",
+                               "made on the zommed-in plot to the left."),
+                      helpText("Note: A selection must be made before spectra will appear.")
+                    )
+                  ),
+                  fluidRow( # ZOOM PLOT AND DATATABLE
+                    column(
+                      width = 6,
+                      div(h1(icon("grav")))
+                      # plotlyOutput("db_zoomydots", height = "400px")
+                    ),
+                    column(
+                      width = 6,
+                      div(h1(icon("grav")))
+                      # div(h1(icon("grav")))
+                      # spectraViewerUI("db_spectraViewer")
+                    )
+                  ),
+                  fluidRow(
+                    column(
+                      width = 6,
+                      h4("Interactive Table:"),
+                      helpText("This is an interactive table.",
+                               "The rows can be filtered using the search bar, or sorted using the header row arrow buttons.",
+                               "It shows details for what appears in the 'Zoom' plot above.",
+                               "Selecting points there will filter what is shown here.")
+                    )
+                  ),
+                  fluidRow(
+                    column(
+                      width = 12,
+                      DTOutput("db_data_print")
+                      # DTOutput("db_zoomyDT", width = "100%"),
+                      # DTOutput("db_zoomytable")
+                      # hr(),
+                      # verbatimTextOutput("db_testysquid")
+                    )
+                  )
+                )
+              )
             )
           )
         )
@@ -687,12 +784,21 @@ server <- function(input, output, session) {
   
   db_product_table <- eventReactive(input$db_refresh, {
     req(ebase_dev)
+    # # inner_join method..
+    # DBI::dbGetQuery(
+    #   ebase_dev,
+    #   "SELECT p.name product_name, p.id product_id, p.catalog_number
+    #    FROM products p
+    #    INNER JOIN uncle_experiments e
+    #    on p.id = e.product_id"
+    # )
+    # # semi_join method.. may be better but probably same to the optimizer
     DBI::dbGetQuery(
       ebase_dev,
-      "SELECT x.name AS product_name, x.id AS product_id, x.catalog_number
-       FROM products AS x
-       INNER JOIN uncle_experiments AS y
-       on x.id = y.product_id"
+      "SELECT p.name product_name, p.id product_id, p.catalog_number
+       FROM products p
+       WHERE EXISTS (SELECT 1 FROM uncle_experiments e
+                     WHERE e.product_id = p.id)"
     )
   })
 
@@ -823,7 +929,15 @@ server <- function(input, output, session) {
                  WHERE uncle_experiment_id = ", input$db_exp_sel)
     )
     join_sls_dls(sls = sls_data, dls = dls_data) |> 
-      tidyr::unite(col = "sharedKey", c("sls_id", "dls_id"), sep = "_", remove = FALSE)
+      tidyr::unite(col = "sharedKey", c("sls_id", "dls_id"), sep = "_", remove = FALSE) |> 
+      dplyr::rename(
+        Tagg266 = t_agg_266,
+        Tagg473 = t_agg_473,
+        Tm1 = t_m_1,
+        Z_D = z_avg_diameter,
+        peak1_D = pk_1_mode_diameter,
+        PdI = pdi
+      )
   })
   
   output$db_data_print <- renderDT({
@@ -850,16 +964,18 @@ server <- function(input, output, session) {
   ##  PSQL Plots  ::
   ##::::::::::::::::
   
+  db_plotOpts <- callModule(plotOpts, "db_summyOpts")
+  
   # Plot 1 as a reactive..
   db_p1 <- reactive({
     source("R/plotly.R", local = TRUE)
     db_buildplotly(
       data = db_summyShared(),
-      x = "z_avg_diameter",
-      y = "pdi",
+      x = db_plotOpts$xvar1(),
+      y = db_plotOpts$yvar1(),
       source = "db_summydots",
       color = "well",
-      palette = "Spectral",
+      palette = db_plotOpts$palette(),
       customdata = "well"
     )
   })
@@ -869,11 +985,11 @@ server <- function(input, output, session) {
     source("R/plotly.R", local = TRUE)
     db_buildplotly(
       data = db_summyShared(),
-      x = "t_agg_266",
-      y = "t_m_1",
+      x = db_plotOpts$xvar2(),
+      y = db_plotOpts$yvar2(),
       source = "db_summydots",
       color = "well",
-      palette = "Spectral",
+      palette = db_plotOpts$palette(),
       # showlegend = FALSE,
       # colorbar = FALSE,
       customdata = "well"
