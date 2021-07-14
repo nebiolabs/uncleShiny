@@ -68,6 +68,7 @@ source("modules/activityAssay.R")
 ##===============================================================
 
 source("R/vars.R")
+source("R/funs.R")
 
 
 ##===============================================================
@@ -129,8 +130,9 @@ ui <- tagList(
           div(style = "display: inline-block", h4("Database")),
           helpText("Click refresh to re-establish connection to ebase
                    and display available protein datasets for analysis."),
+          verbatimTextOutput("db_prod_selected"),
           selectInput(
-            "db_product_sel",
+            "db_prod_sel",
             NULL,
             choices = NULL
           ),
@@ -142,6 +144,7 @@ ui <- tagList(
           br(),
           br(),
           br(),
+          verbatimTextOutput("db_exp_selected"),
           selectInput(
             "db_exp_sel",
             NULL,
@@ -149,7 +152,7 @@ ui <- tagList(
           ),
           actionButton(
             "db_load",
-            "Load Data",
+            "Load Experiment",
             icon = icon("sync-alt")
           )
         ),
@@ -177,7 +180,8 @@ ui <- tagList(
             tabPanel(
               "Visualization",
               value = "db_visualize",
-              icon = icon("chart-area")
+              icon = icon("chart-area"),
+              DTOutput("db_data_print")
             )
           )
         )
@@ -726,10 +730,14 @@ server <- function(input, output, session) {
     req(db_prod_available())
     updateSelectInput(
       session,
-      "db_product_sel",
+      "db_prod_sel",
       choices = c(" " = 0, db_prod_available()),
       selected = 0
     )
+  })
+  
+  output$db_prod_selected <- renderPrint({
+    input$db_prod_sel
   })
   
   
@@ -737,7 +745,7 @@ server <- function(input, output, session) {
   ##  Available Experiments  ::
   ##:::::::::::::::::::::::::::
   
-  db_exp_table <- eventReactive(input$db_product_sel, {
+  db_exp_table <- eventReactive(input$db_prod_sel, {
     req(db_product_table())
     DBI::dbGetQuery(
       ebase_dev,
@@ -745,7 +753,7 @@ server <- function(input, output, session) {
                  uncle_instrument_id AS instrument_id, product_id, exp_type,
                  plate_generation, plate_side
                  FROM uncle_experiments
-                 WHERE product_id = ", input$db_product_sel)
+                 WHERE product_id = ", input$db_prod_sel)
     )
   })
   
@@ -773,11 +781,12 @@ server <- function(input, output, session) {
     )
   })
   
-  db_exp_available <- eventReactive(input$db_product_sel, {
+  db_exp_available <- eventReactive(input$db_prod_sel, {
     req(db_exp_table())
     db_exp_table() |>
       tidyr::unite(col = "experiment", exp_type, plate_generation, plate_side, sep = "_") |> 
       dplyr::select(experiment, experiment_id) |> 
+      dplyr::mutate(experiment_id = as.integer(experiment_id)) |> 
       tibble::deframe()
   })
   
@@ -788,6 +797,36 @@ server <- function(input, output, session) {
       "db_exp_sel",
       choices = c(" " = 0, db_exp_available())
     )
+  })
+  
+  output$db_exp_selected <- renderPrint({
+    input$db_exp_sel
+  })
+  
+  
+  ##::::::::::::::::::
+  ##  PSQL Load-in  ::
+  ##::::::::::::::::::
+  
+  db_data <- eventReactive(input$db_load, {
+    sls_data <- DBI::dbGetQuery(
+      ebase_dev,
+      paste0("SELECT *
+                 FROM uncle_sls
+                 WHERE uncle_experiment_id = ", input$db_exp_sel)
+    )
+    dls_data <- DBI::dbGetQuery(
+      ebase_dev,
+      paste0("SELECT *
+                 FROM uncle_dls
+                 WHERE uncle_experiment_id = ", input$db_exp_sel)
+    )
+    join_sls_dls(sls = sls_data, dls = dls_data)
+  })
+  
+  output$db_data_print <- renderDT({
+    db_data() |> 
+      dplyr::select(-contains("spec"), -contains("residuals"))
   })
   
   
