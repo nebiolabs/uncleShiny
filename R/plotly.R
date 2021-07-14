@@ -163,4 +163,57 @@ buildplotly <- function(data, x, y, source, color, palette, showlegend = TRUE, l
   
 }
 
+db_buildplotly <- function(data, x, y, source, color, palette, showlegend = TRUE, legendgroup = NULL, colorbar = TRUE, customdata = NA) {
+  if (is.null(legendgroup)) {
+    legendgroup <- color
+  }
+  
+  p <- plot_ly(
+    data = data,
+    source = source,
+    color = as.formula(paste0("~", color)),
+    colors = mycolors(palette, length( unique( data$origData()[[color]] ) ) ),
+    showlegend = showlegend,
+    legendgroup = as.formula(paste0("~", legendgroup)),
+    customdata = as.formula(paste0("~", customdata)),
+    hoverinfo = "text",
+    text = ~paste0(
+      "<em>Uni: ", well, "</em><br>"
+    )
+  ) %>% 
+    add_markers(
+      x = as.formula(paste0("~", x)),
+      y = as.formula(paste0("~", y)),
+      marker = markerList,
+      showlegend = showlegend
+    )
+  
+  if (x %in% c("z_avg_diameter", "pk_1_mode_diameter")) {
+    p <- p %>%
+      layout(
+        xaxis = axisList,
+        yaxis = axisList,
+        shapes = list(vline(5), vline(20), vrect(5, 20, 0.2))#,
+        # colorbar = colorbarList,
+        # legend = legendList
+      ) %>%
+      layout(xaxis = list(type = "log"))
+  } else {
+    p <- p %>%
+      layout(
+        xaxis = axisList,
+        yaxis = axisList#,
+        # colorbar = colorbarList,
+        # legend = legendList
+      )
+  }
+  
+  if (colorbar == TRUE) {
+    return(p)
+  } else {
+    return(p %>% hide_colorbar())
+  }
+  
+}
+
 

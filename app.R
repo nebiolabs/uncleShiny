@@ -181,7 +181,8 @@ ui <- tagList(
               "Visualization",
               value = "db_visualize",
               icon = icon("chart-area"),
-              DTOutput("db_data_print")
+              DTOutput("db_data_print"),
+              plotlyOutput("db_summydots")
             )
           )
         )
@@ -821,12 +822,97 @@ server <- function(input, output, session) {
                  FROM uncle_dls
                  WHERE uncle_experiment_id = ", input$db_exp_sel)
     )
-    join_sls_dls(sls = sls_data, dls = dls_data)
+    join_sls_dls(sls = sls_data, dls = dls_data) |> 
+      tidyr::unite(col = "sharedKey", c("sls_id", "dls_id"), sep = "_", remove = FALSE)
   })
   
   output$db_data_print <- renderDT({
     db_data() |> 
       dplyr::select(-contains("spec"), -contains("residuals"))
+  })
+  
+  
+  ##::::::::::::::::::::
+  ##  PSQL Plot Data  ::
+  ##::::::::::::::::::::
+  
+  db_summyShared <- eventReactive(c(db_data()), {
+    req(db_data())
+    highlight_key(
+      db_data,
+      key = ~sharedKey,
+      group = paste("summy", input$db_prod_sel, input$db_exp_sel, sep = "_")
+    )
+  })
+  
+  
+  ##::::::::::::::::
+  ##  PSQL Plots  ::
+  ##::::::::::::::::
+  
+  # Plot 1 as a reactive..
+  db_p1 <- reactive({
+    source("R/plotly.R", local = TRUE)
+    db_buildplotly(
+      data = db_summyShared(),
+      x = "z_avg_diameter",
+      y = "pdi",
+      source = "db_summydots",
+      color = "well",
+      palette = "Spectral",
+      customdata = "well"
+    )
+  })
+  
+  # Plot 2 as a reactive..
+  db_p2 <- reactive({
+    source("R/plotly.R", local = TRUE)
+    db_buildplotly(
+      data = db_summyShared(),
+      x = "t_agg_266",
+      y = "t_m_1",
+      source = "db_summydots",
+      color = "well",
+      palette = "Spectral",
+      # showlegend = FALSE,
+      # colorbar = FALSE,
+      customdata = "well"
+    )
+  })
+  
+  # The plotly subplot of both connected plots..
+  output$db_summydots <- renderPlotly({
+    subplot(
+      db_p1(), db_p2(),
+      nrows = 1,
+      titleX = TRUE,
+      titleY = TRUE,
+      margin = 0.04
+    ) %>%
+      layout(
+        annotations = list(
+          list(
+            x = 0, xref = "paper", xanchor = "right",
+            y = 1.09, yref = "paper", 
+            text = "Plot1", font = list(size = 18, family = "Roboto Condensed"),
+            showarrow = F
+          ),
+          list(
+            x = 0.54, xref = "paper", xanchor = "right",
+            y = 1.09, yref = "paper",
+            text = "Plot2", font = list(size = 18, family = "Roboto Condensed"),
+            showarrow = F
+          )
+        ),
+        legend = legendList
+      ) %>%
+      highlight(
+        on = "plotly_selected", off = "plotly_deselect",
+        opacityDim = 0.15,
+        selected = attrs_selected(showlegend = FALSE)
+      ) %>%
+      config(displaylogo = FALSE) %>% 
+      toWebGL()
   })
   
   
