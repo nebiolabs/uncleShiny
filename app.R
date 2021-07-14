@@ -71,20 +71,6 @@ source("R/vars.R")
 source("R/funs.R")
 
 
-##===============================================================
-##                         Connections                         ==
-##===============================================================
-
-ebase_dev <- pool::dbPool(
-  drv = RPostgres::Postgres(),
-  dbname = "ebase_dev",
-  host = "ebase-db-c.neb.com",
-  port = 5432,
-  user = Sys.getenv("ebase_uid"),
-  password = Sys.getenv("ebase_pwd")
-)
-
-
 ############################################################################
 ############################################################################
 ############################################################################
@@ -773,10 +759,6 @@ server <- function(input, output, session) {
   ##===============================================================
   ##                     PostgreSQL Database                     ==
   ##===============================================================
-  
-  # db connection should be made as a `pool` object on app initiation
-  print(ebase_dev)
-  
   
   ##::::::::::::::::::::::::
   ##  Available Products  ::
@@ -1577,8 +1559,30 @@ server <- function(input, output, session) {
   
 }
 
+##===============================================================
+##                         Connections                         ==
+##===============================================================
+
+global <- function() {
+  ebase_dev <<- pool::dbPool(
+    drv = RPostgres::Postgres(),
+    dbname = "ebase_dev",
+    host = "ebase-db-c.neb.com",
+    port = 5432,
+    user = Sys.getenv("ebase_uid"),
+    password = Sys.getenv("ebase_pwd")
+  )
+  message("Connection established? : ", DBI::dbIsValid(ebase_dev))
+  print(ebase_dev)
+  onStop(function() {
+    pool::poolClose(ebase_dev)
+    message("Connection closed? : ", !(DBI::dbIsValid(ebase_dev)))
+  })
+  
+}
+
 # Run the application
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, onStart = global)
 # 
 # opens the app in a local, pre-sized RStudio window
 # shiny::runGadget(
