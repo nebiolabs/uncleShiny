@@ -25,10 +25,12 @@ library(shiny)
 library(DBI)
 library(pool)
 library(RPostgres)
+library(bit64)
 # library(shinythemes) # using bootswatch library bslib for theming
 library(bslib)
 library(shinyWidgets)
 library(tidyverse)
+library(glue)
 library(extrafont)
 library(RColorBrewer)
 library(plotly)
@@ -766,21 +768,22 @@ server <- function(input, output, session) {
   
   db_product_table <- eventReactive(input$db_refresh, {
     req(ebase_dev)
-    # # inner_join method..
+    # inner_join method.. might create replicate protein entries
+    # if there are multiple matches in the experiment_sets table
     # DBI::dbGetQuery(
     #   ebase_dev,
     #   "SELECT p.name product_name, p.id product_id, p.catalog_number
     #    FROM products p
-    #    INNER JOIN uncle_experiments e
-    #    on p.id = e.product_id"
+    #    INNER JOIN uncle_experiment_sets exp_sets
+    #    on p.id = exp_sets.product_id"
     # )
-    # # semi_join method.. may be better but probably same to the optimizer
+    # semi_join method.. could prevent the above issue
     DBI::dbGetQuery(
       ebase_dev,
-      "SELECT p.name product_name, p.id product_id, p.catalog_number
+      "SELECT p.name AS product_name, p.id AS product_id, p.catalog_number
        FROM products p
-       WHERE EXISTS (SELECT 1 FROM uncle_experiments e
-                     WHERE e.product_id = p.id)"
+       WHERE EXISTS (SELECT * FROM uncle_experiment_sets exp_sets
+                     WHERE exp_sets.product_id = p.id)"
     )
   })
 
@@ -838,11 +841,14 @@ server <- function(input, output, session) {
     req(db_product_table())
     DBI::dbGetQuery(
       ebase_dev,
-      paste0("SELECT id AS experiment_id, date,
-                 uncle_instrument_id AS instrument_id, product_id, exp_type,
-                 plate_generation, plate_side
-                 FROM uncle_experiments
-                 WHERE product_id = ", input$db_prod_sel)
+      glue::glue_sql(
+        "SELECT id AS experiment_set_id, product_id,
+                exp_type, plate_generation, well_set_id
+          FROM uncle_experiment_sets
+          WHERE product_id = {input}",
+        input = input$db_prod_sel,
+        .con = ebase_dev
+      )
     )
   })
   
@@ -873,9 +879,14 @@ server <- function(input, output, session) {
   db_exp_available <- eventReactive(input$db_prod_sel, {
     req(db_exp_table())
     db_exp_table() |>
-      tidyr::unite(col = "experiment", exp_type, plate_generation, plate_side, sep = "_") |> 
-      dplyr::select(experiment, experiment_id) |> 
-      dplyr::mutate(experiment_id = as.integer(experiment_id)) |> 
+      tidyr::unite(
+        col = "experiment",
+        exp_type, plate_generation, experiment_set_id, well_set_id,
+        sep = "_",
+        remove = FALSE
+      ) |> 
+      dplyr::select(experiment, experiment_set_id) |> 
+      dplyr::mutate(across(c(experiment_set_id), .fns = bit64::as.integer64)) |> 
       tibble::deframe()
   })
   
@@ -884,7 +895,7 @@ server <- function(input, output, session) {
     updateSelectInput(
       session,
       "db_exp_sel",
-      choices = c(" " = 0, db_exp_available())
+      choices = bit64::c.integer64(" " = 0, db_exp_available())
     )
   })
   
