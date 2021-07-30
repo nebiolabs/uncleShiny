@@ -31,6 +31,7 @@ library(bslib)
 library(shinyWidgets)
 library(tidyverse)
 library(glue)
+library(rlang)
 library(extrafont)
 library(RColorBrewer)
 library(plotly)
@@ -777,7 +778,7 @@ server <- function(input, output, session) {
     #    INNER JOIN uncle_experiment_sets exp_sets
     #    on p.id = exp_sets.product_id"
     # )
-    # semi_join method.. could prevent the above issue
+    # semi_join method.. could prevent the above issue, maybe fastest
     DBI::dbGetQuery(
       ebase_dev,
       "SELECT p.name AS product_name, p.id AS product_id, p.catalog_number
@@ -785,6 +786,13 @@ server <- function(input, output, session) {
        WHERE EXISTS (SELECT * FROM uncle_experiment_sets exp_sets
                      WHERE exp_sets.product_id = p.id)"
     )
+    # # collapse with distinct? SELECT DISTINCT(p.name...) FROM...
+    # DBI::dbGetQuery(
+    #   ebase_dev,
+    #   "SELECT DISTINCT p.name AS product_name, p.id AS product_id, p.catalog_number
+    #    FROM products p INNER JOIN uncle_experiment_sets exp_sets
+    #     ON p.id = exp_sets.product_id)"
+    # )
   })
 
   output$db_product_table <- renderDT({
@@ -909,20 +917,21 @@ server <- function(input, output, session) {
   ##::::::::::::::::::
   
   db_data <- eventReactive(input$db_load, {
-    sls_data <- DBI::dbGetQuery(
+    summary_data <- DBI::dbGetQuery(
       ebase_dev,
-      paste0("SELECT *
-                 FROM uncle_sls
-                 WHERE uncle_experiment_id = ", input$db_exp_sel)
-    )
-    dls_data <- DBI::dbGetQuery(
-      ebase_dev,
-      paste0("SELECT *
-                 FROM uncle_dls
-                 WHERE uncle_experiment_id = ", input$db_exp_sel)
-    )
-    join_sls_dls(sls = sls_data, dls = dls_data) |> 
-      tidyr::unite(col = "sharedKey", c("sls_id", "dls_id"), sep = "_", remove = FALSE) |> 
+      glue::glue_sql(
+        "SELECT sum.*, wells.layout_address AS well
+        FROM uncle_summary sum INNER JOIN wells
+          ON sum.well_id = wells.id
+              WHERE EXISTS (SELECT *
+                            FROM uncle_experiments exps
+                            WHERE exps.uncle_experiment_set_id IN ({input*})
+                              AND sum.uncle_experiment_id = exps.id)",
+        input = input$db_exp_sel,
+        .con = ebase_dev
+      )
+    ) |> 
+      dplyr::mutate(sharedKey = id) |> 
       dplyr::rename(
         Tagg266 = t_agg_266,
         Tagg473 = t_agg_473,
@@ -930,8 +939,19 @@ server <- function(input, output, session) {
         Z_D = z_avg_diameter,
         peak1_D = pk_1_mode_diameter,
         PdI = pdi
-      )
+      ) |> 
+      dplyr::mutate(residuals = purrr::map(residuals, parse_float8)) |>
+      dplyr::rename(uncle_summary_id = id) |> 
+      tibble::as_tibble()
+    
+    summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
+    
+    spec_tbls <- get_spec_tbls(ebase_dev, spec_tbl_list, summary_ids)
+    
+    # return(nest_spectra(summary_data, spec_tbls))
+    return(summary_data)
   })
+  
   
   output$db_data_print <- renderDT({
     db_data() |> 

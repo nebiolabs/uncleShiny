@@ -107,3 +107,12 @@ specDerived <- c(
   "specDLS_I" = "Z_D",
   "specDLS_M" = "Z_D"
 )
+
+spec_tbl_list <- c(
+  specTm = "uncle_sls_bcm",
+  specSLS266 = "uncle_sls_266",
+  specSLS473 = "uncle_sls_473",
+  specDLS_C = "uncle_dls_correlation",
+  specDLS_I = "uncle_dls_intensity",
+  specDLS_M = "uncle_dls_mass"
+)
