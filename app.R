@@ -919,14 +919,35 @@ server <- function(input, output, session) {
   db_data <- eventReactive(input$db_load, {
     summary_data <- DBI::dbGetQuery(
       ebase_dev,
+      # glue::glue_sql(
+      #   "SELECT sum.*, wells.layout_address AS well
+      #   FROM uncle_summaries sum INNER JOIN wells
+      #     ON sum.well_id = wells.id
+      #         WHERE EXISTS (SELECT *
+      #                       FROM uncle_experiments exps
+      #                       WHERE exps.uncle_experiment_set_id IN ({input*})
+      #                         AND sum.uncle_experiment_id = exps.id)",
       glue::glue_sql(
-        "SELECT sum.*, wells.layout_address AS well
-        FROM uncle_summary sum INNER JOIN wells
+        "WITH cte_sum AS
+        (SELECT wells.layout_address AS well, sum.* 
+        FROM uncle_summaries sum
+        INNER JOIN wells
           ON sum.well_id = wells.id
-              WHERE EXISTS (SELECT *
-                            FROM uncle_experiments exps
-                            WHERE exps.uncle_experiment_set_id IN ({input*})
-                              AND sum.uncle_experiment_id = exps.id)",
+        WHERE EXISTS (SELECT *
+                      FROM uncle_experiments exps
+                      WHERE exps.uncle_experiment_set_id IN ({input*})
+                        AND sum.uncle_experiment_id = exps.id)
+        )
+        SELECT cte_sum.*, exp_conds.well_id, exp_conds.id AS experiment_condition_id, exp_conds.condition_id,
+          exp_conds.unit_id, exp_conds.raw_value AS unit_value,
+          units.name AS unit_name, conds.name AS cond_name 
+        FROM cte_sum
+        INNER JOIN experimental_conditions AS exp_conds
+          ON cte_sum.well_id = exp_conds.well_id
+        INNER JOIN units
+          ON exp_conds.unit_id = units.id
+        INNER JOIN conditions AS conds
+         ON exp_conds.condition_id = conds.id",
         input = input$db_exp_sel,
         .con = ebase_dev
       )
@@ -1411,7 +1432,15 @@ server <- function(input, output, session) {
       ) %>%
         layout(
           annotations = list(
-            list(x = 0, xref = "paper", y = 1.09, yref = "paper", text = "Zoom", showarrow = F, font = list(size = 18, family = "Roboto Condensed"), xanchor = "right")
+            list(x = 0,
+                 xref = "paper",
+                 y = 1.09,
+                 yref = "paper",
+                 text = "Zoom",
+                 showarrow = F,
+                 font = list(size = 18,
+                             family = "Roboto Condensed"),
+                 xanchor = "right")
           ),
           legend = legendList
         )

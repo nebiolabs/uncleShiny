@@ -178,7 +178,7 @@ db_buildplotly <- function(data, x, y, source, color, palette, showlegend = TRUE
     customdata = as.formula(paste0("~", customdata)),
     hoverinfo = "text",
     text = ~paste0(
-      "<em>Uni: ", well, "</em><br>"
+      "<em>Well: ", well, "</em><br>"
     )
   ) %>% 
     add_markers(
