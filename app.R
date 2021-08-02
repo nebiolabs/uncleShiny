@@ -269,6 +269,26 @@ ui <- tagList(
                   )
                 )
               )
+            ),
+            ##===============================================================
+            ##                        Visual QC tab                        ==
+            ##===============================================================
+            tabPanel(
+              "Parser QC",
+              value = "parser_qc",
+              icon = icon("eye"),
+              fluidRow(
+                column(
+                  width = 6,
+                  plotOutput("db_dls"),
+                  plotOutput("db_sls")
+                ),
+                column(
+                  width = 6,
+                  plotOutput("local_dls"),
+                  plotOutput("local_sls")
+                )
+              )
             )
           )
         )
@@ -1066,10 +1086,143 @@ server <- function(input, output, session) {
   })
   
   
+  ##================================================================
+  ##                      db/Local Visual QC                      ==
+  ##================================================================
+  
+  
+  ##:::::::::
+  ##  DLS  ::
+  ##:::::::::
+  
+  output$db_dls <- renderPlot({
+  req(db_data())
+  fun_data <- db_data() |>
+    dplyr::select(-c(created_at:cond_name)) |> 
+    dplyr::distinct() |> 
+    dplyr::filter(between(Z_D, 0, 999)) |> 
+    dplyr::mutate(PdI = round(PdI, digits = 2))
+  plot <- ggplot(
+    data = fun_data,
+    aes_string(x = "Z_D", y = "PdI")
+  ) +
+    geom_point(aes_string(fill = "well"),
+               shape = 21,
+               color = "black",
+               size = 2,
+               alpha = 0.5,
+               show.legend = FALSE) +
+    ggrepel::geom_text_repel(aes_string(label = "well"), alpha = 0.5) +
+    scale_color_manual(values = mycolors("Spectral", 96)) +
+    theme(legend.position = "none") +
+    labs(
+      subtitle = "(db) DLS Summary"
+    ) +
+    geom_vline(xintercept = 1, linetype = "dashed", alpha = 0.2) +
+    geom_vline(xintercept = 10, linetype = "dashed", alpha = 0.2) +
+    scale_x_log10(limits = c(0.1, max(fun_data[["Z_D"]]))) +
+    scale_y_continuous(limits = c(min(fun_data[["PdI"]]), max(fun_data[["PdI"]]))) +
+    # scale_x_log10(limits = c(1, 1000)) +
+    # scale_y_continuous(limits = c(0,1)) +
+    annotation_logticks(sides = "b")
+  return(plot)
+})
+  
+  output$local_dls <- renderPlot({
+    req(summyData())
+    fun_data <- summyData() |> 
+      tidyr::drop_na(Z_D)
+    plot <- ggplot(
+      data = fun_data,
+      aes_string(x = "Z_D", y = "PdI")
+    ) +
+      geom_point(aes_string(fill = "well"),
+                 shape = 21,
+                 color = "black",
+                 size = 2,
+                 alpha = 0.5,
+                 show.legend = FALSE) +
+      ggrepel::geom_text_repel(aes_string(label = "well"), alpha = 0.5) +
+      scale_color_manual(values = mycolors("Spectral", 96)) +
+      theme(legend.position = "none") +
+      labs(
+        subtitle = "(local) DLS Summary"
+      ) +
+      geom_vline(xintercept = 1, linetype = "dashed", alpha = 0.2) +
+      geom_vline(xintercept = 10, linetype = "dashed", alpha = 0.2) +
+      scale_x_log10(limits = c(0.1, max(fun_data[["Z_D"]]))) +
+      scale_y_continuous(limits = c(min(fun_data[["PdI"]]), max(fun_data[["PdI"]]))) +
+      # scale_x_log10(limits = c(1, 1000)) +
+      # scale_y_continuous(limits = c(0,1)) +
+      annotation_logticks(sides = "b")
+    return(plot)
+  })
+  
+  
+  ##:::::::::
+  ##  SLS  ::
+  ##:::::::::
+  
+  output$db_sls <- renderPlot({
+    req(db_data())
+    fun_data <- db_data() |> 
+      dplyr::select(-c(created_at:cond_name)) |> 
+      dplyr::distinct()
+    plot <- ggplot(
+      data = fun_data,
+      aes_string(x = "Tm1", y = "Tagg266")
+    ) +
+      geom_point(aes_string(fill = "well"),
+                 shape = 21,
+                 color = "black",
+                 size = 2,
+                 alpha = 0.5,
+                 show.legend = FALSE) +
+      ggrepel::geom_text_repel(aes_string(label = "well"), alpha = 0.5) +
+      # geom_text(aes_string(label = "well"), alpha = 0.5) +
+      scale_color_manual(values = mycolors("Spectral", 96)) +
+      theme(legend.position = "none") +
+      labs(
+        subtitle = "(db) SLS Summary"
+      ) +
+      scale_x_continuous(limits = c(min(fun_data[["Tm1"]]), max(fun_data[["Tm1"]]))) +
+      scale_y_continuous(limits = c(min(fun_data[["Tagg266"]]), max(fun_data[["Tagg266"]])))
+      # scale_x_continuous(limits = c(20, 80)) +
+      # scale_y_continuous(limits = c(20, 80))
+    return(plot)
+  })
+  
+  output$local_sls <- renderPlot({
+    req(summyData())
+    fun_data <- summyData()
+    plot <- ggplot(
+      data = fun_data,
+      aes_string(x = "Tm1", y = "Tagg266")
+    ) +
+      geom_point(aes_string(fill = "well"),
+                 shape = 21,
+                 color = "black",
+                 size = 2,
+                 alpha = 0.5,
+                 show.legend = FALSE) +
+      ggrepel::geom_text_repel(aes_string(label = "well"), alpha = 0.5) +
+      # geom_text(aes_string(label = "well"), alpha = 0.5) +
+      scale_color_manual(values = mycolors("Spectral", 96)) +
+      theme(legend.position = "none") +
+      labs(
+        subtitle = "(local) SLS Summary"
+      ) +
+      scale_x_continuous(limits = c(min(fun_data[["Tm1"]]), max(fun_data[["Tm1"]]))) +
+      scale_y_continuous(limits = c(min(fun_data[["Tagg266"]]), max(fun_data[["Tagg266"]])))
+      # scale_x_continuous(limits = c(20, 80)) +
+      # scale_y_continuous(limits = c(20, 80))
+    return(plot)
+  })
+  
+  
   ##===============================================================
   ##                           Load-in                           ==
   ##===============================================================
-  
   
   # creates the reactive list of experiment data tables from selected value in sidebar on button click..
   dataList <- eventReactive(input$loadData, {
