@@ -133,7 +133,7 @@ ui <- tagList(
           br(),
           br(),
           br(),
-          verbatimTextOutput("db_exp_selected"),
+          verbatimTextOutput("db_exp_set_selected"),
           selectInput(
             "db_exp_sel",
             NULL,
@@ -160,10 +160,22 @@ ui <- tagList(
               "Selection",
               value = "db_selection",
               icon = icon("object-group"),
-              h4("Products available on server:"),
-              DTOutput("db_product_table", width = "100%"),
-              h4("Experiments available for selected product:"),
-              DTOutput("db_exp_available", width = "100%")
+              fluidRow(
+                h5("Products available on server:"),
+                DTOutput("db_products_available", width = "100%"),
+              ),
+              fluidRow(
+                column(
+                  width = 6,
+                  h5("Experiments sets available for selected product:"),
+                  DTOutput("db_exp_sets_available", width = "100%")
+                ),
+                column(
+                  width = 6,
+                  h5("Experiments in experiment sets:"),
+                  DTOutput("db_exps_available", width = "100%")
+                )
+              )
             ),
             ##===============================================================
             ##                      Visualization tab                      ==
@@ -787,7 +799,7 @@ server <- function(input, output, session) {
   ##  Available Products  ::
   ##::::::::::::::::::::::::
   
-  db_product_table <- eventReactive(input$db_refresh, {
+  db_products_table <- eventReactive(input$db_refresh, {
     req(ebase_dev)
     # inner_join method.. might create replicate protein entries
     # if there are multiple matches in the experiment_sets table
@@ -815,21 +827,21 @@ server <- function(input, output, session) {
     # )
   })
 
-  output$db_product_table <- renderDT({
-    req(db_product_table())
+  output$db_products_available <- renderDT({
+    req(db_products_table())
     datatable(
-      data = db_product_table(),
+      data = db_products_table(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
-        dom = "ftip",
+        dom = "tip",
         # f - filter
-        searchHighlight = TRUE,
+        # searchHighlight = TRUE,
         # p - pagination
-        scrollX = TRUE,
+        scrollX = FALSE,
         # scrollY = "250px",
         paging = TRUE,
-        pageLength = 16,
+        pageLength = 10,
         scrollCollapse = TRUE#,
         # t - table
         # fixedColumns = list(leftColumns = 5),
@@ -840,8 +852,8 @@ server <- function(input, output, session) {
   })
   
   db_prod_available <- eventReactive(input$db_refresh, {
-    req(db_product_table())
-    db_product_table() |>
+    req(db_products_table())
+    db_products_table() |>
       dplyr::select(product_name, product_id) |>
       tibble::deframe()
   })
@@ -865,13 +877,13 @@ server <- function(input, output, session) {
   ##  Available Experiments  ::
   ##:::::::::::::::::::::::::::
   
-  db_exp_table <- eventReactive(input$db_prod_sel, {
-    req(db_product_table())
+  db_exp_sets_table <- eventReactive(input$db_prod_sel, {
+    req(db_products_table())
     DBI::dbGetQuery(
       ebase_dev,
       glue::glue_sql(
-        "SELECT id AS experiment_set_id, product_id,
-                exp_type, plate_generation, well_set_id
+        "SELECT id AS set_id, product_id,
+                exp_type, plate_generation AS gen, well_set_id
           FROM uncle_experiment_sets
           WHERE product_id = {input}",
         input = input$db_prod_sel,
@@ -880,21 +892,39 @@ server <- function(input, output, session) {
     )
   })
   
-  output$db_exp_available <- renderDT({
-    req(db_exp_table())
+  db_exps_table <- eventReactive(input$db_prod_sel, {
+    req(db_products_table())
+    exp_sets <- db_exp_sets_table() |> 
+      dplyr::pull(set_id) |> 
+      unique()
+    DBI::dbGetQuery(
+      ebase_dev,
+      glue::glue_sql(
+        "SELECT id AS exp_id, uncle_experiment_set_id AS set_id,
+            uncle_instrument_id AS inst_id, plate_side AS side, date
+          FROM uncle_experiments
+          WHERE uncle_experiment_set_id IN ({input*})",
+        input = exp_sets,
+        .con = ebase_dev
+      )
+    )
+  })
+  
+  output$db_exp_sets_available <- renderDT({
+    req(db_exp_sets_table())
     datatable(
-      data = db_exp_table(),
+      data = db_exp_sets_table(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
-        dom = "ftip",
+        dom = "tip",
         # f - filter
-        searchHighlight = TRUE,
+        # searchHighlight = TRUE,
         # p - pagination
         scrollX = TRUE,
-        # scrollY = "250px",
-        paging = TRUE,
-        pageLength = 16,
+        scrollY = "400px",
+        paging = FALSE,
+        pageLength = 20,
         scrollCollapse = TRUE#,
         # t - table
         # fixedColumns = list(leftColumns = 5),
@@ -904,30 +934,54 @@ server <- function(input, output, session) {
     )
   })
   
-  db_exp_available <- eventReactive(input$db_prod_sel, {
-    req(db_exp_table())
-    db_exp_table() |>
-      tidyr::unite(
-        col = "experiment",
-        exp_type, plate_generation, experiment_set_id, well_set_id,
-        sep = "_",
-        remove = FALSE
-      ) |> 
-      dplyr::select(experiment, experiment_set_id) |> 
-      dplyr::mutate(across(c(experiment_set_id), .fns = bit64::as.integer64)) |> 
-      tibble::deframe()
-  })
-  
-  observeEvent(db_exp_available(), {
-    req(db_exp_available())
-    updateSelectInput(
-      session,
-      "db_exp_sel",
-      choices = bit64::c.integer64(" " = 0, db_exp_available())
+  output$db_exps_available <- renderDT({
+    req(db_exps_table())
+    datatable(
+      data = db_exps_table(),
+      selection = "none",
+      # extensions = c("FixedColumns"),
+      options = list(
+        dom = "tip",
+        # f - filter
+        # searchHighlight = TRUE,
+        # p - pagination
+        scrollX = TRUE,
+        scrollY = "400px",
+        paging = FALSE,
+        pageLength = 80,
+        scrollCollapse = TRUE#,
+        # t - table
+        # fixedColumns = list(leftColumns = 5),
+        # order = list(list(3, "asc")),
+        # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
+      )
     )
   })
   
-  output$db_exp_selected <- renderPrint({
+  db_exps_available <- eventReactive(input$db_prod_sel, {
+    req(db_exp_sets_table())
+    db_exp_sets_table() |>
+      tidyr::unite(
+        col = "experiment",
+        exp_type, gen, set_id, well_set_id,
+        sep = "_",
+        remove = FALSE
+      ) |> 
+      dplyr::select(experiment, set_id) |> 
+      dplyr::mutate(across(c(set_id), .fns = bit64::as.integer64)) |> 
+      tibble::deframe()
+  })
+  
+  observeEvent(db_exps_available(), {
+    req(db_exps_available())
+    updateSelectInput(
+      session,
+      "db_exp_sel",
+      choices = bit64::c.integer64(" " = 0, db_exps_available())
+    )
+  })
+  
+  output$db_exp_set_selected <- renderPrint({
     input$db_exp_sel
   })
   
