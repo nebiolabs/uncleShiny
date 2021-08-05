@@ -22,20 +22,25 @@
 ##================================================================
 
 library(shiny)
+library(shinybusy)
+# library(shinythemes) # using bootswatch library bslib for theming
+library(bslib)
+library(shinyWidgets)
+
 library(DBI)
 library(pool)
 library(RPostgres)
 library(bit64)
-# library(shinythemes) # using bootswatch library bslib for theming
-library(bslib)
-library(shinyWidgets)
+
 library(tidyverse)
 library(glue)
 library(rlang)
+
 library(extrafont)
 library(RColorBrewer)
 library(plotly)
 library(DT)
+
 # library(profvis)
 
 
@@ -115,6 +120,10 @@ ui <- tagList(
         ##================================================================
         sidebarPanel(
           width = 2,
+          shinybusy::add_busy_gif(src = "https://jeroen.github.io/images/banana.gif",
+                                  height = 70,
+                                  width = 70,
+                                  position = "bottom-left"),
           div(style = "display: inline-block", icon("database")),
           div(style = "display: inline-block", h4("Database")),
           helpText("Click refresh to re-establish connection to ebase
@@ -1021,7 +1030,7 @@ server <- function(input, output, session) {
         INNER JOIN units
           ON exp_conds.unit_id = units.id
         INNER JOIN conditions AS conds
-         ON exp_conds.condition_id = conds.id",
+          ON exp_conds.condition_id = conds.id",
         input = input$db_exp_sel,
         .con = ebase_dev
       )
