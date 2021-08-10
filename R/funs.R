@@ -250,8 +250,25 @@ join_sls_dls <- function(sls, dls) {
 ##                       Banner Functions                       ==
 ##================================================================
 
-# mainBanner <- function(x, y) {bannerCommenter::banner(x, y, emph = TRUE, upper = FALSE, leftSideHashes = 4, rightSideHashes = 4, numLines = 4)}
-# secBanner <- function(x) {bannerCommenter::banner(x, emph = FALSE, upper = FALSE, bandChar = "=")}
-# subSecBanner <- function(x) {bannerCommenter::banner(x, emph = FALSE, upper = FALSE, bandChar = ":", numLines = 1, snug = TRUE)}
+secBanner <- function(x, char = "-") {
+  bannerCommenter::banner(
+    x,
+    emph = FALSE,
+    upper = FALSE,
+    centre = FALSE,
+    bandChar = char,
+    minHashes = 80
+  )
+}
+subSecBanner <- function(x, char = "-") {
+  bannerCommenter::banner(
+    x,
+    emph = FALSE,
+    upper = FALSE,
+    centre = FALSE,
+    bandChar = char,
+    minHashes = 40
+  )
+}
 
 

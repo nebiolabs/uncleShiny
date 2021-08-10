@@ -149,88 +149,91 @@ plotOptsUI <- function(id) {
 
 
 # SERVER
-plotOpts <- function(input, output, session) {
-# plotOpts <- function(input, output, session, x_choices, y_choices) {
-  
-  # observe({
-  #   # xvar choices
-  #   updateSelectInput(
-  #     inputId = "xvar1",
-  #     choices = x_choices
-  #   )
-  #   updateSelectInput(
-  #     inputId = "xvar2",
-  #     choices = x_choices
-  #   )
-  #   updateSelectInput(
-  #     inputId = "xvar3",
-  #     choices = x_choices
-  #   )
-  #   # yvar choices
-  #   updateSelectInput(
-  #     inputId = "yvar1",
-  #     choices = y_choices
-  #   )
-  #   updateSelectInput(
-  #     inputId = "yvar2",
-  #     choices = y_choices
-  #   )
-  #   updateSelectInput(
-  #     inputId = "yvar3",
-  #     choices = y_choices
-  #   )
-  # })
-  
-  # # dynamically updated filters for plots
-  # observeEvent(dataList(), {
-  #   req(dataList())
-  #   # update filter options
-  #   updateSelectInput(
-  #     session, "bufferFilter",
-  #     choices = purrr::map(dataList(), ~ dplyr::pull(dplyr::distinct(.x, buffer))) %>% purrr::flatten_chr()
-  #   )
-  #   updateSelectInput(
-  #     session, "saltFilter",
-  #     choices = purrr::map(dataList(), ~ dplyr::pull(dplyr::distinct(.x, salt))) %>% purrr::flatten_chr()
-  #   )
-  # })
-  # 
-  # output$dataName <- renderText({
-  #   stringr::str_extract(dataName, "(?<=./data/).*(?=_data.rds)")
-  # })
-  
-  return(
-    list(
-      color = reactive({
-        input$color
-      }),
-      palette = reactive({
-        input$palette
-      }),
-      updateGlobal = reactive({
-        input$updateGlobal
-      }),
-      xvar1 = reactive({
-        input$xvar1
-      }),
-      yvar1 = reactive({
-        input$yvar1
-      }),
-      xvar2 = reactive({
-        input$xvar2
-      }),
-      yvar2 = reactive({
-        input$yvar2
-      }),
-      zoomycolor = reactive({
-        input$zoomycolor
-      }),
-      xvar3 = reactive({
-        input$xvar3
-      }),
-      yvar3 = reactive({
-        input$yvar3
-      })
-    )
+plotOptsServer <- function(id) {
+  shiny::moduleServer(
+    id,
+    function(input, output, session) {
+      # observe({
+      #   # xvar choices
+      #   updateSelectInput(
+      #     inputId = "xvar1",
+      #     choices = x_choices
+      #   )
+      #   updateSelectInput(
+      #     inputId = "xvar2",
+      #     choices = x_choices
+      #   )
+      #   updateSelectInput(
+      #     inputId = "xvar3",
+      #     choices = x_choices
+      #   )
+      #   # yvar choices
+      #   updateSelectInput(
+      #     inputId = "yvar1",
+      #     choices = y_choices
+      #   )
+      #   updateSelectInput(
+      #     inputId = "yvar2",
+      #     choices = y_choices
+      #   )
+      #   updateSelectInput(
+      #     inputId = "yvar3",
+      #     choices = y_choices
+      #   )
+      # })
+      
+      # # dynamically updated filters for plots
+      # observeEvent(dataList(), {
+      #   req(dataList())
+      #   # update filter options
+      #   updateSelectInput(
+      #     session, "bufferFilter",
+      #     choices = purrr::map(dataList(), ~ dplyr::pull(dplyr::distinct(.x, buffer))) %>% purrr::flatten_chr()
+      #   )
+      #   updateSelectInput(
+      #     session, "saltFilter",
+      #     choices = purrr::map(dataList(), ~ dplyr::pull(dplyr::distinct(.x, salt))) %>% purrr::flatten_chr()
+      #   )
+      # })
+      # 
+      # output$dataName <- renderText({
+      #   stringr::str_extract(dataName, "(?<=./data/).*(?=_data.rds)")
+      # })
+      
+      return(
+        list(
+          color = reactive({
+            input$color
+          }),
+          palette = reactive({
+            input$palette
+          }),
+          updateGlobal = reactive({
+            input$updateGlobal
+          }),
+          xvar1 = reactive({
+            input$xvar1
+          }),
+          yvar1 = reactive({
+            input$yvar1
+          }),
+          xvar2 = reactive({
+            input$xvar2
+          }),
+          yvar2 = reactive({
+            input$yvar2
+          }),
+          zoomycolor = reactive({
+            input$zoomycolor
+          }),
+          xvar3 = reactive({
+            input$xvar3
+          }),
+          yvar3 = reactive({
+            input$yvar3
+          })
+        )
+      )
+    }
   )
 }
