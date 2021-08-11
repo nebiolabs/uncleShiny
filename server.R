@@ -1,108 +1,48 @@
 
-####----------------------------------------------------------------------------
-####----------------------------------------------------------------------------
-####                                                                        ----
-####  server.R                                                              ----
-####  Server Backend                                                        ----
-####                                                                        ----
-####----------------------------------------------------------------------------
-####----------------------------------------------------------------------------
-
-
-##================================================================
-##                           Defaults                           ==
-##================================================================
-
-
-
+##------------------------------------------------------------------------------
+##  server.R                                                                  --
+##------------------------------------------------------------------------------
 
 function(input, output, session) {
+  
+  ##-----------------------------------------------------------
+  ##  Interactive theme selection                            --
+  ##-----------------------------------------------------------
+
   # bslib::bs_themer()
+  
+  
+  ##-----------------------------------------------------------
+  ##  Performance profiling                                  --
+  ##-----------------------------------------------------------
   
   # callModule(profvis::profvis_server, "profiler")
   
   
-  ##================================================================
-  ##                       Local 'Database'                       ==
-  ##================================================================
-  
-  # watches the data directory for any changes and auto-updates a named path list every ten seconds..
-  dataPaths <- reactiveFileReader(
-    intervalMillis = 10000,
-    session,
-    filePath = "data/",
-    readFunc = function(x) {
-      purrr::set_names(
-        list.files(x, full.names = TRUE),
-        nm = stringr::str_extract(list.files(x, full.names = FALSE), ".*(?=_data.rds)")
-      )
-    }
-  )
-  # this observer updates the data input dropdown whenever there is a change detected in the data directory..
-  observeEvent(dataPaths(), {
-    updateSelectInput(
-      session,
-      "dataSelection",
-      choices = c(dataPaths())
-    )
-  })
   
   
-  ##===============================================================
-  ##                     PostgreSQL Database                     ==
-  ##===============================================================
+  ##----------------------------------------------------------
+  ##  Postgres database connection                          --
+  ##----------------------------------------------------------
   
+  ##--------------------------------------
+  ##  Available products                --
+  ##--------------------------------------
   
-  ##:::::::::::::
-  ##  Queries  ::
-  ##:::::::::::::
-  
-  queries_path <- reactiveFileReader(
-    intervalMillis = 1000,
-    session,
-    filePath = "R/queries.R",
-    readFunc = \(x) return(x)
-  )
-  
-  observeEvent(queries_path(), {
-    source(queries_path())
-  })
-  
-  ##::::::::::::::::::::::::
-  ##  Available Products  ::
-  ##::::::::::::::::::::::::
-  
-  db_products_table <- eventReactive(input$db_refresh, {
+  # Reactive object of available products
+  reactive_products <- eventReactive(input$db_refresh, {
     req(ebase_dev)
-    # # INNER JOIN method will create replicate protein entries
-    # # if there are multiple matches in the experiment_sets table
-    # DBI::dbGetQuery(
-    #   ebase_dev,
-    #   "SELECT p.name product_name, p.id product_id, p.catalog_number
-    #    FROM products p
-    #    INNER JOIN uncle_experiment_sets exp_sets
-    #    on p.id = exp_sets.product_id"
-    # )
-    # instead, use semi join (WHERE EXISTS) method to prevent the above issue,
-    # also maybe faster, but negligible given table size
     DBI::dbGetQuery(
       ebase_dev,
       sql_queries$products
     )
-    # # collapsing with DISTINCT also works, but is the slowest option
-    # DBI::dbGetQuery(
-    #   ebase_dev,
-    #   "SELECT DISTINCT p.name AS product_name, p.id AS product_id,
-    #   p.catalog_number
-    #    FROM products p INNER JOIN uncle_experiment_sets exp_sets
-    #     ON p.id = exp_sets.product_id)"
-    # )
   })
   
-  output$db_products_available <- renderDT({
-    req(db_products_table())
+  # Render table for db inspection
+  output$table_products_available <- renderDT({
+    req(reactive_products())
     datatable(
-      data = db_products_table(),
+      data = reactive_products(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
@@ -123,25 +63,25 @@ function(input, output, session) {
     )
   })
   
-  db_prod_available <- eventReactive(input$db_refresh, {
-    req(db_products_table())
-    db_products_table() |>
+  # Update choices for product selection
+  observeEvent(reactive_products(), {
+    req(reactive_products())
+    
+    updated_choices <- reactive_products() |>
       dplyr::select(product_name, product_id) |>
       tibble::deframe()
-  })
-  
-  observeEvent(db_prod_available(), {
-    req(db_prod_available())
+    
     updateSelectInput(
       session,
-      "db_prod_sel",
-      choices = c(" " = 0, db_prod_available()),
+      "product_selected",
+      choices = c(" " = 0, updated_choices),
       selected = 0
     )
   })
   
-  output$db_prod_selected <- renderPrint({
-    input$db_prod_sel
+  # Raw output for debugging
+  output$raw_product_selected <- renderPrint({
+    input$product_selected
   })
   
   
@@ -149,20 +89,20 @@ function(input, output, session) {
   ##  Available Experiments  ::
   ##:::::::::::::::::::::::::::
   
-  db_exp_sets_table <- eventReactive(input$db_prod_sel, {
-    req(db_products_table())
+  db_exp_sets_table <- eventReactive(input$product_selected, {
+    req(reactive_products())
     DBI::dbGetQuery(
       ebase_dev,
       glue::glue_sql(
         sql_queries$exp_sets,
-        input = input$db_prod_sel,
+        input = input$product_selected,
         .con = ebase_dev
       )
     )
   })
   
-  db_exps_table <- eventReactive(input$db_prod_sel, {
-    req(db_products_table())
+  db_exps_table <- eventReactive(input$product_selected, {
+    req(reactive_products())
     exp_sets <- db_exp_sets_table() |> 
       dplyr::pull(set_id) |> 
       unique()
@@ -227,7 +167,7 @@ function(input, output, session) {
     )
   })
   
-  db_exps_available <- eventReactive(input$db_prod_sel, {
+  db_exps_available <- eventReactive(input$product_selected, {
     req(db_exp_sets_table())
     db_exp_sets_table() |>
       tidyr::unite(
@@ -332,7 +272,7 @@ function(input, output, session) {
     highlight_key(
       db_data,
       key = ~sharedKey,
-      group = paste("summy", input$db_prod_sel, input$db_exp_sel, sep = "_")
+      group = paste("summy", input$product_selected, input$db_exp_sel, sep = "_")
     )
   })
   

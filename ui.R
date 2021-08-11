@@ -1,15 +1,7 @@
 
-####----------------------------------------------------------------------------
-####----------------------------------------------------------------------------
-####                                                                        ----
-####  ui.R                                                                  ----
-####  User Interface                                                        ----
-####                                                                        ----
-####----------------------------------------------------------------------------
-####----------------------------------------------------------------------------
-
-
-
+##------------------------------------------------------------------------------
+##  ui.R                                                                      --
+##------------------------------------------------------------------------------
 
 tagList(
   tags$head(tags$script(type = "text/javascript", src = "code.js")),
@@ -37,9 +29,9 @@ tagList(
           div(style = "display: inline-block", h4("Database")),
           helpText("Click refresh to re-establish connection to ebase
                    and display available protein datasets for analysis."),
-          verbatimTextOutput("db_prod_selected"),
+          verbatimTextOutput("raw_product_selected"),
           selectInput(
-            "db_prod_sel",
+            "product_selected",
             NULL,
             choices = NULL
           ),
@@ -79,7 +71,7 @@ tagList(
               icon = icon("object-group"),
               fluidRow(
                 h5("Products available on server:"),
-                DTOutput("db_products_available", width = "100%"),
+                DTOutput("table_products_available", width = "100%"),
               ),
               fluidRow(
                 column(

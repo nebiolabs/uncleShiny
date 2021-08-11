@@ -250,7 +250,7 @@ join_sls_dls <- function(sls, dls) {
 ##                       Banner Functions                       ==
 ##================================================================
 
-secBanner <- function(x, char = "-") {
+banner1 <- function(x, char = "-") {
   bannerCommenter::banner(
     x,
     emph = FALSE,
@@ -260,7 +260,17 @@ secBanner <- function(x, char = "-") {
     minHashes = 80
   )
 }
-subSecBanner <- function(x, char = "-") {
+banner2 <- function(x, char = "-") {
+  bannerCommenter::banner(
+    x,
+    emph = FALSE,
+    upper = FALSE,
+    centre = FALSE,
+    bandChar = char,
+    minHashes = 60
+  )
+}
+banner3 <- function(x, char = "-") {
   bannerCommenter::banner(
     x,
     emph = FALSE,

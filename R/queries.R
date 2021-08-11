@@ -64,4 +64,4 @@ sql_queries$exp_sets <-  {
   WHERE product_id = {input}"
 }
 
-return(list)
+# return(sql_queries)
