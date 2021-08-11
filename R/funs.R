@@ -257,7 +257,7 @@ banner1 <- function(x, char = "-") {
     upper = FALSE,
     centre = FALSE,
     bandChar = char,
-    minHashes = 80
+    minHashes = 75
   )
 }
 banner2 <- function(x, char = "-") {
@@ -267,7 +267,7 @@ banner2 <- function(x, char = "-") {
     upper = FALSE,
     centre = FALSE,
     bandChar = char,
-    minHashes = 60
+    minHashes = 57
   )
 }
 banner3 <- function(x, char = "-") {
@@ -277,7 +277,7 @@ banner3 <- function(x, char = "-") {
     upper = FALSE,
     centre = FALSE,
     bandChar = char,
-    minHashes = 40
+    minHashes = 42
   )
 }
 

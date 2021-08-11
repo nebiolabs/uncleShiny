@@ -1,33 +1,33 @@
 
-##------------------------------------------------------------------------------
-##  server.R                                                                  --
-##------------------------------------------------------------------------------
+##--------------------------------------------------------------------------
+##  server.R                                                              --
+##--------------------------------------------------------------------------
 
 function(input, output, session) {
   
-  ##-----------------------------------------------------------
-  ##  Interactive theme selection                            --
-  ##-----------------------------------------------------------
+  ##-------------------------------------------------------
+  ##  Interactive theme selection                        --
+  ##-------------------------------------------------------
 
   # bslib::bs_themer()
   
   
-  ##-----------------------------------------------------------
-  ##  Performance profiling                                  --
-  ##-----------------------------------------------------------
+  ##-------------------------------------------------------
+  ##  Performance profiling                              --
+  ##-------------------------------------------------------
   
   # callModule(profvis::profvis_server, "profiler")
   
   
   
   
-  ##----------------------------------------------------------
-  ##  Postgres database connection                          --
-  ##----------------------------------------------------------
+  ##--------------------------------------------------------
+  ##  Postgres database access                            --
+  ##--------------------------------------------------------
   
-  ##--------------------------------------
-  ##  Available products                --
-  ##--------------------------------------
+  ##----------------------------------------
+  ##  Available products                  --
+  ##----------------------------------------
   
   # Reactive object of available products
   reactive_products <- eventReactive(input$db_refresh, {
@@ -38,7 +38,7 @@ function(input, output, session) {
     )
   })
   
-  # Render table for db inspection
+  # Render products table for db inspection
   output$table_products_available <- renderDT({
     req(reactive_products())
     datatable(
@@ -79,50 +79,50 @@ function(input, output, session) {
     )
   })
   
-  # Raw output for debugging
+  # Raw output of product_id for debugging
   output$raw_product_selected <- renderPrint({
     input$product_selected
   })
   
   
-  ##:::::::::::::::::::::::::::
-  ##  Available Experiments  ::
-  ##:::::::::::::::::::::::::::
+  ##-----------------------------------------
+  ##  Available experiments                --
+  ##-----------------------------------------
   
-  db_exp_sets_table <- eventReactive(input$product_selected, {
+  # Reactive object of available experiment sets for user-selected product
+  reactive_experiment_sets <- eventReactive(input$product_selected, {
     req(reactive_products())
     DBI::dbGetQuery(
       ebase_dev,
       glue::glue_sql(
-        sql_queries$exp_sets,
+        sql_queries$experiment_sets,
         input = input$product_selected,
         .con = ebase_dev
       )
     )
   })
   
-  db_exps_table <- eventReactive(input$product_selected, {
-    req(reactive_products())
-    exp_sets <- db_exp_sets_table() |> 
+  # Reactive object of available experiments within the sets above
+  reactive_experiments <- eventReactive(reactive_experiment_sets(), {
+    req(reactive_products(), reactive_experiment_sets())
+    sets <- reactive_experiment_sets() |> 
       dplyr::pull(set_id) |> 
       unique()
     DBI::dbGetQuery(
       ebase_dev,
       glue::glue_sql(
-        "SELECT id AS exp_id, uncle_experiment_set_id AS set_id,
-            uncle_instrument_id AS inst_id, plate_side AS side, date
-          FROM uncle_experiments
-          WHERE uncle_experiment_set_id IN ({input*})",
-        input = exp_sets,
+        sql_queries$experiments,
+        input = sets,
         .con = ebase_dev
       )
     )
   })
   
-  output$db_exp_sets_available <- renderDT({
-    req(db_exp_sets_table())
+  # Render experiment sets table for db inspection
+  output$table_experiment_sets_available <- renderDT({
+    req(reactive_experiment_sets())
     datatable(
-      data = db_exp_sets_table(),
+      data = reactive_experiment_sets(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
@@ -143,10 +143,11 @@ function(input, output, session) {
     )
   })
   
-  output$db_exps_available <- renderDT({
-    req(db_exps_table())
+  # Render experiments table for db inspection
+  output$table_experiments_available <- renderDT({
+    req(reactive_experiments())
     datatable(
-      data = db_exps_table(),
+      data = reactive_experiments(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
@@ -167,9 +168,11 @@ function(input, output, session) {
     )
   })
   
-  db_exps_available <- eventReactive(input$product_selected, {
-    req(db_exp_sets_table())
-    db_exp_sets_table() |>
+  # Update choices for experiment set selection
+  observeEvent(reactive_experiment_sets(), {
+    req(reactive_experiment_sets())
+    
+    updated_choices <- reactive_experiment_sets() |>
       tidyr::unite(
         col = "experiment",
         exp_type, gen, set_id, well_set_id,
@@ -179,19 +182,17 @@ function(input, output, session) {
       dplyr::select(experiment, set_id) |> 
       dplyr::mutate(across(c(set_id), .fns = bit64::as.integer64)) |> 
       tibble::deframe()
-  })
-  
-  observeEvent(db_exps_available(), {
-    req(db_exps_available())
+    
     updateSelectInput(
       session,
-      "db_exp_sel",
-      choices = bit64::c.integer64(" " = 0, db_exps_available())
+      "experiment_set_selected",
+      choices = bit64::c.integer64(" " = 0, updated_choices)
     )
   })
   
-  output$db_exp_set_selected <- renderPrint({
-    input$db_exp_sel
+  # Raw output of experiment_set_id for debugging
+  output$raw_experiment_set_selected <- renderPrint({
+    input$experiment_set_selected
   })
   
   
@@ -231,7 +232,7 @@ function(input, output, session) {
           ON exp_conds.unit_id = units.id
         INNER JOIN conditions AS conds
           ON exp_conds.condition_id = conds.id",
-        input = input$db_exp_sel,
+        input = input$experiment_set_selected,
         .con = ebase_dev
       )
     ) |> 
@@ -272,7 +273,7 @@ function(input, output, session) {
     highlight_key(
       db_data,
       key = ~sharedKey,
-      group = paste("summy", input$product_selected, input$db_exp_sel, sep = "_")
+      group = paste("summy", input$product_selected, input$experiment_set_selected, sep = "_")
     )
   })
   
