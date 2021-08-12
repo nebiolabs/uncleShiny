@@ -2,8 +2,8 @@ library(shiny)
 library(shinyWidgets)
 library(tidyverse)
 
-source("R/vars.R")
-source("R/funs.R")
+# source("R/vars.R")
+# source("R/funs.R")
 
 # UI
 plotOptsUI <- function(id) {

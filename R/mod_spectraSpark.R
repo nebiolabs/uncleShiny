@@ -9,7 +9,7 @@ library(tidyverse)
 library(glue)
 
 
-source("R/vars.R")
+# source("R/vars.R")
 
 
 # Theme for spectra sparklines.. 

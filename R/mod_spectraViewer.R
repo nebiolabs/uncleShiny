@@ -11,8 +11,8 @@ library(DT)
 library(ggridges)
 library(rlang)
 
-source("R/vars.R")
-source("R/funs.R")
+# source("R/vars.R")
+# source("R/funs.R")
 
 spectraTheme <- function() {
   list(

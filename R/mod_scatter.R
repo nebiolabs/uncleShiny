@@ -10,9 +10,9 @@ library(glue)
 library(rlang)
 
 # Modules..
-source("R/vars.R")
-source("R/funs.R")
-source("R/plotly.R")
+# source("R/vars.R")
+# source("R/funs.R")
+# source("R/plotly.R")
 
 # Helpers..
 # source("modules/plotOpts.R")
@@ -144,7 +144,7 @@ scatterServer <- function(id, data, loadBtn, expSel) {
       
       # Plot 1 reactive..
       p1 <- reactive({
-        source("R/plotly.R", local = TRUE)
+        source("R/func_plotly.R", local = TRUE)
         buildplotly(
           data = plotData(),
           x = plotOpts$xvar1(),
@@ -161,7 +161,7 @@ scatterServer <- function(id, data, loadBtn, expSel) {
       
       # Plot 2 reactive..
       p2 <- reactive({
-        source("R/plotly.R", local = TRUE)
+        source("R/func_plotly.R", local = TRUE)
         buildplotly(
           data = plotData(),
           x = plotOpts$xvar2(),
@@ -307,7 +307,7 @@ scatterServer <- function(id, data, loadBtn, expSel) {
       
       # The zoomed-in plot..
       zoomy <- reactive({
-        source("R/plotly.R", local = TRUE)
+        source("R/func_plotly.R", local = TRUE)
         if (is.null(selectedData())) {
           p <- NULL
         } else {
