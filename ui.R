@@ -4,6 +4,7 @@
 ## --------------------------------------------------------------------------
 
 tagList(
+  # Adds the NEB logo to the navbar
   tags$head(tags$script(type = "text/javascript", src = "code.js")),
   ##--------------------------------------------------------
   ##  Navbar tab: database                                --
@@ -25,14 +26,7 @@ tagList(
         ## ----------------------------------------
         sidebarPanel(
           width = 2,
-          dbQueryUI("ebase_query"),
-          ### this shoould be in the dbView module as a "plot selection" button
-          actionButton(
-            "bttn_load",
-            "Load Experiment",
-            icon = icon("sync-alt")
-          )
-          ###
+          dbQueryUI("ebase_query")
         ),
         ## ----------------------------------------
         ##  Main panel                          --
@@ -144,7 +138,6 @@ tagList(
           fluidRow(
             column(
               width = 12,
-              DTOutput("db_data_print"),
               DT::DTOutput("db_summySel")
               # DTOutput("db_zoomyDT", width = "100%"),
               # DTOutput("db_zoomytable")

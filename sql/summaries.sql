@@ -10,7 +10,7 @@ WHERE EXISTS (SELECT *
               WHERE exps.uncle_experiment_set_id IN (29)
                 AND sum.uncle_experiment_id = exps.id)
 )
-SELECT cte_sum.*, exp_conds.well_id, exp_conds.id AS experiment_condition_id,
+SELECT cte_sum.*, exp_conds.id AS experiment_condition_id,
   exp_conds.condition_id, exp_conds.unit_id, exp_conds.raw_value AS unit_value,
   units.name AS unit_name, conds.name AS cond_name, conds.type AS condition_type
 FROM cte_sum

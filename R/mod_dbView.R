@@ -9,23 +9,36 @@
 dbViewUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::fluidRow(
-      column(
-        width = 12,
-        shiny::h5("Products available on server:"),
-        DT::DTOutput(ns("table_products_available"), width = "100%")
+    shiny::tabsetPanel(
+      shiny::tabPanel(
+        title = "db Table Inspection",
+        icon = shiny::icon("object-group"),
+        value = "db_tbls",
+        shiny::fluidRow(
+          column(
+            width = 12,
+            shiny::h5("Products available on server:"),
+            DT::DTOutput(ns("table_products_available"), width = "100%")
+          ),
+        ),
+        shiny::fluidRow(
+          shiny::column(
+            width = 6,
+            shiny::h5("Experiments sets available for selected product:"),
+            DT::DTOutput(ns("table_experiment_sets_available"), width = "100%")
+          ),
+          shiny::column(
+            width = 6,
+            shiny::h5("Experiments in experiment sets:"),
+            DT::DTOutput(ns("table_experiments_available"), width = "100%")
+          )
+        )
       ),
-    ),
-    shiny::fluidRow(
-      shiny::column(
-        width = 6,
-        shiny::h5("Experiments sets available for selected product:"),
-        DT::DTOutput(ns("table_experiment_sets_available"), width = "100%")
-      ),
-      shiny::column(
-        width = 6,
-        shiny::h5("Experiments in experiment sets:"),
-        DT::DTOutput(ns("table_experiments_available"), width = "100%")
+      shiny::tabPanel(
+        title = "db Data Collection",
+        icon = shiny::icon("cloud-download-alt"),
+        values = "collection",
+        DT::DTOutput(ns("table_collected_data"), width = "100%")
       )
     )
   )
@@ -94,6 +107,34 @@ dbViewServer <- function(id, grv) {
         shiny::req(grv$robj_experiments())
         DT::datatable(
           data = grv$robj_experiments(),
+          selection = "none",
+          # extensions = c("FixedColumns"),
+          options = list(
+            dom = "tip",
+            # f - filter
+            # searchHighlight = TRUE,
+            # p - pagination
+            scrollX = TRUE,
+            scrollY = "400px",
+            paging = FALSE,
+            pageLength = 80,
+            scrollCollapse = TRUE#,
+            # t - table
+            # fixedColumns = list(leftColumns = 5),
+            # order = list(list(3, "asc")),
+            # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
+          )
+        )
+      })
+      
+      # Render summary data table for collected selection
+      output$table_collected_data <- DT::renderDT({
+        shiny::req(grv$robj_collected_data())
+        DT::datatable(
+          data = dplyr::select(
+            grv$robj_collected_data(),
+            -tidyselect::contains("residuals")#, -tidyselect::contains("spec")
+          ),
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(

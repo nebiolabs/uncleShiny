@@ -46,83 +46,19 @@ function(input, output, session) {
   dbViewServer("ebase_view", grv)
   
   
-  ##::::::::::::::::::
-  ##  PSQL Load-in  ::
-  ##::::::::::::::::::
-  
-  db_data <- eventReactive(input$bttn_load, {
-    summary_data <- DBI::dbGetQuery(
-      ebase_dev,
-      # glue::glue_sql(
-      #   "SELECT sum.*, wells.layout_address AS well
-      #   FROM uncle_summaries sum INNER JOIN wells
-      #     ON sum.well_id = wells.id
-      #         WHERE EXISTS (SELECT *
-      #                       FROM uncle_experiments exps
-      #                       WHERE exps.uncle_experiment_set_id IN ({input*})
-      #                         AND sum.uncle_experiment_id = exps.id)",
-      glue::glue_sql(
-        "WITH cte_sum AS
-        (SELECT wells.layout_address AS well, sum.* 
-        FROM uncle_summaries sum
-        INNER JOIN wells
-          ON sum.well_id = wells.id
-        WHERE EXISTS (SELECT *
-                      FROM uncle_experiments exps
-                      WHERE exps.uncle_experiment_set_id IN ({input*})
-                        AND sum.uncle_experiment_id = exps.id)
-        )
-        SELECT cte_sum.*, exp_conds.well_id, exp_conds.id AS experiment_condition_id, exp_conds.condition_id,
-          exp_conds.unit_id, exp_conds.raw_value AS unit_value,
-          units.name AS unit_name, conds.name AS cond_name 
-        FROM cte_sum
-        INNER JOIN experimental_conditions AS exp_conds
-          ON cte_sum.well_id = exp_conds.well_id
-        INNER JOIN units
-          ON exp_conds.unit_id = units.id
-        INNER JOIN conditions AS conds
-          ON exp_conds.condition_id = conds.id",
-        input = input$experiment_set_selected,
-        .con = ebase_dev
-      )
-    ) |> 
-      dplyr::mutate(sharedKey = id) |> 
-      dplyr::rename(
-        Tagg266 = t_agg_266,
-        Tagg473 = t_agg_473,
-        Tm1 = t_m_1,
-        Z_D = z_avg_diameter,
-        peak1_D = pk_1_mode_diameter,
-        PdI = pdi
-      ) |> 
-      dplyr::mutate(residuals = purrr::map(residuals, parse_float8)) |>
-      dplyr::rename(uncle_summary_id = id) |> 
-      tibble::as_tibble()
-    
-    summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
-    
-    spec_tbls <- get_spec_tbls(ebase_dev, spec_tbl_list, summary_ids)
-    
-    # return(nest_spectra(summary_data, spec_tbls))
-    return(summary_data)
-  })
   
   
-  output$db_data_print <- renderDT({
-    db_data() |> 
-      dplyr::select(-contains("spec"), -contains("residuals"))
-  })
   
   
   ##::::::::::::::::::::
   ##  PSQL Plot Data  ::
   ##::::::::::::::::::::
   
-  db_summyShared <- eventReactive(c(db_data()), {
-    req(db_data())
+  db_summyShared <- eventReactive(c(grv$robj_collected_data()), {
+    req(grv$robj_collected_data())
     highlight_key(
-      db_data,
-      key = ~sharedKey,
+      grv$robj_collected_data,
+      key = ~summary_id,
       group = paste("summy", input$product_selected, input$experiment_set_selected, sep = "_")
     )
   })
@@ -136,7 +72,7 @@ function(input, output, session) {
   
   # Plot 1 as a reactive..
   db_p1 <- reactive({
-    source("R/plotly.R", local = TRUE)
+    source("R/func_plotly.R", local = TRUE)
     db_buildplotly(
       data = db_summyShared(),
       x = db_plotOpts$xvar1(),
@@ -150,7 +86,7 @@ function(input, output, session) {
   
   # Plot 2 as a reactive..
   db_p2 <- reactive({
-    source("R/plotly.R", local = TRUE)
+    source("R/func_plotly.R", local = TRUE)
     db_buildplotly(
       data = db_summyShared(),
       x = db_plotOpts$xvar2(),
@@ -205,7 +141,7 @@ function(input, output, session) {
   output$db_summySel <- DT::renderDT({
     req(db_summyShared())
     event_data(event = "plotly_selected", source = "db_summydots")#[["key"]]
-    # db_data()[db_data()$sharedKey %in% cd, ]
+    # grv$robj_collected_data()[grv$robj_collected_data()$summary_id %in% cd, ]
   })
   
   
@@ -219,8 +155,8 @@ function(input, output, session) {
   ##:::::::::
   
   output$db_dls <- renderPlot({
-    req(db_data())
-    fun_data <- db_data() |>
+    req(grv$robj_collected_data())
+    fun_data <- grv$robj_collected_data() |>
       dplyr::select(-c(created_at:cond_name)) |> 
       dplyr::distinct() |> 
       dplyr::filter(between(Z_D, 0, 999)) |> 
@@ -287,8 +223,8 @@ function(input, output, session) {
   ##:::::::::
   
   output$db_sls <- renderPlot({
-    req(db_data())
-    fun_data <- db_data() |> 
+    req(grv$robj_collected_data())
+    fun_data <- grv$robj_collected_data() |> 
       dplyr::select(-c(created_at:cond_name)) |> 
       dplyr::distinct()
     plot <- ggplot(
@@ -533,7 +469,7 @@ function(input, output, session) {
   
   # Plot 1 as a reactive..
   p1 <- reactive({
-    source("R/plotly.R", local = TRUE)
+    source("R/func_plotly.R", local = TRUE)
     buildplotly(
       data = summyShared(),
       x = plotOpts$xvar1(),
@@ -550,7 +486,7 @@ function(input, output, session) {
   
   # Plot 2 as a reactive..
   p2 <- reactive({
-    source("R/plotly.R", local = TRUE)
+    source("R/func_plotly.R", local = TRUE)
     buildplotly(
       data = summyShared(),
       x = plotOpts$xvar2(),
@@ -694,7 +630,7 @@ function(input, output, session) {
   # The zoomed-in plot as a reactive..
   zoomy <- reactive({
     req(zoomyShared())
-    source("R/plotly.R", local = TRUE)
+    source("R/func_plotly.R", local = TRUE)
     if (is.null(summySelData())) {
       p <- NULL
     } else {
