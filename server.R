@@ -35,18 +35,6 @@ function(input, output, session) {
   
   dbQueryServer("ebase_query", grv, ebase_dev)
   
-  ##----------------------------------------
-  ##  Available products                  --
-  ##----------------------------------------
-  
-  # # Reactive object of available products
-  # grv$robj_products <- eventReactive(input$db_refresh, {
-  #   req(ebase_dev)
-  #   DBI::dbGetQuery(
-  #     ebase_dev,
-  #     sql_queries$products
-  #   )
-  # })
   
   # Render products table for db inspection
   output$table_products_available <- renderDT({
@@ -73,66 +61,45 @@ function(input, output, session) {
     )
   })
   
-  # # Update choices for product selection
-  # observeEvent(grv$robj_products(), {
-  #   req(grv$robj_products())
-  #   
-  #   updated_choices <- grv$robj_products() |>
-  #     dplyr::select(product_name, product_id) |>
-  #     tibble::deframe()
-  #   
-  #   updateSelectInput(
-  #     session,
-  #     "product_selected",
-  #     choices = c(" " = 0, updated_choices),
-  #     selected = 0
-  #   )
-  # })
-  # 
-  # # Raw output of product_id for debugging
-  # output$raw_product_selected <- renderPrint({
-  #   input$product_selected
-  # })
-  
   
   ##-----------------------------------------
   ##  Available experiments                --
   ##-----------------------------------------
   
-  # Reactive object of available experiment sets for user-selected product
-  reactive_experiment_sets <- eventReactive(input$product_selected, {
-    req(grv$robj_products())
-    DBI::dbGetQuery(
-      ebase_dev,
-      glue::glue_sql(
-        sql_queries$experiment_sets,
-        input = input$product_selected,
-        .con = ebase_dev
-      )
-    )
-  })
-  
-  # Reactive object of available experiments within the sets above
-  reactive_experiments <- eventReactive(reactive_experiment_sets(), {
-    req(grv$robj_products(), reactive_experiment_sets())
-    sets <- reactive_experiment_sets() |> 
-      dplyr::pull(set_id) |> 
-      unique()
-    DBI::dbGetQuery(
-      ebase_dev,
-      glue::glue_sql(
-        sql_queries$experiments,
-        input = sets,
-        .con = ebase_dev
-      )
-    )
-  })
+  # # Reactive object of available experiment sets for user-selected product
+  # reactive_experiment_sets <- eventReactive(input$product_selected, {
+  #   req(grv$robj_products())
+  #   DBI::dbGetQuery(
+  #     ebase_dev,
+  #     glue::glue_sql(
+  #       sql_queries$experiment_sets,
+  #       input = input$product_selected,
+  #       .con = ebase_dev
+  #     )
+  #   )
+  # })
+  # 
+  # # Reactive object of available experiments within the sets above
+  # grv$robj_experiments <- eventReactive(reactive_experiment_sets(), {
+  #   req(grv$robj_products(), reactive_experiment_sets())
+  #   sets <- reactive_experiment_sets() |> 
+  #     dplyr::pull(set_id) |> 
+  #     unique()
+  #   DBI::dbGetQuery(
+  #     ebase_dev,
+  #     glue::glue_sql(
+  #       sql_queries$experiments,
+  #       input = sets,
+  #       .con = ebase_dev
+  #     )
+  #   )
+  # })
   
   # Render experiment sets table for db inspection
   output$table_experiment_sets_available <- renderDT({
-    req(reactive_experiment_sets())
+    req(grv$robj_experiment_sets())
     datatable(
-      data = reactive_experiment_sets(),
+      data = grv$robj_experiment_sets(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
@@ -155,9 +122,9 @@ function(input, output, session) {
   
   # Render experiments table for db inspection
   output$table_experiments_available <- renderDT({
-    req(reactive_experiments())
+    req(grv$robj_experiments())
     datatable(
-      data = reactive_experiments(),
+      data = grv$robj_experiments(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
@@ -178,32 +145,32 @@ function(input, output, session) {
     )
   })
   
-  # Update choices for experiment set selection
-  observeEvent(reactive_experiment_sets(), {
-    req(reactive_experiment_sets())
-    
-    updated_choices <- reactive_experiment_sets() |>
-      tidyr::unite(
-        col = "experiment",
-        exp_type, gen, set_id, well_set_id,
-        sep = "_",
-        remove = FALSE
-      ) |> 
-      dplyr::select(experiment, set_id) |> 
-      dplyr::mutate(across(c(set_id), .fns = bit64::as.integer64)) |> 
-      tibble::deframe()
-    
-    updateSelectInput(
-      session,
-      "experiment_set_selected",
-      choices = bit64::c.integer64(" " = 0, updated_choices)
-    )
-  })
-  
-  # Raw output of experiment_set_id for debugging
-  output$raw_experiment_set_selected <- renderPrint({
-    input$experiment_set_selected
-  })
+  # # Update choices for experiment set selection
+  # observeEvent(grv$robj_experiment_sets(), {
+  #   req(grv$robj_experiment_sets())
+  #   
+  #   updated_choices <- grv$robj_experiment_sets() |>
+  #     tidyr::unite(
+  #       col = "experiment",
+  #       exp_type, gen, set_id, well_set_id,
+  #       sep = "_",
+  #       remove = FALSE
+  #     ) |> 
+  #     dplyr::select(experiment, set_id) |> 
+  #     dplyr::mutate(across(c(set_id), .fns = bit64::as.integer64)) |> 
+  #     tibble::deframe()
+  #   
+  #   updateSelectInput(
+  #     session,
+  #     "experiment_set_selected",
+  #     choices = bit64::c.integer64(" " = 0, updated_choices)
+  #   )
+  # })
+  # 
+  # # Raw output of experiment_set_id for debugging
+  # output$raw_experiment_set_selected <- renderPrint({
+  #   input$experiment_set_selected
+  # })
   
   
   ##::::::::::::::::::
