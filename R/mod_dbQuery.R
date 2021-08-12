@@ -6,7 +6,6 @@
 ##-------------------------------------------------------
 ##  UI components                                      --
 ##-------------------------------------------------------
-
 dbQueryUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -40,7 +39,6 @@ dbQueryUI <- function(id) {
 ##-------------------------------------------------------
 ##  Server function                                    --
 ##-------------------------------------------------------
-
 dbQueryServer <- function(id, grv, dbobj) {
   shiny::moduleServer(
     id,

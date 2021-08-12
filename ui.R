@@ -39,22 +39,7 @@ tagList(
         ## ----------------------------------------
         mainPanel(
           width = 9,
-          fluidRow(
-            h5("Products available on server:"),
-            DTOutput("table_products_available", width = "100%"),
-          ),
-          fluidRow(
-            column(
-              width = 6,
-              h5("Experiments sets available for selected product:"),
-              DTOutput("table_experiment_sets_available", width = "100%")
-            ),
-            column(
-              width = 6,
-              h5("Experiments in experiment sets:"),
-              DTOutput("table_experiments_available", width = "100%")
-            )
-          )
+          dbViewUI("ebase_view")
         )
       )
     ),
