@@ -31,7 +31,7 @@ dbQueryUI <- function(id) {
       "Select product:",
       choices = NULL
     ),
-    shiny::verbatimTextOutput(ns("raw_product_selection")),
+    shiny::textOutput(ns("raw_product_selection")),
     shiny::br(),
     shiny::helpText("Once a product is selected, associated Uncle experiments
                     will be listed in the dropdown below. Select one, or
@@ -43,7 +43,7 @@ dbQueryUI <- function(id) {
       choices = NULL,
       multiple = TRUE
     ),
-    shiny::verbatimTextOutput(ns("raw_experiment_set_selection")),
+    shiny::textOutput(ns("raw_experiment_set_selection")),
     shiny::br(),
     shiny::helpText("Once a selection of experiments has been made,
                     click 'Collect Data' to gather the data from ebase."),
@@ -52,7 +52,8 @@ dbQueryUI <- function(id) {
       ns("bttn_collect"),
       "Collect Data",
       icon = shiny::icon("sync-alt")
-    )
+    ),
+    shiny::textOutput(ns("raw_bttn_collect"))
   )
 }
 
@@ -90,7 +91,7 @@ dbQueryServer <- function(id, grv, dbobj) {
       
       # Raw output of product_id for debugging
       output$raw_product_selection <- shiny::renderPrint({
-        input$product_selection
+        print(input$product_selection)
       })
       
       ##-----------------------------------------
@@ -135,12 +136,26 @@ dbQueryServer <- function(id, grv, dbobj) {
       
       # Raw output of experiment_set_id for debugging
       output$raw_experiment_set_selection <- shiny::renderPrint({
-        input$experiment_set_selection
+        print(input$experiment_set_selection)
       })
       
       ##-------------------------------------------------------
       ##  Data collection                                    --
       ##-------------------------------------------------------
+      # Reactive object for bttn_collect value
+      # grv$state_bttn_collect <- shiny::eventReactive(input$bttn_collect, {
+      #   input$bttn_collect[1]
+      # })
+      shiny::observeEvent(input$bttn_collect, {
+        grv$state_bttn_collect <- input$bttn_collect[1]
+      })
+      
+      # Raw output of bttn_collect state for debugging
+      output$raw_bttn_collect <- shiny::renderPrint({
+        print(grv$state_bttn_collect)
+      })
+      
+      # Reactive object of data collected from server matching selection
       grv$robj_collected_data <- shiny::eventReactive(input$bttn_collect, {
         summary_data <- getQuery(
           dbobj, sql_queries$summary_data, input$experiment_set_selection

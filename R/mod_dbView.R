@@ -9,11 +9,13 @@
 dbViewUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
+    shiny::textOutput(ns("raw_bttn_collect")),
     shiny::tabsetPanel(
+      id = ns("db_tbls"),
       shiny::tabPanel(
         title = "db Table Inspection",
         icon = shiny::icon("object-group"),
-        value = "db_tbls",
+        value = "inspection",
         shiny::fluidRow(
           column(
             width = 12,
@@ -37,7 +39,7 @@ dbViewUI <- function(id) {
       shiny::tabPanel(
         title = "db Data Collection",
         icon = shiny::icon("cloud-download-alt"),
-        values = "collection",
+        value = "collection",
         DT::DTOutput(ns("table_collected_data"), width = "100%")
       )
     )
@@ -61,6 +63,7 @@ dbViewServer <- function(id, grv) {
           # extensions = c("FixedColumns"),
           options = list(
             dom = "tip",
+            # i - information
             # f - filter
             # searchHighlight = TRUE,
             # p - pagination
@@ -86,6 +89,7 @@ dbViewServer <- function(id, grv) {
           # extensions = c("FixedColumns"),
           options = list(
             dom = "tip",
+            # i - information
             # f - filter
             # searchHighlight = TRUE,
             # p - pagination
@@ -111,6 +115,7 @@ dbViewServer <- function(id, grv) {
           # extensions = c("FixedColumns"),
           options = list(
             dom = "tip",
+            # i - information
             # f - filter
             # searchHighlight = TRUE,
             # p - pagination
@@ -127,6 +132,14 @@ dbViewServer <- function(id, grv) {
         )
       })
       
+      # On data collection, switch to the collection tab
+      shiny::observeEvent(grv$state_bttn_collect, {
+        shiny::updateTabsetPanel(
+          inputId = "db_tbls",
+          selected = "collection"
+        )
+      })
+      
       # Render summary data table for collected selection
       output$table_collected_data <- DT::renderDT({
         shiny::req(grv$robj_collected_data())
@@ -138,12 +151,13 @@ dbViewServer <- function(id, grv) {
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
-            dom = "tip",
+            dom = "ftip",
+            # i - information
             # f - filter
-            # searchHighlight = TRUE,
+            searchHighlight = TRUE,
             # p - pagination
             scrollX = TRUE,
-            scrollY = "400px",
+            scrollY = "800px",
             paging = FALSE,
             pageLength = 80,
             scrollCollapse = TRUE#,
