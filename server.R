@@ -20,29 +20,39 @@ function(input, output, session) {
   
   
   
+  ##--------------------------------------------------------
+  ##  Global reactive values                              --
+  ##--------------------------------------------------------
+  
+  # Instantiates a reactive values object to share data/input amongst modules,
+  # and is passed as an argument to the moduleServer functions
+  grv <- shiny::reactiveValues()
+  
   
   ##--------------------------------------------------------
   ##  Postgres database access                            --
   ##--------------------------------------------------------
   
+  dbQueryServer("ebase_query", grv, ebase_dev)
+  
   ##----------------------------------------
   ##  Available products                  --
   ##----------------------------------------
   
-  # Reactive object of available products
-  reactive_products <- eventReactive(input$db_refresh, {
-    req(ebase_dev)
-    DBI::dbGetQuery(
-      ebase_dev,
-      sql_queries$products
-    )
-  })
+  # # Reactive object of available products
+  # grv$robj_products <- eventReactive(input$db_refresh, {
+  #   req(ebase_dev)
+  #   DBI::dbGetQuery(
+  #     ebase_dev,
+  #     sql_queries$products
+  #   )
+  # })
   
   # Render products table for db inspection
   output$table_products_available <- renderDT({
-    req(reactive_products())
+    req(grv$robj_products())
     datatable(
-      data = reactive_products(),
+      data = grv$robj_products(),
       selection = "none",
       # extensions = c("FixedColumns"),
       options = list(
@@ -63,26 +73,26 @@ function(input, output, session) {
     )
   })
   
-  # Update choices for product selection
-  observeEvent(reactive_products(), {
-    req(reactive_products())
-    
-    updated_choices <- reactive_products() |>
-      dplyr::select(product_name, product_id) |>
-      tibble::deframe()
-    
-    updateSelectInput(
-      session,
-      "product_selected",
-      choices = c(" " = 0, updated_choices),
-      selected = 0
-    )
-  })
-  
-  # Raw output of product_id for debugging
-  output$raw_product_selected <- renderPrint({
-    input$product_selected
-  })
+  # # Update choices for product selection
+  # observeEvent(grv$robj_products(), {
+  #   req(grv$robj_products())
+  #   
+  #   updated_choices <- grv$robj_products() |>
+  #     dplyr::select(product_name, product_id) |>
+  #     tibble::deframe()
+  #   
+  #   updateSelectInput(
+  #     session,
+  #     "product_selected",
+  #     choices = c(" " = 0, updated_choices),
+  #     selected = 0
+  #   )
+  # })
+  # 
+  # # Raw output of product_id for debugging
+  # output$raw_product_selected <- renderPrint({
+  #   input$product_selected
+  # })
   
   
   ##-----------------------------------------
@@ -91,7 +101,7 @@ function(input, output, session) {
   
   # Reactive object of available experiment sets for user-selected product
   reactive_experiment_sets <- eventReactive(input$product_selected, {
-    req(reactive_products())
+    req(grv$robj_products())
     DBI::dbGetQuery(
       ebase_dev,
       glue::glue_sql(
@@ -104,7 +114,7 @@ function(input, output, session) {
   
   # Reactive object of available experiments within the sets above
   reactive_experiments <- eventReactive(reactive_experiment_sets(), {
-    req(reactive_products(), reactive_experiment_sets())
+    req(grv$robj_products(), reactive_experiment_sets())
     sets <- reactive_experiment_sets() |> 
       dplyr::pull(set_id) |> 
       unique()
@@ -200,7 +210,7 @@ function(input, output, session) {
   ##  PSQL Load-in  ::
   ##::::::::::::::::::
   
-  db_data <- eventReactive(input$db_load, {
+  db_data <- eventReactive(input$bttn_load, {
     summary_data <- DBI::dbGetQuery(
       ebase_dev,
       # glue::glue_sql(

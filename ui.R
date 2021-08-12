@@ -25,36 +25,14 @@ tagList(
         ## ----------------------------------------
         sidebarPanel(
           width = 2,
-          div(style = "display: inline-block", icon("database")),
-          div(style = "display: inline-block", h4("Database")),
-          helpText("Click refresh to re-establish connection to ebase
-                   and display available protein datasets for analysis."),
-          verbatimTextOutput("raw_product_selected"),
-          selectInput(
-            "product_selected",
-            NULL,
-            choices = NULL
-          ),
+          dbQueryUI("ebase_query"),
+          ### this shoould be in the dbView module as a "plot selection" button
           actionButton(
-            "db_refresh",
-            "Refresh",
-            icon = icon("sync-alt")
-          ),
-          br(),
-          br(),
-          br(),
-          verbatimTextOutput("raw_experiment_set_selected"),
-          selectInput(
-            "experiment_set_selected",
-            NULL,
-            choices = NULL
-          ),
-          actionButton(
-            "db_load",
+            "bttn_load",
             "Load Experiment",
             icon = icon("sync-alt")
-          ),
-          br()
+          )
+          ###
         ),
         ## ----------------------------------------
         ##  Main panel                          --
