@@ -12,6 +12,7 @@ dbViewUI <- function(id) {
     shiny::textOutput(ns("raw_bttn_collect")),
     shiny::tabsetPanel(
       id = ns("db_tbls"),
+      type = "pills",
       shiny::tabPanel(
         title = "db Table Inspection",
         icon = shiny::icon("object-group"),

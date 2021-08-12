@@ -58,7 +58,7 @@ function(input, output, session) {
     req(grv$robj_collected_data())
     highlight_key(
       grv$robj_collected_data,
-      key = ~summary_id,
+      key = ~uncle_summary_id,
       group = paste("summy", input$product_selected, input$experiment_set_selected, sep = "_")
     )
   })
@@ -141,7 +141,7 @@ function(input, output, session) {
   output$db_summySel <- DT::renderDT({
     req(db_summyShared())
     event_data(event = "plotly_selected", source = "db_summydots")#[["key"]]
-    # grv$robj_collected_data()[grv$robj_collected_data()$summary_id %in% cd, ]
+    # grv$robj_collected_data()[grv$robj_collected_data()$uncle_summary_id %in% cd, ]
   })
   
   
