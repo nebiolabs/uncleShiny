@@ -12,7 +12,7 @@ tagList(
   navbarPage(
     title = "Uncle Dashboard",
     # theme = shinytheme("yeti"),
-    theme = theme_dark,
+    theme = theme_light,
     ## ----------------------------------------
     ##  Navbar tab: database                --
     ## ----------------------------------------
@@ -148,6 +148,17 @@ tagList(
         )
       )
     ),
+    shiny::br(),
+    shiny::icon("adjust"),
+    shinyWidgets::prettySwitch(
+      inputId = "dark_mode",
+      label = NULL,
+      value = TRUE,
+      slim = TRUE,
+      bigger = TRUE,
+      inline = TRUE,
+      width = "42px"
+    ),
     ##----------------------------------------
     ##  Busy indicator                      --
     ##----------------------------------------
@@ -155,7 +166,7 @@ tagList(
       src = "https://jeroen.github.io/images/banana.gif",
       height = 70,
       width = 70,
-      position = "bottom-left"
+      position = "bottom-right"
     )
   )
 )

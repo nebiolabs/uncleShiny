@@ -8,8 +8,14 @@ function(input, output, session) {
   ##-------------------------------------------------------
   ##  Interactive theme selection                        --
   ##-------------------------------------------------------
-
+  # Instantiates an overlay UI for previewing bootswatch themes
   # bslib::bs_themer()
+  
+  # Switching between dark and light theme based on user-input
+  shiny::observe(session$setCurrentTheme(
+    if (isTRUE(input$dark_mode)) {theme_dark} else {theme_light}
+  ))
+  
   
   
   ##-------------------------------------------------------
@@ -44,9 +50,6 @@ function(input, output, session) {
   ##  Query result viewing module          --
   ##-----------------------------------------
   dbViewServer("ebase_view", grv)
-  
-  
-  
   
   
   

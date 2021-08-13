@@ -42,21 +42,35 @@ library(rlang)
 ##-------------------------------------------------------
 
 # Reusable variables for below
-the_font <- "Fira Sans Condensed"
-the_weight <- 400
+the_base_font <- "Roboto Condensed"
+the_heading_font <- "Oswald"
+the_weight <- 300
+google_base_font <- rlang::expr(bslib::font_google(
+  the_base_font,
+  local = TRUE
+))
+google_heading_font <- rlang::expr(bslib::font_google(
+  the_heading_font,
+  local = TRUE
+))
 
 # App themes
 theme_light <- bslib::bs_theme(
+  version = 4,
   bootswatch = "flatly",
-  base_font = bslib::font_google(the_font, wght = the_weight)
+  base_font = rlang::eval_tidy(google_base_font),
+  heading_font = rlang::eval_tidy(google_heading_font),
+  font_scale = 1.05
 )
 theme_dark <- bslib::bs_theme(
+  version = 4,
   bootswatch = "solar",
-  base_font = bslib::font_google(the_font, wght = the_weight)
+  base_font = rlang::eval_tidy(google_base_font),
+  heading_font = rlang::eval_tidy(google_heading_font)
 )
 
 # Fonts for plots
-sysfonts::font_add_google(the_font, regular.wt = the_weight)
+sysfonts::font_add_google(the_base_font, regular.wt = the_weight)
 showtext::showtext_auto()
 
 # `ggplot2` theme defaults (also controlled by `thematic`)
@@ -72,6 +86,7 @@ theme_set(
 
 # Auto theme plots
 thematic::thematic_shiny(
+  # font = "auto"
   # to-do: apply global color schemes here
   # qualitative = ,
   # sequential = 
