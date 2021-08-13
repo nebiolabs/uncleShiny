@@ -12,7 +12,7 @@ tagList(
   navbarPage(
     title = "Uncle Dashboard",
     # theme = shinytheme("yeti"),
-    theme = theme_light,
+    theme = theme_dark,
     ## ----------------------------------------
     ##  Navbar tab: database                --
     ## ----------------------------------------
