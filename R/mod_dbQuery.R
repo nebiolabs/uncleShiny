@@ -171,10 +171,54 @@ dbQueryServer <- function(id, grv, dbobj) {
           ) |> 
           dplyr::mutate(residuals = purrr::map(residuals, parse_float8)) |>
           dplyr::rename(uncle_summary_id = id) |> 
-          tibble::as_tibble()
+          tibble::as_tibble() |> 
+          dplyr::select(-tidyselect::any_of(c("experiment_condition_id", "condition_id", "unit_id")))
         
+        # uncle_summary_id keys for spectra table query
         summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
         
+        # Recode values as temporary fix until condition_type added to ebase
+        cond_recode_vals <- readr::read_csv("data/condition_types.csv") |> 
+          dplyr::select(name, type) |> 
+          tibble::deframe()
+        
+        # Base table for condition and unit join manipulations; join on well_id
+        conditions_units <- getQuery(
+          dbobj, sql_queries$conditions_units, input$experiment_set_selection
+        ) |> 
+          dplyr::mutate(
+            condition_type = purrr::map_chr(
+              condition_name,
+              \(nm) rlang::exec(dplyr::recode, nm, !!!cond_recode_vals)
+            )
+          )
+        
+        # Pivoted join table for conditions
+        cond_join <- conditions_units |> 
+          dplyr::select(-c(unit_value, unit_name)) |> 
+          tidyr::pivot_wider(
+            names_from = condition_type,
+            values_from = condition_name
+          )
+        
+        # Pivoted join table for units
+        unit_join <- conditions_units |> 
+          dplyr::select(-c(condition_name)) |> 
+          tidyr::pivot_wider(
+            names_from = c(condition_type, unit_name),
+            values_from = unit_value,
+            names_sep = "_"
+          )
+        
+        # Join summary data with conditions and units
+        summary_cond_unit_join <- purrr::reduce(
+          list(summary_data, cond_join, unit_join),
+          dplyr::left_join,
+          on = c("well_id")
+        )
+        return(summary_cond_unit_join)
+        
+        # Retrieve nested spectra tables for selected summary data
         # spec_tbls <- get_spec_tbls(ebase_dev, spec_tbl_list, summary_ids)
         
         # return(nest_spectra(summary_data, spec_tbls))

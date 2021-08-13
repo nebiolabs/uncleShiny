@@ -82,24 +82,42 @@ sql_queries$summary_data <- {
     )
   SELECT p.name AS product_name, p.id AS product_id,
     exp_sets.id AS exp_set_id, exp_sets.exp_type, exp_sets.plate_generation,
-    cte_sum.*, exp_conds.id AS experiment_condition_id,
-    exp_conds.condition_id, exp_conds.unit_id,
-    exp_conds.raw_value AS unit_value,
-    units.name AS unit_name,
-    conds.name AS cond_name, conds.type AS cond_type
+    exps.id AS exp_id, cte_sum.*
   FROM cte_sum
   INNER JOIN uncle_experiments AS exps
     ON cte_sum.uncle_experiment_id = exps.id
   INNER JOIN uncle_experiment_sets AS exp_sets
     ON exps.uncle_experiment_set_id = exp_sets.id
   INNER JOIN products AS p
-    ON exp_sets.product_id = p.id
-  INNER JOIN experimental_conditions AS exp_conds
-    ON cte_sum.well_id = exp_conds.well_id
-  INNER JOIN units
-    ON exp_conds.unit_id = units.id
-  INNER JOIN conditions AS conds
-    ON exp_conds.condition_id = conds.id"
+    ON exp_sets.product_id = p.id"
 }
+
+
+##--------------------------------------------------------
+##  Table of conditions/units for joining to summary    --
+##--------------------------------------------------------
+sql_queries$conditions_units <- {
+  "WITH cte_sum AS
+    (SELECT wells.layout_address AS well, sum.* 
+    FROM uncle_summaries sum
+    INNER JOIN wells
+      ON sum.well_id = wells.id
+    WHERE EXISTS (SELECT *
+                  FROM uncle_experiments exps
+                  WHERE exps.uncle_experiment_set_id IN ({input*})
+                    AND sum.uncle_experiment_id = exps.id)
+    )
+    SELECT exp_conds.well_id, exp_conds.raw_value AS unit_value, units.name AS unit_name,
+      conds.name AS condition_name, conds.type AS condition_type
+    FROM experimental_conditions AS exp_conds
+    INNER JOIN units
+     ON exp_conds.unit_id = units.id
+    INNER JOIN conditions AS conds
+      ON exp_conds.condition_id = conds.id
+    WHERE EXISTS (SELECT *
+                  FROM cte_sum
+                  WHERE cte_sum.well_id = exp_conds.well_id)"
+}
+
 
 # return(sql_queries)
