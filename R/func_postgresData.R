@@ -20,7 +20,8 @@ get_spec_tbls <- function(source, tbl_list, filter) {
           "SELECT *
         FROM {`t`}
         WHERE {`t`}.uncle_summary_id IN ({filter*})",
-        .con = source
+        .con = source,
+        filter = filter
         )
       ) |>
         dplyr::select(-c(id)) |>

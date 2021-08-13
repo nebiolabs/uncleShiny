@@ -147,7 +147,7 @@ dbViewServer <- function(id, grv) {
         DT::datatable(
           data = dplyr::select(
             grv$robj_collected_data(),
-            -tidyselect::contains("residuals")#, -tidyselect::contains("spec")
+            -tidyselect::contains("residuals"), -tidyselect::contains("spec")
           ),
           selection = "none",
           # extensions = c("FixedColumns"),

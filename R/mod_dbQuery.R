@@ -216,13 +216,13 @@ dbQueryServer <- function(id, grv, dbobj) {
           dplyr::left_join,
           on = c("well_id")
         )
-        return(summary_cond_unit_join)
+        # return(summary_cond_unit_join)
         
         # Retrieve nested spectra tables for selected summary data
-        # spec_tbls <- get_spec_tbls(ebase_dev, spec_tbl_list, summary_ids)
+        spec_tbls <- get_spec_tbls(dbobj, spec_tbl_list, summary_ids)
         
-        # return(nest_spectra(summary_data, spec_tbls))
-        return(summary_data)
+        # Join nested spectra tables to summary data and return
+        return(nest_spectra(summary_cond_unit_join, spec_tbls))
       })
     }
   )
