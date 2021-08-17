@@ -1,158 +1,353 @@
-library(shiny)
-library(shinyWidgets)
-library(tidyverse)
 
-# source("R/vars.R")
-# source("R/funs.R")
+##-------------------------------------------------------------------------
+##  mod_plotOpts - plot options                                          --
+##-------------------------------------------------------------------------
 
-# UI
+
+
+##-------------------------------------------------------
+##  UI components                                      --
+##-------------------------------------------------------
 plotOptsUI <- function(id) {
-  ns <- NS(id)
+  ns <- shiny::NS(id)
   
-  tagList(
-    ##================================================================
-    ##                        Global options                        ==
-    ##================================================================
-    br(),
-    br(),
-    br(),
-    br(),
-    h5("Global Settings"),
-    # the dropdown buttons were breaking the UI
-    # so I switched to this more basic dropdown
-    dropdown(
-      selectInput(
-        ns("color"),
-        "Color Points By:",
-        choices = colorvarChoices,
-        selected = "buffer"
+  shiny::tagList(
+    shiny::h3("Plot Options"),
+    shiny::tabsetPanel(
+      type = "pills",
+      ##----------------------------------------
+      ##  Global Options                      --
+      ##----------------------------------------
+      shiny::tabPanel(
+        title = NULL,
+        value = "globalOpts",
+        icon = shiny::icon("globe"),
+        shiny::h5("Global Plot Settings"),
+        ##-----------------------
+        ##  Color              --
+        ##-----------------------
+        shiny::selectInput(
+          ns("color_global"),
+          "Color Points By:",
+          choices = colorvarChoices,
+          selected = "buffer"
+        ),
+        ##-----------------------
+        ##  Palette            --
+        ##-----------------------
+        shiny::selectInput(
+          ns("palette_global"),
+          shiny::HTML(
+            "<a target='_blank' href='https://colorbrewer2.org'>ColorBrewer</a> Palette:"
+          ),
+          choices = palChoices,
+          selected = "Spectral"
+        ),
+        ##----------------------
+        ##  Point size        --
+        ##----------------------
+        shiny::sliderInput(
+          ns("size_points"),
+          label = "Size of points:",
+          min = 1,
+          max = 5,
+          value = 2,
+          step = 0.5,
+          ticks = TRUE
+        ),
+        ##-----------------------
+        ##  Point alpha        --
+        ##-----------------------
+        shiny::sliderInput(
+          ns("alpha_points"),
+          label = "Opacity of points:",
+          min = 0.1,
+          max = 1,
+          value = 0.5,
+          step = 0.1,
+          ticks = TRUE
+        )
       ),
-      selectInput(
-        ns("palette"),
-        HTML("<a target='_blank' href='https://colorbrewer2.org'>ColorBrewer</a> Palette:"),
-        choices = palChoices,
-        selected = "Spectral"
+      ##----------------------------------------
+      ##  Plot 1/L Options                    --
+      ##----------------------------------------
+      shiny::tabPanel(
+        title = NULL,
+        value = "plot1Opts",
+        icon = shiny::icon("arrow-alt-circle-left"),
+        shiny::h5("Left Plot Settings"),
+        ##-----------------------
+        ##  Y-var              --
+        ##-----------------------
+        shiny::selectInput(
+          ns("yvar1"),
+          "Y Variable:",
+          choices = yvarChoices,
+          selected = "PdI"
+        ),
+        ##----------------------
+        ##  H-guides          --
+        ##----------------------
+        shiny::checkboxInput(
+          ns("show_guides_h1"),
+          "Show hoiz. guides?",
+          value = FALSE
+        ),
+        shiny::sliderInput(
+          ns("guides_h1"),
+          label = "Size of points:",
+          min = 0,
+          max = 2,
+          value = c(0,0.8),
+          step = 1,
+          ticks = FALSE
+        ),
+        ##-----------------------
+        ##  X-var              --
+        ##-----------------------
+        shiny::selectInput(
+          ns("xvar1"),
+          "X Variable:",
+          choices = xvarChoices,
+          selected = "Z_D"
+        ),
+        shiny::checkboxInput(
+          ns("xvar1_is_log"),
+          "Transform axis with log()?",
+          value = TRUE
+        ),
+        ##----------------------
+        ##  V-guides          --
+        ##----------------------
+        shiny::checkboxInput(
+          ns("show_guides_v1"),
+          "Show vertical guides?",
+          value = TRUE
+        ),
+        shiny::sliderInput(
+          ns("guides_v1"),
+          label = "Size of points:",
+          min = 2,
+          max = 50,
+          value = c(5,20),
+          step = 1,
+          ticks = FALSE
+        )
       ),
-      # actionButton(
-      #   inputId = ns("updateGlobal"),
-      #   label = "Update",
-      #   icon = icon("sync-alt")
-      # ),
-      right = TRUE,
-      icon = icon("sliders"),
-      size = "sm",
-      width = "250px"
-    ),
-    br(),
-    ##================================================================
-    ##                        Plot 1 options                        ==
-    ##================================================================
-    h5("Plot1 Settings"),
-    dropdown(
-      selectInput(
-        ns("yvar1"),
-        "Y Variable:",
-        choices = yvarChoices,
-        selected = "PdI"
+      ##----------------------------------------
+      ##  Plot 2/R Options                    --
+      ##----------------------------------------
+      shiny::tabPanel(
+        title = NULL,
+        value = "plot1Opts",
+        icon = shiny::icon("arrow-alt-circle-right"),
+        shiny::h5("Right Plot Settings"),
+        ##-----------------------
+        ##  Y-var              --
+        ##-----------------------
+        shiny::selectInput(
+          ns("yvar2"),
+          "Y Variable:",
+          choices = yvarChoices,
+          selected = "Tagg266"
+        ),
+        ##----------------------
+        ##  H-guides          --
+        ##----------------------
+        shiny::checkboxInput(
+          ns("show_guides_h2"),
+          "Show hoiz. guides?",
+          value = FALSE
+        ),
+        shiny::sliderInput(
+          ns("guides_h2"),
+          label = "Size of points:",
+          min = 1,
+          max = 100,
+          value = c(10,70),
+          step = 1,
+          ticks = FALSE
+        ),
+        ##-----------------------
+        ##  X-var              --
+        ##-----------------------
+        shiny::selectInput(
+          ns("xvar2"),
+          "X Variable:",
+          choices = xvarChoices,
+          selected = "Tm1"
+        ),
+        ##-----------------------
+        ##  Log transform      --
+        ##-----------------------
+        shiny::checkboxInput(
+          ns("xvar2_is_log"),
+          "Transform axis with log()?",
+          value = FALSE
+        ),
+        ##----------------------
+        ##  V-guides          --
+        ##----------------------
+        shiny::checkboxInput(
+          ns("show_guides_v2"),
+          "Show vertical guides?",
+          value = FALSE
+        ),
+        shiny::sliderInput(
+          ns("guides_v2"),
+          label = "Size of points:",
+          min = 1,
+          max = 100,
+          value = c(10,70),
+          step = 1,
+          ticks = FALSE
+        )
       ),
-      selectInput(
-        ns("xvar1"),
-        "X Variable:",
-        choices = xvarChoices,
-        selected = "Z_D"
-      ),
-      # actionButton(
-      #   inputId = ns("updatePlot1"),
-      #   label = "Update",
-      #   icon = icon("sync-alt")
-      # ),
-      right = TRUE,
-      icon = icon("sliders"),
-      size = "sm",
-      width = "250px"
-    ),
-    br(),
-    ##================================================================
-    ##                        Plot 2 options                        ==
-    ##================================================================
-    h5("Plot2 Settings"),
-    dropdown(
-      selectInput(
-        ns("yvar2"),
-        "Y Variable:",
-        choices = yvarChoices,
-        selected = "Tagg266"
-      ),
-      selectInput(
-        ns("xvar2"),
-        "X Variable:",
-        choices = xvarChoices,
-        selected = "Tm1"
-      ),
-      # actionButton(
-      #   inputId = ns("updatePlot2"),
-      #   label = "Update",
-      #   icon = icon("sync-alt")
-      # ),
-      right = TRUE,
-      icon = icon("sliders"),
-      size = "sm",
-      width = "250px"
-    ),
-    br(),
-    br(),
-    br(),
-    br(),
-    br(),
-    br(),
-    br(),
-    br(),
-    br(),
-    br(),
-    ##===============================================================
-    ##                     Zoomed-Plot options                     ==
-    ##===============================================================
-    h5("Zoom Settings"),
-    dropdown(
-      selectInput(
-        ns("zoomycolor"),
-        "Color Points By:",
-        choices = colorvarChoices,
-        selected = "buffer"
-      ),
-      selectInput(
-        ns("yvar3"),
-        "Y Variable:",
-        choices = yvarChoices,
-        selected = "Tagg266"
-      ),
-      selectInput(
-        ns("xvar3"),
-        "X Variable:",
-        choices = xvarChoices,
-        selected = "Z_D"
-      ),
-      # actionButton(
-      #   inputId = ns("updatePlot2"),
-      #   label = "Update",
-      #   icon = icon("sync-alt")
-      # ),
-      up = TRUE,
-      right = TRUE,
-      icon = icon("sliders"),
-      size = "sm",
-      width = "250px"
+      ##----------------------------------------
+      ##  Plot 3/Z Options                    --
+      ##----------------------------------------
+      shiny::tabPanel(
+        title = NULL,
+        value = "plot3Opts",
+        icon = shiny::icon("search-plus"),
+        # shiny::div(
+        #   style = "display: inline-block",
+        #   shiny::icon("search-plus")
+        # ),
+        # shiny::div(
+        #   style = "display: inline-block",
+        #   shiny::h5("Zoomed Plot Settings")
+        # ),
+        shiny::h5("Zoomed Plot Settings"),
+        shiny::selectInput(
+          ns("color_zoom"),
+          "Color Points By:",
+          choices = colorvarChoices,
+          selected = "buffer"
+        ),
+        shiny::selectInput(
+          ns("yvar3"),
+          "Y Variable:",
+          choices = yvarChoices,
+          selected = "Tagg266"
+        ),
+        shiny::selectInput(
+          ns("xvar3"),
+          "X Variable:",
+          choices = xvarChoices,
+          selected = "Z_D"
+        )
+      )
     )
   )
 }
 
 
-
-# SERVER
-plotOptsServer <- function(id) {
+##-------------------------------------------------------
+##  Server function                                    --
+##-------------------------------------------------------
+plotOptsServer <- function(id, opts_obj, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      
+      ##--------------------------------------------------------
+      ##  Theme selections                                    --
+      ##--------------------------------------------------------
+      shiny::observe({
+        opts_obj$palette_global <- input$palette_global
+      })
+      shiny::observe({
+        opts_obj$color_global <- input$color_global
+      })
+      shiny::observe({
+        opts_obj$color_zoom <- input$color_zoom
+      })
+      shiny::observe({
+        opts_obj$size_points <- shiny::debounce(
+          function(){input$size_points},
+          2000
+        )
+      })
+      shiny::observe({
+        opts_obj$alpha_points <- shiny::debounce(
+          function(){input$alpha_points},
+          2000
+        )
+      })
+
+      ##-------------------------------------------------------
+      ##  X variable selections                              --
+      ##-------------------------------------------------------
+      # xvar1
+      shiny::observe({
+        opts_obj$xvar1 <- input$xvar1
+      })
+      shiny::observe({
+        opts_obj$xvar1_is_log <- input$xvar1_is_log
+      })
+      shiny::observe({
+        opts_obj$show_guides_v1 <- input$show_guides_v1
+      })
+      shiny::observe({
+        opts_obj$guides_v1 <- shiny::debounce(
+          function(){input$guides_v1},
+          2000
+        )
+      })
+      # xvar2
+      shiny::observe({
+        opts_obj$xvar2 <- input$xvar2
+      })
+      shiny::observe({
+        opts_obj$xvar2_is_log <- input$xvar2_is_log
+      })
+      shiny::observe({
+        opts_obj$show_guides_v2 <- input$show_guides_v2
+      })
+      shiny::observe({
+        opts_obj$guides_v2 <- shiny::debounce(
+          function(){input$guides_v2},
+          2000
+        )
+      })
+      # xvar3
+      shiny::observe({
+        opts_obj$xvar3 <- input$xvar3
+      })
+      
+      
+      ##-------------------------------------------------------
+      ##  Y variable selections                              --
+      ##-------------------------------------------------------
+      shiny::observe({
+        opts_obj$yvar1 <- input$yvar1
+      })
+      shiny::observe({
+        opts_obj$show_guides_h1 <- input$show_guides_h1
+      })
+      shiny::observe({
+        opts_obj$guides_h1 <- shiny::debounce(
+          function(){input$guides_h1},
+          2000
+        )
+      })
+      shiny::observe({
+        opts_obj$yvar2 <- input$yvar2
+      })
+      shiny::observe({
+        opts_obj$show_guides_h2 <- input$show_guides_h2
+      })
+      shiny::observe({
+        opts_obj$guides_h2 <- shiny::debounce(
+          function(){input$guides_h2},
+          2000
+        )
+      })
+      shiny::observe({
+        opts_obj$yvar3 <- input$yvar3
+      })
+
       # observe({
       #   # xvar choices
       #   updateSelectInput(
@@ -199,41 +394,6 @@ plotOptsServer <- function(id) {
       # output$dataName <- renderText({
       #   stringr::str_extract(dataName, "(?<=./data/).*(?=_data.rds)")
       # })
-      
-      return(
-        list(
-          color = reactive({
-            input$color
-          }),
-          palette = reactive({
-            input$palette
-          }),
-          updateGlobal = reactive({
-            input$updateGlobal
-          }),
-          xvar1 = reactive({
-            input$xvar1
-          }),
-          yvar1 = reactive({
-            input$yvar1
-          }),
-          xvar2 = reactive({
-            input$xvar2
-          }),
-          yvar2 = reactive({
-            input$yvar2
-          }),
-          zoomycolor = reactive({
-            input$zoomycolor
-          }),
-          xvar3 = reactive({
-            input$xvar3
-          }),
-          yvar3 = reactive({
-            input$yvar3
-          })
-        )
-      )
     }
   )
 }

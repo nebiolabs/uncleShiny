@@ -57,22 +57,40 @@ yvarChoices <- c(
   "Albumin (mg/mL)" = "albumin_mgml"
 )
 
+# colorvarChoices <- c(
+#   "Buffer" = "buffer",
+#   "pH" = "pH",
+#   "Salt" = "salt",
+#   "Salt Conc. (mM)" = "salt_mM",
+#   "Additive 1" = "additive1",
+#   "Additive 1 Conc." = "additive1_conc",
+#   "Additive 2" = "additive2",
+#   "Additive 2 Conc." = "additive2_conc",
+#   "Glycerol" = "glycerol",
+#   "Activity (Endpoint)" = "act_endpoint",
+#   "Activity (Rate)" = "act_rate",
+#   "Z Modality" = "mode_Z",
+#   "Timecourse (hr)" = "time_uncle_hr",
+#   "Plate" = "plate",
+#   "Comment" = "comment"
+# )
+
 colorvarChoices <- c(
-  "Buffer" = "buffer",
-  "pH" = "pH",
-  "Salt" = "salt",
-  "Salt Conc. (mM)" = "salt_mM",
-  "Additive 1" = "additive1",
-  "Additive 1 Conc." = "additive1_conc",
-  "Additive 2" = "additive2",
-  "Additive 2 Conc." = "additive2_conc",
-  "Glycerol" = "glycerol",
-  "Activity (Endpoint)" = "act_endpoint",
-  "Activity (Rate)" = "act_rate",
-  "Z Modality" = "mode_Z",
-  "Timecourse (hr)" = "time_uncle_hr",
-  "Plate" = "plate",
-  "Comment" = "comment"
+  "Buffer" = "Buffer",
+  # "pH" = "pH",
+  "Buffer Salt" = "Buffer Salt",
+  "Buffer Salt (mM)" = "Buffer Salt_mM",
+  # "Additive 1" = "additive1",
+  # "Additive 1 Conc." = "additive1_conc",
+  # "Additive 2" = "additive2",
+  # "Additive 2 Conc." = "additive2_conc",
+  "Glycerol" = "Glycerol"#,
+  # "Activity (Endpoint)" = "act_endpoint",
+  # "Activity (Rate)" = "act_rate",
+  # "Z Modality" = "mode_Z",
+  # "Timecourse (hr)" = "time_uncle_hr",
+  # "Plate" = "plate",
+  # "Comment" = "comment"
 )
 
 

@@ -37,6 +37,12 @@ library(rlang)
 # library(profvis)
 
 
+test_shared <- readr::read_rds("test/test_data.rds") |> 
+  plotly::highlight_key(
+    key = ~uncle_summary_id,
+    group = "scatter_test"
+  )
+
 ##-------------------------------------------------------
 ##  Setup                                              --
 ##-------------------------------------------------------

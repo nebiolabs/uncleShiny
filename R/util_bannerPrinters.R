@@ -35,3 +35,14 @@ banner3 <- function(x, char = "-") {
     minHashes = 42
   )
 }
+
+banner4 <- function(x, char = "-") {
+  bannerCommenter::banner(
+    x,
+    emph = FALSE,
+    upper = FALSE,
+    centre = FALSE,
+    bandChar = char,
+    minHashes = 24
+  )
+}

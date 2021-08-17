@@ -85,7 +85,7 @@ vrect <- function(x0 = 0, x1 = 1, opacity = 0.5, color = "lightgrey") {
     yref = "paper", # extend beyond the limits of the plot view
     y0 = 0, 
     y1 = 1,
-    opacity = 0.2
+    opacity = opacity
   )
 }
 
@@ -100,6 +100,6 @@ prect <- function(x0 = 0, x1 = 1, y0 = 0, y1 = 1, opacity = 0.5, color = "lightg
     y0 = y0, 
     y1 = y1,
     # yref = "paper", # extend beyond the limits of the plot view
-    opacity = 0.2
+    opacity = opacity
   )
 }

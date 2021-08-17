@@ -107,7 +107,8 @@ sql_queries$conditions_units <- {
                   WHERE exps.uncle_experiment_set_id IN ({input*})
                     AND sum.uncle_experiment_id = exps.id)
     )
-    SELECT exp_conds.well_id, exp_conds.raw_value AS unit_value, units.name AS unit_name,
+    SELECT exp_conds.well_id, exp_conds.raw_value AS unit_value,
+      units.name AS unit_name,
       conds.name AS condition_name, conds.type AS condition_type
     FROM experimental_conditions AS exp_conds
     INNER JOIN units

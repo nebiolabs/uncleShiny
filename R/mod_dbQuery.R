@@ -224,6 +224,17 @@ dbQueryServer <- function(id, grv, dbobj) {
         # Join nested spectra tables to summary data and return
         return(nest_spectra(summary_cond_unit_join, spec_tbls))
       })
+      
+      # Reactive object of collected data `crosstalk` SharedData instance
+      grv$robj_collected_SharedData <- shiny::eventReactive(
+        input$bttn_collect, {
+          req(grv$robj_collected_data())
+          crosstalk::SharedData$new(
+            grv$robj_collected_data,
+            key = ~uncle_summary_id
+          )
+        }
+      )
     }
   )
 }
