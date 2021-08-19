@@ -33,24 +33,35 @@ ggspark <- function(data, spec_var, x_var, y_var, summary_var,
   ##-----------------------------------------
   # derived values from the data
   spec_df <- shiny::reactive({
-    data()[[spec_var]][[1]] |> 
-      mutate(!!y_var := (.data[[y_var]] - abs(min(.data[[y_var]]))) / 
-               (max(.data[[y_var]]) - abs(min(.data[[y_var]]))))
+    if (spec_var %in% colnames(data())) {
+      data()[[spec_var]][[1]] |> 
+        mutate(!!y_var := (.data[[y_var]] - abs(min(.data[[y_var]]))) / 
+                 (max(.data[[y_var]]) - abs(min(.data[[y_var]]))))
+    } else {
+      NULL
+    }
   })
-  # x intercept
-  summary_val <- shiny::reactive({data()[[summary_var]][[1]]})
-  # y on spectra curve at x intercept
-  nearest_y <- NULL
   
-  if (shiny::isTruthy(spec_df()) & shiny::isTruthy(summary_val())) {
-    nearest_y <- shiny::reactive({
-      shiny::req(spec_df())
+  # x intercept
+  summary_val <- shiny::reactive({
+    if (is.null(summary_var)) {
+      NA_real_
+    } else {
+      data()[[summary_var]][[1]]
+    }
+  })
+  
+  # y on spectra curve at x intercept
+  nearest_y <- shiny::reactive({
+    if (shiny::isTruthy(spec_df()) & shiny::isTruthy(summary_val())) {
       spec_df()[which(abs(spec_df()[[x_var]] - 
                             summary_val()) == 
-                            min(abs(spec_df()[[x_var]] - 
-                                      summary_val()))), ][[y_var]]
-    })
-  }
+                        min(abs(spec_df()[[x_var]] - 
+                                  summary_val()))), ][[y_var]]
+    } else {
+      NULL
+    }
+  })
 
   
   
@@ -84,7 +95,37 @@ ggspark <- function(data, spec_var, x_var, y_var, summary_var,
       )
   }
   
-  if (grepl("DLS", spec_var)) {
+  if (grepl("DLS_I|DLS_M", spec_var, perl = TRUE)) {
+    p <- p +
+      annotate(
+        "rect",
+        xmin = 1,
+        xmax = 5,
+        ymin = 0,
+        ymax = Inf,
+        fill = "orange",
+        alpha = 0.3
+      ) +
+      annotate(
+        "rect",
+        xmin = 20,
+        xmax = Inf,
+        ymin = 0,
+        ymax = Inf,
+        fill = "red",
+        alpha = 0.3
+      ) +
+      geom_vline(xintercept = 5, linetype = "dotted", alpha = 0.5) +
+      geom_vline(xintercept = 20, linetype = "dotted", alpha = 0.5) +
+      scale_x_log10(
+        limits = c(1, 100000),
+        breaks = c(1, 5, 10, 100, 1000), 
+        labels = scales::label_comma(accuracy = 1)
+      ) +
+      annotation_logticks(sides = "b", alpha = 0.5)
+  }
+  
+  if (grepl("DLS_C", spec_var, perl = TRUE)) {
     p <- p +
       ggplot2::scale_x_log10() +
       ggplot2::annotation_logticks(sides = "b")
