@@ -108,22 +108,22 @@ palChoices <- names(palnList)
 
 # Spectra to plot in the sparkline QuickView..
 spec_vars <- c(# previously specList
+  "NanoDSF" = "specTm",
   "SLS 266nm" = "specSLS266",
   "SLS 473nm" = "specSLS473",
-  "NanoDSF" = "specTm",
-  "Correlation Function" = "specDLS_C",
   "DLS (Intensity)" = "specDLS_I",
-  "DLS (Mass)" = "specDLS_M"
+  "DLS (Mass)" = "specDLS_M",
+  "Correlation Function" = "specDLS_C"
 )
 
 # Summary values corresponding to each spectra type
 summary_vars <- c(# previously specDerived
+  "specTm" = "Tm1",
   "specSLS266" = "Tagg266",
   "specSLS473" = "Tagg473",
-  "specTm" = "Tm1", 
-  "specDLS_C" = NULL,
   "specDLS_I" = "Z_D",
-  "specDLS_M" = "Z_D"
+  "specDLS_M" = "Z_D",
+  "specDLS_C" = NULL
 )
 
 spec_tbl_list <- c(
