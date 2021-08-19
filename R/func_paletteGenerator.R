@@ -8,6 +8,6 @@ mycolors <- function(palette, n) {
   if(palette == "Default") {
     return(NULL)
   } else {
-    colorRampPalette(brewer.pal(paln, palette))(n)
+    grDevices::colorRampPalette(RColorBrewer::brewer.pal(paln, palette))(n)
   }
 }
