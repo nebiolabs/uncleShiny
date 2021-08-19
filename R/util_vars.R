@@ -79,18 +79,17 @@ colorvarChoices <- c(
   "Buffer" = "Buffer",
   # "pH" = "pH",
   "Buffer Salt" = "Buffer Salt",
-  "Buffer Salt (mM)" = "Buffer Salt_mM",
+  "[Buffer Salt](mM)" = "Buffer Salt_mM",
   # "Additive 1" = "additive1",
   # "Additive 1 Conc." = "additive1_conc",
   # "Additive 2" = "additive2",
   # "Additive 2 Conc." = "additive2_conc",
-  "Glycerol" = "Glycerol"#,
-  # "Activity (Endpoint)" = "act_endpoint",
-  # "Activity (Rate)" = "act_rate",
+  "Glycerol" = "Glycerol",
+  "Amino Acid" = "Amino Acid",
+  "[Amino Acid](mM)" = "Amino Acid_mM",
   # "Z Modality" = "mode_Z",
-  # "Timecourse (hr)" = "time_uncle_hr",
-  # "Plate" = "plate",
-  # "Comment" = "comment"
+  "Exp. Type" = "exp_type",
+  "Well" = "well"
 )
 
 
@@ -108,7 +107,7 @@ palnList <- list(
 palChoices <- names(palnList)
 
 # Spectra to plot in the sparkline QuickView..
-specList <- c(
+spec_vars <- c(# previously specList
   "SLS 266nm" = "specSLS266",
   "SLS 473nm" = "specSLS473",
   "NanoDSF" = "specTm",
@@ -117,11 +116,12 @@ specList <- c(
   "DLS (Mass)" = "specDLS_M"
 )
 
-specDerived <- c(
+# Summary values corresponding to each spectra type
+summary_vars <- c(# previously specDerived
   "specSLS266" = "Tagg266",
   "specSLS473" = "Tagg473",
   "specTm" = "Tm1", 
-  "specDLS_C" = "none",
+  "specDLS_C" = NULL,
   "specDLS_I" = "Z_D",
   "specDLS_M" = "Z_D"
 )

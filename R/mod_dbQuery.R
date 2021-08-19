@@ -4,7 +4,7 @@
 ##-------------------------------------------------------------------------
 
 ##-------------------------------------------------------
-##  UI components                                      --
+##  UI COMPONENTS                                      --
 ##-------------------------------------------------------
 dbQueryUI <- function(id) {
   ns <- shiny::NS(id)
@@ -58,15 +58,15 @@ dbQueryUI <- function(id) {
 }
 
 ##-------------------------------------------------------
-##  Server function                                    --
+##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
 dbQueryServer <- function(id, grv, dbobj) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
-      ##----------------------------------------
-      ##  Available products                  --
-      ##----------------------------------------
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Available prods                     <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive object of available products
       grv$robj_products <- shiny::eventReactive(input$bttn_refresh, {
         shiny::req(dbobj)
@@ -94,15 +94,18 @@ dbQueryServer <- function(id, grv, dbobj) {
         print(input$product_selection)
       })
       
-      ##-----------------------------------------
-      ##  Available experiments                --
-      ##-----------------------------------------
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Available exp_sets                  <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive object of available experiment sets for user-selected product
       grv$robj_experiment_sets <- shiny::eventReactive(input$product_selection, {
         shiny::req(grv$robj_products())
         getQuery(dbobj, sql_queries$experiment_sets, input$product_selection)
       })
       
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Available exps                      <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive object of available experiments within the sets above
       grv$robj_experiments <- shiny::eventReactive(grv$robj_experiment_sets(), {
         shiny::req(grv$robj_products(), grv$robj_experiment_sets())
@@ -155,6 +158,10 @@ dbQueryServer <- function(id, grv, dbobj) {
         print(grv$state_bttn_collect)
       })
       
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Collected data                      <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive object of data collected from server matching selection
       grv$robj_collected_data <- shiny::eventReactive(input$bttn_collect, {
         summary_data <- getQuery(
@@ -225,13 +232,17 @@ dbQueryServer <- function(id, grv, dbobj) {
         return(nest_spectra(summary_cond_unit_join, spec_tbls))
       })
       
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  SharedData obj                      <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive object of collected data `crosstalk` SharedData instance
       grv$robj_collected_SharedData <- shiny::eventReactive(
         input$bttn_collect, {
           req(grv$robj_collected_data())
           crosstalk::SharedData$new(
             grv$robj_collected_data,
-            key = ~uncle_summary_id
+            key = ~bit64::as.character.integer64(uncle_summary_id)
           )
         }
       )

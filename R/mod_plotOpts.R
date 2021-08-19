@@ -6,7 +6,7 @@
 
 
 ##-------------------------------------------------------
-##  UI components                                      --
+##  UI COMPONENTS                                      --
 ##-------------------------------------------------------
 plotOptsUI <- function(id) {
   ns <- shiny::NS(id)
@@ -244,16 +244,17 @@ plotOptsUI <- function(id) {
 
 
 ##-------------------------------------------------------
-##  Server function                                    --
+##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
 plotOptsServer <- function(id, opts_obj, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
       
-      ##--------------------------------------------------------
-      ##  Theme selections                                    --
-      ##--------------------------------------------------------
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Theme selections                    <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       shiny::observe({
         opts_obj$palette_global <- input$palette_global
       })
@@ -276,9 +277,10 @@ plotOptsServer <- function(id, opts_obj, grv) {
         )
       })
 
-      ##-------------------------------------------------------
-      ##  X variable selections                              --
-      ##-------------------------------------------------------
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  X var selections                    <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # xvar1
       shiny::observe({
         opts_obj$xvar1 <- input$xvar1
@@ -317,9 +319,9 @@ plotOptsServer <- function(id, opts_obj, grv) {
       })
       
       
-      ##-------------------------------------------------------
-      ##  Y variable selections                              --
-      ##-------------------------------------------------------
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Y var selections                    <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       shiny::observe({
         opts_obj$yvar1 <- input$yvar1
       })

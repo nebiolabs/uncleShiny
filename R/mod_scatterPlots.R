@@ -4,7 +4,7 @@
 ##-------------------------------------------------------------------------
 
 ##-------------------------------------------------------
-##  UI components                                      --
+##  UI COMPONENTS                                      --
 ##-------------------------------------------------------
 scatterPlotsUI <- function(id) {
   ns <- shiny::NS(id)
@@ -17,7 +17,12 @@ scatterPlotsUI <- function(id) {
         ##-----------------------------------------
         shiny::fluidRow(
           shiny::h3("Summary Data"),
-          plotly::plotlyOutput(ns("plot_scatter"), width = "100%", height = "600px")
+          shiny::verbatimTextOutput(ns("data_shared_group")),
+          plotly::plotlyOutput(
+            ns("plot_scatter"),
+            width = "100%",
+            height = "600px"
+          )
         ),
         ##-----------------------------------------
         ##  Zoomed plot                          --
@@ -33,36 +38,47 @@ scatterPlotsUI <- function(id) {
         ##  Spectra sparks                      --
         ##----------------------------------------
         shiny::h3("Spectra Quickview"),
-        shiny::verbatimTextOutput(ns("data_shared_group"))
+        spectraSparksUI(ns("spectraSparks"))
       )
     ),
     ##-----------------------------------------
     ##  Test tables                          --
     ##-----------------------------------------
-    shiny::fluidRow(shiny::h3("Direct Output (Debugging)")),
+    shiny::fluidRow(shiny::h4("Direct Output (Debugging)")),
     shiny::fluidRow(
       shiny::column(
-        width = 6,
-        shiny::h5("Selected:"),
-        DT::DTOutput(ns("test_selected"))
+        width = 4,
+        shiny::h6("Hovered:"),
+        shiny::tableOutput(ns("test_hovered"))
       ),
       shiny::column(
-        width = 6,
-        shiny::h5("Hovered:"),
-        DT::DTOutput(ns("test_hovered"))
+        width = 4,
+        shiny::h6("Selected:"),
+        shiny::tableOutput(ns("test_selected"))
+      ),
+      shiny::column(
+        width = 4,
+        shiny::h6("Hovered:"),
+        shiny::verbatimTextOutput(ns("test_hover_summary_id")),
+        shiny::h6("Selected"),
+        shiny::verbatimTextOutput(ns("test_selected_summary_ids"))
       )
     )
   )
 }
 
 ##-------------------------------------------------------
-##  Server function                                    --
+##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
 scatterPlotsServer <- function(id, opts_obj, grv, data_shared) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
       
+      
+      ##-----------------------------------------
+      ##  Left Plot (DLS)                      --
+      ##-----------------------------------------
       # Reactive object of DLS plot
       plot_DLS <- shiny::reactive({
         ggscatter(
@@ -83,6 +99,10 @@ scatterPlotsServer <- function(id, opts_obj, grv, data_shared) {
         )
       })
       
+      
+      ##-----------------------------------------
+      ##  Right Plot (SLS/DSF)                 --
+      ##-----------------------------------------
       # Reactive object of SLS & DSF plot
       plot_SLS_DSF <- shiny::reactive({
         ggscatter(
@@ -103,6 +123,10 @@ scatterPlotsServer <- function(id, opts_obj, grv, data_shared) {
         )
       })
       
+      
+      ##-----------------------------------------
+      ##  Plotly Output                        --
+      ##-----------------------------------------
       # Plotly subplot output rendering
       output$plot_scatter <- plotly::renderPlotly({
         plotly::subplot(
@@ -146,68 +170,102 @@ scatterPlotsServer <- function(id, opts_obj, grv, data_shared) {
           plotly::event_register("plotly_hover")
       })
       
+      
+      ##-----------------------------------------
+      ##  Plotly Callbacks                     --
+      ##-----------------------------------------
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter selected                    <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Scatter plot selected event data
       grv$scatter_selected_event <- shiny::debounce(shiny::reactive({
-        plotly::event_data(event = "plotly_selected", source = "scatter")
+        df <- plotly::event_data(event = "plotly_selected", source = "scatter")
+        # shiny::req(df)
+        df
+      }), 1000)
+      # Scatter plot selected summary_ids (key) and well_ids (customdata)
+      grv$scatter_selected_summary_ids <- shiny::debounce(shiny::reactive({
+        df <- plotly::event_data(event = "plotly_selected", source = "scatter")
+        shiny::req(df)
+        if (rlang::is_list(df[["key"]])) {
+          df[["key"]] <- as.character(unlist(df[["key"]]))
+        }
+        if (rlang::is_list(df[["customdata"]])) {
+          df[["customdata"]] <- as.character(unlist(df[["customdata"]]))
+        }
+        list(
+          summary_ids = bit64::as.integer64.character(df[["key"]]),
+          well_ids = bit64::as.integer64.character(df[["customdata"]])
+        )
       }), 1000)
       
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter hovered                     <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Scatter plot hover event data
       grv$scatter_hover_event <- shiny::debounce(shiny::reactive({
-        plotly::event_data(event = "plotly_hover", source = "scatter")
+        df <- plotly::event_data(event = "plotly_hover", source = "scatter")
+        # shiny::req(df)
+        df
+      }), 1000)
+      # Scatter plot hover summary_id (key) and well_id (customdata)
+      grv$scatter_hover_summary_id <- shiny::debounce(shiny::reactive({
+        df <- plotly::event_data(event = "plotly_hover", source = "scatter")
+        shiny::req(df)
+        if (rlang::is_list(df[["key"]])) {
+          df[["key"]] <- as.character(unlist(df[["key"]]))
+        }
+        if (rlang::is_list(df[["customdata"]])) {
+          df[["customdata"]] <- as.character(unlist(df[["customdata"]]))
+        }
+        list(
+          summary_ids = bit64::as.integer64.character(df[["key"]]),
+          well_ids = bit64::as.integer64.character(df[["customdata"]])
+        )
       }), 1000)
       
-      output$test_selected <- DT::renderDT({
+      
+      ##-----------------------------------------
+      ##  Testing Outputs                      --
+      ##-----------------------------------------
+      # Testing - selected table output
+      output$test_selected <- shiny::renderTable({
         shiny::req(grv$scatter_selected_event())
-        DT::datatable(
-          data = dplyr::select(grv$scatter_selected_event(), -c(curveNumber)),
-          options = list(
-            dom = "it",
-            scrollX = TRUE,
-            scrollY = "100px",
-            scrollCollapse = TRUE
-          )
-        )
+        dplyr::select(grv$scatter_selected_event(), -c(curveNumber))
       })
-      output$test_hovered <- DT::renderDT({
+      # Testing - selected print
+      output$test_selected_summary_ids <- shiny::renderPrint({
+        shiny::req(grv$scatter_selected_summary_ids())
+        grv$scatter_selected_summary_ids()
+      })
+      # Testing - hover table output
+      output$test_hovered <- shiny::renderTable({
         shiny::req(grv$scatter_hover_event())
-        DT::datatable(
-          data = dplyr::select(grv$scatter_hover_event(), -c(curveNumber)),
-          options = list(
-            dom = "it",
-            scrollX = TRUE,
-            scrollY = "100px",
-            scrollCollapse = TRUE
-          )
-        )
+        dplyr::select(grv$scatter_hover_event(), -c(curveNumber))
+      })
+      # Testing - hover print
+      output$test_hover_summary_id <- shiny::renderPrint({
+        shiny::req(grv$scatter_hover_summary_id())
+        grv$scatter_hover_summary_id()
       })
       
+      # Testing - SharedData group id
       output$data_shared_group <- renderPrint({
         data_shared$groupName()
       })
       
-      output$data_shared_selected <- DT::renderDT({
-        DT::datatable(
-          data = data_shared,
-          selection = "none",
-          # extensions = c("FixedColumns"),
-          options = list(
-            dom = "tip",
-            # i - information
-            # f - filter
-            # searchHighlight = TRUE,
-            # p - pagination
-            scrollX = TRUE,
-            scrollY = "200px",
-            paging = FALSE,
-            # pageLength = 80,
-            scrollCollapse = TRUE#,
-            # t - table
-            # fixedColumns = list(leftColumns = 5),
-            # order = list(list(3, "asc")),
-            # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
-          )
-        )
-      })
+      
+      
+      ##////////////////////////////////////////
+      ##  Sparkline Module                    //
+      ##////////////////////////////////////////
+      spectraSparksServer(
+        "spectraSparks",
+        grv,
+        opts_obj
+      )
+      
     }
   )
 }

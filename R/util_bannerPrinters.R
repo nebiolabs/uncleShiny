@@ -18,10 +18,43 @@ banner2 <- function(x, char = "-") {
   bannerCommenter::banner(
     x,
     emph = FALSE,
-    upper = FALSE,
+    upper = TRUE,
     centre = FALSE,
     bandChar = char,
     minHashes = 57
+  )
+}
+
+bannerAssign <- function(x) {
+  bannerCommenter::banner(
+    x,
+    emph = FALSE,
+    upper = FALSE,
+    centre = FALSE,
+    bandChar = ">",
+    minHashes = 42
+  )
+}
+
+bannerReturn <- function(x) {
+  bannerCommenter::banner(
+    x,
+    emph = FALSE,
+    upper = FALSE,
+    centre = FALSE,
+    bandChar = "<",
+    minHashes = 42
+  )
+}
+
+bannerFlag <- function(x) {
+  bannerCommenter::banner(
+    x,
+    emph = FALSE,
+    upper = FALSE,
+    centre = FALSE,
+    bandChar = "/",
+    minHashes = 42
   )
 }
 

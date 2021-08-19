@@ -2,7 +2,6 @@
 ##--------------------------------------------------------------------------
 ##  Summary scatter plot building function                                --
 ##--------------------------------------------------------------------------
-
 ggscatter <- function(data_shared, x_var, y_var, color_var, palette_name,
                       size = NULL, alpha = NULL,
                       show_vert_guides = FALSE, vert_guides = c(5,20),
@@ -31,7 +30,7 @@ ggscatter <- function(data_shared, x_var, y_var, color_var, palette_name,
       x = .data[[x_var]],
       y = .data[[y_var]],
       # customdata is a special plotly field to be passed on in event_data calls
-      customdata = .data[[custom_data]],
+      customdata = bit64::as.character.integer64(.data[[custom_data]]),
       # aesthetic used as the tooltip; assigned in plotly::ggplotly(tooltip = .)
       text = eval(tootip_glue_string)
     )

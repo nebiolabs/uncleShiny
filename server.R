@@ -4,9 +4,8 @@
 ##--------------------------------------------------------------------------
 
 function(input, output, session) {
-  
   ##-------------------------------------------------------
-  ##  Interactive theme selection                        --
+  ##  THEME SELECTION                                    --
   ##-------------------------------------------------------
   # Instantiates an overlay UI for previewing bootswatch themes
   # bslib::bs_themer()
@@ -19,55 +18,60 @@ function(input, output, session) {
   
   
   ##-------------------------------------------------------
-  ##  Performance profiling                              --
+  ##  PERFORMANCE PROFILING                              --
   ##-------------------------------------------------------
-  
   # callModule(profvis::profvis_server, "profiler")
   
   
   
-  ##--------------------------------------------------------
-  ##  Global reactive values                              --
-  ##--------------------------------------------------------
   
+  ##-------------------------------------------------------
+  ##  SHARED VALUES                                      --
+  ##-------------------------------------------------------
+
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ##  Global                              >>
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   # Instantiates a global reactive values object to share amongst modules;
   # is is passed as an argument to the moduleServer functions
   grv <- shiny::reactiveValues()
+  # grv$testy_data <- reactive({test_data})
+  
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ##  Scatter plot options                >>
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  scatter_opts <- shiny::reactiveValues()
   
   
-  ##--------------------------------------------------------
-  ##  Postgres database access                            --
-  ##--------------------------------------------------------
   
-  ##----------------------------------------
-  ##  Database querying module            --
-  ##----------------------------------------
+  ##-------------------------------------------------------
+  ##  POSTGRES DATABASE                                  --
+  ##-------------------------------------------------------
+  
+  ##////////////////////////////////////////
+  ##  Query module                        //
+  ##////////////////////////////////////////
   dbQueryServer("ebase_query", grv, ebase_dev)
   
-  
-  ##-----------------------------------------
-  ##  Result viewing module                --
-  ##-----------------------------------------
+  ##////////////////////////////////////////
+  ##  Print module                        //
+  ##////////////////////////////////////////
   dbViewServer("ebase_view", grv)
   
   
+  
   ##-------------------------------------------------------
-  ##  Summary scatter plot module                        --
+  ##  VISUALIZATION                                      --
   ##-------------------------------------------------------
   
-  ##----------------------------------------
-  ##  Plot options reactive values        --
-  ##----------------------------------------
-  scatter_opts <- shiny::reactiveValues()
-  
-  ##-----------------------------------------
-  ##  Plot options module                  --
-  ##-----------------------------------------
+  ##////////////////////////////////////////
+  ##  Scatter options module              //
+  ##////////////////////////////////////////
   plotOptsServer("opts_scatter", scatter_opts, grv)
   
-  ##----------------------------------------
-  ##  Scatter module                      --
-  ##----------------------------------------
+  ##////////////////////////////////////////
+  ##  Scatter plots module                //
+  ##////////////////////////////////////////
   scatterPlotsServer(
     "scatter",
     scatter_opts,
@@ -75,4 +79,8 @@ function(input, output, session) {
     grv$robj_collected_SharedData()
     # test_shared # for testing without database connection
   )
+  
 }
+##--------------------------------------------------------------------------
+##  end server.R                                                          --
+##--------------------------------------------------------------------------
