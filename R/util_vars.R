@@ -123,7 +123,27 @@ summary_vars <- c(# previously specDerived
   "specSLS473" = "Tagg473",
   "specDLS_I" = "Z_D",
   "specDLS_M" = "Z_D",
-  "specDLS_C" = NULL
+  "specDLS_C" = NA_character_
+)
+
+# Spectra X variables
+spec_x_switch <- c(
+  "specTm" = "temperature",
+  "specSLS266" = "temperature",
+  "specSLS473" = "temperature",
+  "specDLS_I" = "hydrodynamic_diameter",
+  "specDLS_M" = "hydrodynamic_diameter",
+  "specDLS_C" = "time"
+)
+
+# Spectra Y variables
+spec_y_switch <- c(
+  "specTm" = "bcm",
+  "specSLS266" = "sls_266",
+  "specSLS473" = "sls_473",
+  "specDLS_I" = "amplitude",
+  "specDLS_M" = "amplitude",
+  "specDLS_C" = "amplitude"
 )
 
 spec_tbl_list <- c(

@@ -3,7 +3,7 @@
 ##  Plot spectra sparklines                                              --
 ##-------------------------------------------------------------------------
 
-ggspark <- function(data, spec_var, x_var, y_var, summary_var,
+ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
                     palette_name = "Spectral", color_n = 1, alpha = 0.6) {
   ##----------------------------------------
   ##  Sparkline ggplot theme              --
@@ -36,21 +36,21 @@ ggspark <- function(data, spec_var, x_var, y_var, summary_var,
     if (spec_var %in% colnames(data())) {
       data()[[spec_var]][[1]] |> 
         dplyr::mutate(!!y_var := (.data[[y_var]] - abs(min(.data[[y_var]]))) / 
-                 (max(.data[[y_var]]) - abs(min(.data[[y_var]]))))
+                        (max(.data[[y_var]]) - abs(min(.data[[y_var]]))))
     } else {
       NULL
     }
   })
-  
+
   # x intercept
   summary_val <- shiny::reactive({
-    if (is.null(summary_var)) {
-      NA_real_
+    if (is.na(summary_var)) {
+      return(NA_real_)
     } else {
-      data()[[summary_var]][[1]]
+      return(data()[[summary_var]][[1]])
     }
   })
-  
+
   # y on spectra curve at x intercept
   nearest_y <- shiny::reactive({
     if (shiny::isTruthy(spec_df()) & shiny::isTruthy(summary_val())) {
@@ -63,20 +63,21 @@ ggspark <- function(data, spec_var, x_var, y_var, summary_var,
     }
   })
 
-  
-  
+
   ##----------------------------------------
   ##  Sparkline plot                      --
   ##----------------------------------------
+  # Base plot of spectrum
   if (shiny::isTruthy(spec_df())) {
     p <- ggplot2::ggplot(
       data = spec_df(),
       ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]])
-      ) +
+    ) +
       ggplot2::geom_area(fill = sparklineColors[color_n], alpha = alpha) +
       ggplot2::geom_line(color = "black", alpha = alpha)
   } else {return(NULL)}
   
+  # Overlay of summary value if it is present
   if (shiny::isTruthy(nearest_y())) {
     p <- p +
       ggplot2::geom_vline(
@@ -101,6 +102,7 @@ ggspark <- function(data, spec_var, x_var, y_var, summary_var,
       )
   }
   
+  # X-axis transform and plot annotation for DLS I/M
   if (grepl("DLS_I|DLS_M", spec_var, perl = TRUE)) {
     p <- p +
       ggplot2::annotate(
@@ -109,7 +111,7 @@ ggspark <- function(data, spec_var, x_var, y_var, summary_var,
         xmax = 2,
         ymin = 0,
         ymax = Inf,
-        fill = "orange",
+        fill = "yellow",
         alpha = 0.1
       ) +
       ggplot2::annotate(
@@ -131,11 +133,13 @@ ggspark <- function(data, spec_var, x_var, y_var, summary_var,
       ggplot2::annotation_logticks(sides = "b", alpha = 0.5)
   }
   
+  # X-axis transform for DLS C
   if (grepl("DLS_C", spec_var, perl = TRUE)) {
     p <- p +
       ggplot2::scale_x_log10() +
       ggplot2::annotation_logticks(sides = "b")
   }
   
-  return(p + sparklineTheme())
+  # Apply theme, add title, and return plot obj
+  return(p + sparklineTheme() + ggplot2::ggtitle(spec_name))
 }

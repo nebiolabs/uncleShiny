@@ -8,23 +8,10 @@
 ##-------------------------------------------------------
 spectraSparksUI <- function(id) {
   ns <- NS(id)
-  
   tagList(
-    # shiny::verbatimTextOutput(ns("test_print")),# debugging
-    # shiny::tableOutput(ns("test_table")),# debugging
-    shiny::plotOutput(ns("dsf"), height = "100px"),
-    shiny::plotOutput(ns("sls266"), height = "100px"),
-    shiny::plotOutput(ns("sls473"), height = "100px"),
-    shiny::plotOutput(ns("dls_int"), height = "100px"),
-    shiny::plotOutput(ns("dls_mass"), height = "100px"),
-    shiny::plotOutput(ns("dls_corr"), height = "100px")
-    # shiny::uiOutput(ns("spectra_plots"))# TO-DO, render UI from server
+    shiny::uiOutput(ns("spectra_plots"))
   )
-  
 }
-
-
-
 
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
@@ -50,101 +37,46 @@ spectraSparksServer <- function(id, grv, opts_obj) {
         )
       })
       
-      # output$test_print <- shiny::renderPrint({
-      #   hover()
-      # })
+      sparkline_vars <- shiny::reactive({get_sparkline_vars(data_hovered())})
       
-      # output$test_table <- shiny::renderTable({
-      #   req(hover())
-      #   data_hovered() |> dplyr::select(-tidyselect::contains("spec") | 
-      #                                     -tidyselect::contains("residuals"))
-      # })
+      output$spectra_plots <- shiny::renderUI({
+        ns <- session$ns
+        plotOutput_list <- purrr::map(
+          sparkline_vars()$spec_vars,
+          function(var) {
+            shiny::plotOutput(ns(var), height = "100px")
+          }
+        )
+        do.call(tagList, plotOutput_list)
+      })
       
-      # output$dsf <- shiny::renderPlot({
-      #   req(data_hovered())
-      #   spec_var <- "specTm"
-      #   summary_var <- "Tm1"
-      #   x_var <- "temperature"
-      #   y_var <- "bcm"
-      #   ggspark(data_hovered, spec_var, x_var, y_var, summary_var)
-      # })
-      
-      output$dsf <- shiny::renderPlot({
-        req(data_hovered())
-        ggspark(
-          data = data_hovered,
-          spec_var = "specTm",
-          x_var = "temperature",
-          y_var = "bcm",
-          summary_var = "Tm1",
-          palette_name = opts_obj$palette_global,
-          color_n = 1
+      plot_list <- shiny::reactive({
+        purrr::pmap(
+          sparkline_vars(),
+          ~ggspark(
+            data = data_hovered,
+            spec_var = ..1,
+            spec_name = ..2,
+            x_var = ..3,
+            y_var = ..4,
+            summary_var = ..5,
+            palette_name = opts_obj$palette_global,
+            color_n = ..6,
+            alpha = 0.6
+          )
         )
       })
       
-      output$sls266 <- shiny::renderPlot({
-        req(data_hovered())
-        ggspark(
-          data = data_hovered,
-          spec_var = "specSLS266",
-          x_var = "temperature",
-          y_var = "sls_266",
-          summary_var = "Tagg266",
-          palette_name = opts_obj$palette_global,
-          color_n = 2
-        )
-      })
-
-      output$sls473 <- shiny::renderPlot({
-        req(data_hovered())
-        ggspark(
-          data = data_hovered,
-          spec_var = "specSLS473",
-          x_var = "temperature",
-          y_var = "sls_473",
-          summary_var = "Tagg473",
-          palette_name = opts_obj$palette_global,
-          color_n = 3
-        )
-      })
-
-      output$dls_int <- shiny::renderPlot({
-        req(data_hovered())
-        ggspark(
-          data = data_hovered,
-          spec_var = "specDLS_I",
-          x_var = "hydrodynamic_diameter",
-          y_var = "amplitude",
-          summary_var = "Z_D",
-          palette_name = opts_obj$palette_global,
-          color_n = 4
-        )
-      })
-
-      output$dls_mass <- shiny::renderPlot({
-        req(data_hovered())
-        ggspark(
-          data = data_hovered,
-          spec_var = "specDLS_M",
-          x_var = "hydrodynamic_diameter",
-          y_var = "amplitude",
-          summary_var = "Z_D",
-          palette_name = opts_obj$palette_global,
-          color_n = 5
-        )
-      })
-
-      output$dls_corr <- shiny::renderPlot({
-        req(data_hovered())
-        ggspark(
-          data = data_hovered,
-          spec_var = "specDLS_C",
-          x_var = "time",
-          y_var = "amplitude",
-          summary_var = NULL,
-          palette_name = opts_obj$palette_global,
-          color_n = 6
-        )
+      shiny::observe({
+        for (i in sparkline_vars()$n) {
+          local({
+            n <- i
+            plot_name <- sparkline_vars()$spec_vars[n]
+            output[[plot_name]] <- shiny::renderPlot({
+              plot_list()[[n]]
+            })
+          })
+        }
       })
     }
   )
