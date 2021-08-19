@@ -49,9 +49,9 @@ library(rlang)
 ##-------------------------------------------------------
 
 # Reusable variables for below
-the_base_font <- "Roboto Condensed"
-the_heading_font <- "Oswald"
-the_weight <- 300
+the_base_font <- "Noto Sans"
+the_heading_font <- "Roboto Condensed"
+the_weight <- 400
 google_base_font <- rlang::expr(bslib::font_google(
   the_base_font,
   local = TRUE
