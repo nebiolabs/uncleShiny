@@ -239,7 +239,7 @@ dbQueryServer <- function(id, grv, dbobj) {
       # Reactive object of collected data `crosstalk` SharedData instance
       grv$robj_collected_SharedData <- shiny::eventReactive(
         input$bttn_collect, {
-          req(grv$robj_collected_data())
+          shiny::req(grv$robj_collected_data())
           crosstalk::SharedData$new(
             grv$robj_collected_data,
             key = ~bit64::as.character.integer64(uncle_summary_id)
