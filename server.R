@@ -18,10 +18,15 @@ function(input, output, session) {
   
   
   ##-------------------------------------------------------
-  ##  PERFORMANCE PROFILING                              --
+  ##  TESTING                                            --
   ##-------------------------------------------------------
+  # Performance profiler
   # callModule(profvis::profvis_server, "profiler")
   
+  # Navigate directly to plots when in testing mode
+  if (use_testing_mode) {
+    updateNavbarPage(inputId = "dashboard_navbar", selected = "tab_scatter")
+  }
   
   
   
@@ -75,9 +80,7 @@ function(input, output, session) {
   scatterPlotsServer(
     "scatter",
     scatter_opts,
-    grv,
-    grv$robj_collected_SharedData()
-    # test_shared # for testing without database connection
+    grv
   )
   
 }

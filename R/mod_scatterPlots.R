@@ -70,11 +70,17 @@ scatterPlotsUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-scatterPlotsServer <- function(id, opts_obj, grv, data_shared) {
+scatterPlotsServer <- function(id, opts_obj, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
-      
+      if (use_testing_mode) {
+        module_data <- shiny::reactive({test_data})
+        module_SharedData <- shiny::reactive({test_SharedData})
+      } else {
+        module_data <- shiny::reactive({grv$robj_collected_data()})
+        module_SharedData <- shiny::reactive({grv$robj_collected_SharedData()})
+      }
       
       ##-----------------------------------------
       ##  Left Plot (DLS)                      --
@@ -82,7 +88,7 @@ scatterPlotsServer <- function(id, opts_obj, grv, data_shared) {
       # Reactive object of DLS plot
       plot_DLS <- shiny::reactive({
         ggscatter(
-          data = data_shared,
+          data = module_SharedData(),
           x_var = opts_obj$xvar1,
           y_var = opts_obj$yvar1,
           color_var = opts_obj$color_global,
@@ -106,7 +112,7 @@ scatterPlotsServer <- function(id, opts_obj, grv, data_shared) {
       # Reactive object of SLS & DSF plot
       plot_SLS_DSF <- shiny::reactive({
         ggscatter(
-          data = data_shared,
+          data = module_SharedData(),
           x_var = opts_obj$xvar2,
           y_var = opts_obj$yvar2,
           color_var = opts_obj$color_global,

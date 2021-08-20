@@ -36,13 +36,21 @@ library(DT)
 library(rlang)
 # library(profvis)
 
-# test_data <- readr::read_rds("test/test_data.rds")
-# test_shared <- test_data |>
-#   plotly::highlight_key(
-#     key = ~uncle_summary_id,
-#     group = "scatter_test"
-#   )
+use_testing_mode <- TRUE
 
+if (use_testing_mode) {
+  cat("TESTING ONE, TWO, THREE. IS THIS THING ON?\n
+      The app is currently in testing mode and will not use real data.\n")
+  test_data <- readr::read_rds("test/test_data.rds")
+  test_SharedData <- crosstalk::SharedData$new(
+    test_data,
+    key = ~uncle_summary_id,
+    group = "scatter_test"
+  )
+} else {
+  test_data <- NULL
+  test_SharedData <- NULL
+}
 
 ##-------------------------------------------------------
 ##  Setup                                              --

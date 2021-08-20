@@ -11,9 +11,8 @@ shiny::tagList(
   ##--------------------------------------------------------
   shiny::navbarPage(
     title = "Uncle Dashboard",
-    # theme = shinytheme("yeti"),
+    id = "dashboard_navbar",
     theme = theme_dark,
-    # selected = "tab_scatter", # directly navigate to scatter for testing
     ## ----------------------------------------
     ##  Navbar tab: database                --
     ## ----------------------------------------
