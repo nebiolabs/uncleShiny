@@ -6,31 +6,46 @@
 shiny::tagList(
   # Adds the NEB logo to the navbar
   tags$head(tags$script(type = "text/javascript", src = "code.js")),
-  ##--------------------------------------------------------
-  ##  Navbar tab: database                                --
-  ##--------------------------------------------------------
+  ##-------------------------------------------------------
+  ##  NAVBAR PAGE                                        --
+  ##-------------------------------------------------------
   shiny::navbarPage(
     title = "Uncle Dashboard",
     id = "dashboard_navbar",
+    selected = "tab_database",
+    ##----------------------------------------
+    ##  Dark mode controls                  --
+    ##----------------------------------------
+    # Theme default on app load
     theme = theme_dark,
-    ## ----------------------------------------
-    ##  Navbar tab: database                --
-    ## ----------------------------------------
+    shiny::div(style = "display: inline-block", shiny::icon("adjust")),
+    shiny::div(style = "display: inline-block", " "),
+    shiny::div(
+      style = "display: inline-block",
+      shinyWidgets::prettySwitch(
+        inputId = "dark_mode",
+        label = "Dark mode.",
+        value = TRUE # set to match the default theme on app load
+      )
+    ),
+    ##--------------------------------------------------------
+    ##  NAVBAR TAB: DATABASE                                --
+    ##--------------------------------------------------------
     shiny::tabPanel(
       "Database Connection",
       icon = shiny::icon("database"),
       value = "tab_database",
       shiny::sidebarLayout(
-        ## ----------------------------------------
+        ##----------------------------------------
         ##  Side panel                          --
-        ## ----------------------------------------
+        ##----------------------------------------
         shiny::sidebarPanel(
           width = 2,
           dbQueryUI("ebase_query")
         ),
-        ## ----------------------------------------
+        ##----------------------------------------
         ##  Main panel                          --
-        ## ----------------------------------------
+        ##----------------------------------------
         shiny::mainPanel(
           width = 10,
           dbViewUI("ebase_view")
@@ -38,48 +53,28 @@ shiny::tagList(
       )
     ),
     ##-------------------------------------------------------
-    ##  Navbar tab: scatter plots                          --
+    ##  NAVBAR TAB: SCATTER PLOTS                          --
     ##-------------------------------------------------------
     shiny::tabPanel(
       "Summary Scatter Plots",
       icon = shiny::icon("braille"),
       value = "tab_scatter",
       shiny::sidebarLayout(
-        ## ----------------------------------------
+        ##----------------------------------------
         ##  Side panel                          --
-        ## ----------------------------------------
+        ##----------------------------------------
         shiny::sidebarPanel(
           width = 2,
           plotOptsUI("opts_scatter")
         ),
-        ## ----------------------------------------
+        ##----------------------------------------
         ##  Main panel                          --
-        ## ----------------------------------------
+        ##----------------------------------------
         shiny::mainPanel(
           width = 10,
           scatterPlotsUI("scatter")
         )
       )
-    ),
-    shiny::br(),
-    shiny::icon("adjust"),
-    shinyWidgets::prettySwitch(
-      inputId = "dark_mode",
-      label = NULL,
-      value = TRUE,
-      slim = TRUE,
-      bigger = TRUE,
-      inline = TRUE,
-      width = "42px"
-    ),
-    ##----------------------------------------
-    ##  Busy indicator                      --
-    ##----------------------------------------
-    shinybusy::add_busy_gif(
-      src = "https://jeroen.github.io/images/banana.gif",
-      height = 70,
-      width = 70,
-      position = "bottom-right"
     )
   )
 )
