@@ -17,37 +17,52 @@ spectraSparksUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-spectraSparksServer <- function(id, grv, opts_obj) {
+spectraSparksServer <- function(id, grv, opts_obj, event_type) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      if (!(event_type %in% c("click", "hover"))) {
+        stop("Argument event_type needs to be 'click' or 'hover'.")
+      }
+      
       if (use_testing_mode) {
         module_data <- shiny::reactive({test_data})
       } else {
         module_data <- shiny::reactive({grv$robj_collected_data()})
       }
       
-      # require(rlang)
+      if (event_type == "click") {
+        data_for_spark <- shiny::reactive({
+          # shiny::req(data(), click())
+          shiny::req(module_data(), grv$scatter_click_summary_id())
+          # selection <- click()[["summary_ids"]]
+          # selection <- grv$scatter_click_summary_id()[["summary_ids"]]
+          dplyr::filter(
+            # data(),
+            shiny::isolate(module_data()),
+            # uncle_summary_id %in% c(!!!selection)
+            uncle_summary_id %in% grv$scatter_click_summary_id()[["summary_ids"]]
+          )
+        })
+      }
       
-      # data <- shiny::reactive({module_data()})
-      # data <- shiny::reactive({grv$testy_data()})
-      # hover <- shiny::reactive({grv$scatter_hover_summary_id()})
+      if (event_type == "hover") {
+        data_for_spark <- shiny::reactive({
+          # shiny::req(data(), hover())
+          shiny::req(module_data(), grv$scatter_hover_summary_id())
+          # selection <- hover()[["summary_ids"]]
+          # selection <- grv$scatter_hover_summary_id()[["summary_ids"]]
+          dplyr::filter(
+            # data(),
+            shiny::isolate(module_data()),
+            # uncle_summary_id %in% c(!!!selection)
+            uncle_summary_id %in% grv$scatter_hover_summary_id()[["summary_ids"]]
+          )
+        })
+      }
       
-      data_hovered <- shiny::reactive({
-        # shiny::req(data(), hover())
-        shiny::req(module_data(), grv$scatter_hover_summary_id())
-        # selection <- hover()[["summary_ids"]]
-        # selection <- grv$scatter_hover_summary_id()[["summary_ids"]]
-        dplyr::filter(
-          # data(),
-          shiny::isolate(module_data()),
-          # uncle_summary_id %in% c(!!!selection)
-          uncle_summary_id %in% grv$scatter_hover_summary_id()[["summary_ids"]]
-        )
-      })
+      sparkline_vars <- shiny::reactive({get_sparkline_vars(data_for_spark())})
       
-      sparkline_vars <- shiny::reactive({get_sparkline_vars(data_hovered())})
-
       output$spectra_plots <- shiny::renderUI({
         ns <- session$ns
         plotOutput_list <- purrr::map(
@@ -63,7 +78,7 @@ spectraSparksServer <- function(id, grv, opts_obj) {
         purrr::pmap(
           sparkline_vars(),
           ~ggspark(
-            data = data_hovered,
+            data = data_for_spark,
             spec_var = ..1,
             spec_name = ..2,
             x_var = ..3,
@@ -91,12 +106,12 @@ spectraSparksServer <- function(id, grv, opts_obj) {
       # # Alternative method - generate single plot object from a list of plots
       # # using the `cowplot` package
       # output$spectra_cowplot <- shiny::renderPlot({
-      #   sparkline_vars <- get_sparkline_vars(data_hovered())
+      #   sparkline_vars <- get_sparkline_vars(data_for_spark())
       # 
       #   plot_list <- purrr::pmap(
       #     sparkline_vars,
       #     ~ggspark(
-      #       data = data_hovered,
+      #       data = data_for_spark,
       #       spec_var = ..1,
       #       spec_name = ..2,
       #       x_var = ..3,

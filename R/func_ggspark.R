@@ -126,7 +126,7 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
       ggplot2::geom_vline(xintercept = 2, linetype = "dotted", alpha = 0.5) +
       ggplot2::geom_vline(xintercept = 20, linetype = "dotted", alpha = 0.5) +
       ggplot2::scale_x_log10(
-        limits = c(1, 100000),
+        limits = c(1, 1000),
         breaks = c(1, 2, 5, 20, 100, 1000), 
         labels = scales::label_comma(accuracy = 1)
       ) +
