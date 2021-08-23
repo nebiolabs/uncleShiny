@@ -36,7 +36,7 @@ library(DT)
 library(rlang)
 # library(profvis)
 
-use_testing_mode <- TRUE
+use_testing_mode <- FALSE
 
 if (use_testing_mode) {
   message("TESTING ONE, TWO, THREE. IS THIS THING ON?")
