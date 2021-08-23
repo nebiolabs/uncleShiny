@@ -3,14 +3,11 @@
 ##  Database querying function                                            --
 ##--------------------------------------------------------------------------
 
-getQuery <- function(connection, query_string, user_input = NULL) {
+getQuery <- function(connection, query_string, ...) {
 require(rlang)
+  args <- list(query_string, ..., .con = connection)
   DBI::dbGetQuery(
     connection,
-    glue::glue_sql(
-      query_string,
-      input = {{user_input}},
-      .con = connection
-    )
+    do.call(glue::glue_sql, args)
   )
 }

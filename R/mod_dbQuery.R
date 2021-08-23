@@ -100,7 +100,7 @@ dbQueryServer <- function(id, grv, dbobj) {
       # Reactive object of available experiment sets for user-selected product
       grv$robj_experiment_sets <- shiny::eventReactive(input$product_selection, {
         shiny::req(grv$robj_products())
-        getQuery(dbobj, sql_queries$experiment_sets, input$product_selection)
+        getQuery(dbobj, sql_queries$experiment_sets, input = input$product_selection)
       })
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -112,7 +112,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         sets <- grv$robj_experiment_sets() |> 
           dplyr::pull(exp_set_id) |> 
           unique()
-        getQuery(dbobj, sql_queries$experiments, sets)
+        getQuery(dbobj, sql_queries$experiments, input = sets)
       })
       
       # Update choices for experiment set selection
@@ -165,7 +165,7 @@ dbQueryServer <- function(id, grv, dbobj) {
       # Reactive object of data collected from server matching selection
       grv$robj_collected_data <- shiny::eventReactive(input$bttn_collect, {
         summary_data <- getQuery(
-          dbobj, sql_queries$summary_data, input$experiment_set_selection
+          dbobj, sql_queries$summary_data, input = input$experiment_set_selection
         ) |> 
           # dplyr::mutate(sharedKey = id) |> 
           dplyr::rename(
@@ -191,7 +191,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         
         # Base table for condition and unit join manipulations; join on well_id
         conditions_units <- getQuery(
-          dbobj, sql_queries$conditions_units, input$experiment_set_selection
+          dbobj, sql_queries$conditions_units, input = input$experiment_set_selection
         ) |> 
           dplyr::mutate(
             condition_type = purrr::map_chr(

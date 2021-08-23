@@ -39,13 +39,12 @@ library(rlang)
 use_testing_mode <- TRUE
 
 if (use_testing_mode) {
-  cat("TESTING ONE, TWO, THREE. IS THIS THING ON?\n
-      The app is currently in testing mode and will not use real data.\n")
+  message("TESTING ONE, TWO, THREE. IS THIS THING ON?")
+  message("The app is currently in testing mode and will not use real data.")
   test_data <- readr::read_rds("test/test_data.rds")
   test_SharedData <- crosstalk::SharedData$new(
     test_data,
-    key = ~uncle_summary_id,
-    group = "scatter_test"
+    key = ~uncle_summary_id
   )
 } else {
   test_data <- NULL
@@ -112,24 +111,34 @@ thematic::thematic_shiny(
 ##  Postgres database connection                        --
 ##--------------------------------------------------------
 
-# Instantiate db pool
-ebase_dev <- pool::dbPool(
-  drv = RPostgres::Postgres(),
-  dbname = "ebase_dev",
-  host = "ebase-db-c.neb.com",
-  port = 5432,
-  user = Sys.getenv("ebase_uid"),
-  password = Sys.getenv("ebase_pwd")
-)
-message("Connection established? : ", DBI::dbIsValid(ebase_dev))
-print(ebase_dev)
-
+if (use_testing_mode) {
+  message("Database connection will not be established in testing mode.")
+} else {
+  # Instantiate db pool
+  ebase_dev <- pool::dbPool(
+    drv = RPostgres::Postgres(),
+    dbname = "ebase_dev",
+    host = "ebase-db-c.neb.com",
+    port = 5432,
+    user = Sys.getenv("ebase_uid"),
+    password = Sys.getenv("ebase_pwd")
+  )
+  message("Connection established? : ", DBI::dbIsValid(ebase_dev))
+  print(ebase_dev)
+}
 
 ##--------------------------------------------------------
 ##  Connection cleanup                                  --
 ##--------------------------------------------------------
 
-onStop(function() {
-  pool::poolClose(ebase_dev)
-  message("Connection closed? : ", !(DBI::dbIsValid(ebase_dev)))
-})
+if (use_testing_mode) {
+  onStop(function() {
+    message("Thanks for testing stuff. Goodbye.")
+  })
+} else {
+  onStop(function() {
+    pool::poolClose(ebase_dev)
+    message("Connection closed? : ", !(DBI::dbIsValid(ebase_dev)))
+  })
+}
+
