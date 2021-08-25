@@ -2,22 +2,40 @@
 ##--------------------------------------------------------------------------
 ##  Summary scatter plot building function                                --
 ##--------------------------------------------------------------------------
-ggscatter <- function(data_shared, x_var, y_var, color_var, palette_name,
+ggscatter <- function(data_shared, x_var, y_var,
+                      color_var, color_encoded = FALSE, palette_name,
                       size = NULL, alpha = NULL,
                       show_vert_guides = FALSE, vert_guides = c(5,20),
                       show_horiz_guides = FALSE, horiz_guides = c(0,0),
                       x_is_log = FALSE, custom_data = "well_id",
                       show_legend = TRUE) {
+  if (!is.logical(color_encoded)) {
+    stop("Argument color_encoded must be TRUE or FALSE.")
+  }
+  if (!is.logical(show_vert_guides)) {
+    stop("Argument show_vert_guides must be TRUE or FALSE.")
+  }
+  if (!is.logical(show_horiz_guides)) {
+    stop("Argument show_horiz_guides must be TRUE or FALSE.")
+  }
   if (!is.logical(x_is_log)) {
     stop("Argument x_is_log must be TRUE or FALSE.")
+  }
+  if (!is.logical(show_legend)) {
+    stop("Argument show_legend must be TRUE or FALSE.")
+  }
+  
+  if (color_encoded) {
+    color_var <- "color_hex"
   }
   
   # Expression for generating hover tooltip (see text aesthetic below)
   tootip_glue_string <- quote(
     glue::glue(
       "<em>Plate Well: {well} </em><br>",
-      "<b>Buffer: </b> {Buffer_mM}mM {Buffer}<br>",
+      "<b>Buffer: </b> {Buffer_mM}mM {Buffer}, pH {pH_pH}<br>",
       "<b>Salt: </b> {`Buffer Salt`} {`Buffer Salt_mM`}mM<br>"
+      # "<b>Metal: </b> {`Metal Salt`} {`Metal Salt_mM`}mM<br>"
     )
   )
 
@@ -40,16 +58,33 @@ ggscatter <- function(data_shared, x_var, y_var, color_var, palette_name,
       ggplot2::aes(color = .data[[color_var]]),
       size = size,
       alpha = alpha
-    ) +
-    # Color palette; see R/func_paletteGenerator.R
-    ggplot2::scale_color_manual(
-      values = mycolors(
-        palette_name,
-        length(unique(data_shared$origData()[[color_var]]))
-      )
-    ) +
+    )# +
     # Calling this fixes strange behavior with plotly::ggplotly() axis scaling
-    ggplot2::scale_y_continuous()
+    # ggplot2::scale_y_continuous()
+  
+  # Apply color
+  if (color_encoded) {
+    p <- p +
+      # Hardcoded color palette; see R/func_paletteGenerator.R
+      ggplot2::scale_color_identity(
+        name = color_var,
+        breaks = mycolors(
+          palette_name,
+          length(unique(data_shared$origData()[[color_var]]))
+        ),
+        labels = levels(data_shared$origData()[[color_var]]),
+        guide = "legend"
+      )
+  } else {
+    p <- p +
+      # Color palette; see R/func_paletteGenerator.R
+      ggplot2::scale_color_manual(
+        values = mycolors(
+          palette_name,
+          length(unique(data_shared$origData()[[color_var]]))
+        )
+      )
+  }
   
   # Vertical guides show/hide
   if (show_vert_guides) {
@@ -95,4 +130,6 @@ ggscatter <- function(data_shared, x_var, y_var, color_var, palette_name,
     p <- p +
       ggplot2::scale_x_continuous()
   }
+  
+  return(p)
 }

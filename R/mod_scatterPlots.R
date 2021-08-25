@@ -12,17 +12,17 @@ scatterPlotsUI <- function(id) {
     shiny::fluidRow(
       shiny::column(
         width = 9,
+        shiny::h3("Summary Data"),
+        shiny::helpText("Click/drag to select for zoom. Double-click to deselect.
+                    Click a point to show all spectra."),
         ##-----------------------------------------
         ##  Scatter plots                        --
         ##-----------------------------------------
-        shiny::fluidRow(
-          shiny::h3("Summary Data"),
-          shiny::verbatimTextOutput(ns("data_shared_group")),
-          plotly::plotlyOutput(
-            ns("plot_scatter"),
-            width = "100%",
-            height = "600px"
-          )
+        # shiny::verbatimTextOutput(ns("data_shared_group")),
+        plotly::plotlyOutput(
+          ns("plot_scatter"),
+          width = "100%",
+          height = "600px"
         ),
         ##-----------------------------------------
         ##  Zoomed plot                          --
@@ -38,30 +38,31 @@ scatterPlotsUI <- function(id) {
         ##  Spectra sparks                      --
         ##----------------------------------------
         shiny::h3("Spectra Quickview"),
+        shiny::helpText("Activated on click."),
         spectraSparksUI(ns("spectraSparks"))
       )
-    ),
-    ##-----------------------------------------
-    ##  Test tables                          --
-    ##-----------------------------------------
-    shiny::fluidRow(shiny::h4("Direct Output (Debugging)")),
-    shiny::fluidRow(
-      shiny::column(
-        width = 4,
-        shiny::h6("Hovered:"),
-        shiny::verbatimTextOutput(ns("test_hover_summary_id")),
-      ),
-      shiny::column(
-        width = 4,
-        shiny::h6("Clicked:"),
-        shiny::verbatimTextOutput(ns("test_click_summary_id")),
-      ),
-      shiny::column(
-        width = 4,
-        shiny::h6("Selected:"),
-        shiny::verbatimTextOutput(ns("test_selected_summary_ids")),
-      )
-    )
+    )#,
+    # ##----------------------------------------
+    # ##  Test outputs                        --
+    # ##----------------------------------------
+    # shiny::fluidRow(shiny::h4("Direct Output (Debugging)")),
+    # shiny::fluidRow(
+    #   shiny::column(
+    #     width = 4,
+    #     shiny::h6("Hovered:"),
+    #     shiny::verbatimTextOutput(ns("test_hover_summary_id")),
+    #   ),
+    #   shiny::column(
+    #     width = 4,
+    #     shiny::h6("Clicked:"),
+    #     shiny::verbatimTextOutput(ns("test_click_summary_id")),
+    #   ),
+    #   shiny::column(
+    #     width = 4,
+    #     shiny::h6("Selected:"),
+    #     shiny::verbatimTextOutput(ns("test_selected_summary_ids")),
+    #   )
+    # )
   )
 }
 
@@ -73,12 +74,20 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
     id,
     function(input, output, session) {
       if (use_testing_mode) {
-        module_data <- shiny::reactive({test_data})
-        module_SharedData <- shiny::reactive({test_SharedData})
+        module_data <- shiny::reactive({
+          test_data |> 
+            cbindColors(opts_obj$color_global, opts_obj$palette_global)
+        })
       } else {
-        module_data <- shiny::reactive({grv$robj_collected_data()})
-        module_SharedData <- shiny::reactive({grv$robj_collected_SharedData()})
+        module_data <- shiny::reactive({
+          grv$robj_collected_data() |> 
+            cbindColors(opts_obj$color_global, opts_obj$palette_global)
+        })
       }
+      module_SharedData <- shiny::reactive({
+        crosstalk::SharedData$new(module_data(), key = ~uncle_summary_id)
+      })
+      
       
       ##-----------------------------------------
       ##  Left Plot (DLS)                      --
@@ -86,10 +95,11 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       # Reactive object of DLS plot
       plot_DLS <- shiny::reactive({
         ggscatter(
-          data = module_SharedData(),
+          data_shared = module_SharedData(),
           x_var = opts_obj$xvar1,
           y_var = opts_obj$yvar1,
           color_var = opts_obj$color_global,
+          color_encoded = FALSE,
           palette_name = opts_obj$palette_global,
           size = opts_obj$size_points(),
           alpha = opts_obj$alpha_points(),
@@ -110,10 +120,11 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       # Reactive object of SLS & DSF plot
       plot_SLS_DSF <- shiny::reactive({
         ggscatter(
-          data = module_SharedData(),
+          data_shared = module_SharedData(),
           x_var = opts_obj$xvar2,
           y_var = opts_obj$yvar2,
           color_var = opts_obj$color_global,
+          color_encoded = FALSE,
           palette_name = opts_obj$palette_global,
           size = opts_obj$size_points(),
           alpha = opts_obj$alpha_points(),
@@ -150,20 +161,20 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
           margin = 0.04
         ) |>
           plotly::layout(
-            annotations = list(
-              list(
-                x = 0, xref = "paper", xanchor = "right",
-                y = 1.09, yref = "paper",
-                text = "Plot1", font = list(size = 18),
-                showarrow = F
-              ),
-              list(
-                x = 0.54, xref = "paper", xanchor = "right",
-                y = 1.09, yref = "paper",
-                text = "Plot2", font = list(size = 18),
-                showarrow = F
-              )
-            ),
+            # annotations = list(
+            #   list(
+            #     x = 0.45, xref = "paper", xanchor = "right",
+            #     y = 1, yref = "paper",
+            #     text = "Plot L", font = list(size = 18),
+            #     showarrow = F
+            #   ),
+            #   list(
+            #     x = 1, xref = "paper", xanchor = "right",
+            #     y = 1, yref = "paper",
+            #     text = "Plot R", font = list(size = 18),
+            #     showarrow = F
+            #   )
+            # ),
             legend = legendList
           ) |>
           plotly::highlight(
@@ -263,29 +274,30 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       
       
       
-      ##-----------------------------------------
-      ##  Testing Outputs                      --
-      ##-----------------------------------------
-      # Testing - selected print
-      output$test_selected_summary_ids <- shiny::renderPrint({
-        shiny::req(grv$scatter_selected_summary_ids())
-        grv$scatter_selected_summary_ids()
-      })
-      # Testing - clicked print
-      output$test_click_summary_id <- shiny::renderPrint({
-        shiny::req(grv$scatter_click_summary_id())
-        grv$scatter_click_summary_id()
-      })
-      # Testing - hover print
-      output$test_hover_summary_id <- shiny::renderPrint({
-        shiny::req(grv$scatter_hover_summary_id())
-        grv$scatter_hover_summary_id()
-      })
       
-      # # Testing - SharedData group id
-      # output$data_shared_group <- renderPrint({
-      #   data_shared$groupName()
+      # ##----------------------------------------
+      # ##  Test outputs                        --
+      # ##----------------------------------------
+      # # Testing - selected print
+      # output$test_selected_summary_ids <- shiny::renderPrint({
+      #   shiny::req(grv$scatter_selected_summary_ids())
+      #   grv$scatter_selected_summary_ids()
       # })
+      # # Testing - clicked print
+      # output$test_click_summary_id <- shiny::renderPrint({
+      #   shiny::req(grv$scatter_click_summary_id())
+      #   grv$scatter_click_summary_id()
+      # })
+      # # Testing - hover print
+      # output$test_hover_summary_id <- shiny::renderPrint({
+      #   shiny::req(grv$scatter_hover_summary_id())
+      #   grv$scatter_hover_summary_id()
+      # })
+      # 
+      # # # Testing - SharedData group id
+      # # output$data_shared_group <- renderPrint({
+      # #   data_shared$groupName()
+      # # })
       
       
       

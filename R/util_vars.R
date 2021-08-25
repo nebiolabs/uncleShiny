@@ -96,13 +96,20 @@ colorvarChoices <- c(
 palnList <- list(
   "Set1" = 9,
   "Set2" = 8,
-  "Set3" = 12,
-  "Paired" = 12,
   "Dark2" = 8,
+  "Set3" = 12,
+  "Pastel1" = 9,
+  "Pastel2" = 8,
   "Accent" = 8,
+  "Paired" = 12,
   "Spectral" = 11,
   "BrBG" = 11,
-  "Default" = 0
+  "YlGnBu" = 9,
+  "YlGn" = 9,
+  "RdPu" = 9,
+  "PuRd" = 9,
+  "GnBu" = 9,
+  "BuPu" = 9
 )
 palChoices <- names(palnList)
 
