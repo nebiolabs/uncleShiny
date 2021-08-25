@@ -98,10 +98,16 @@ dbQueryServer <- function(id, grv, dbobj) {
       ##  Available exp_sets                  <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive object of available experiment sets for user-selected product
-      grv$robj_experiment_sets <- shiny::eventReactive(input$product_selection, {
-        shiny::req(grv$robj_products())
-        getQuery(dbobj, sql_queries$experiment_sets, input = input$product_selection)
-      })
+      grv$robj_experiment_sets <- shiny::eventReactive(
+        input$product_selection, {
+          shiny::req(grv$robj_products())
+          getQuery(
+            dbobj,
+            sql_queries$experiment_sets,
+            input = input$product_selection
+          )
+        }
+      )
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Available exps                      <<
@@ -165,7 +171,9 @@ dbQueryServer <- function(id, grv, dbobj) {
       # Reactive object of data collected from server matching selection
       grv$robj_collected_data <- shiny::eventReactive(input$bttn_collect, {
         summary_data <- getQuery(
-          dbobj, sql_queries$summary_data, input = input$experiment_set_selection
+          dbobj,
+          sql_queries$summary_data,
+          input = input$experiment_set_selection
         ) |> 
           # dplyr::mutate(sharedKey = id) |> 
           dplyr::rename(
@@ -179,7 +187,11 @@ dbQueryServer <- function(id, grv, dbobj) {
           dplyr::mutate(residuals = purrr::map(residuals, parse_float8)) |>
           dplyr::rename(uncle_summary_id = id) |> 
           tibble::as_tibble() |> 
-          dplyr::select(-tidyselect::any_of(c("experiment_condition_id", "condition_id", "unit_id")))
+          dplyr::select(-tidyselect::any_of(c(
+            "experiment_condition_id",
+            "condition_id",
+            "unit_id"
+          )))
         
         # uncle_summary_id keys for spectra table query
         summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
@@ -191,7 +203,9 @@ dbQueryServer <- function(id, grv, dbobj) {
         
         # Base table for condition and unit join manipulations; join on well_id
         conditions_units <- getQuery(
-          dbobj, sql_queries$conditions_units, input = input$experiment_set_selection
+          dbobj,
+          sql_queries$conditions_units,
+          input = input$experiment_set_selection
         ) |> 
           dplyr::mutate(
             condition_type = purrr::map_chr(

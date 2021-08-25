@@ -9,7 +9,7 @@
 
 # Shiny packages
 library(shiny)
-library(shinybusy)
+# library(shinybusy)
 
 # Theme and widget packages
 library(shinyWidgets)
@@ -26,14 +26,17 @@ library(bit64)
 
 # Data manipulation
 library(tidyverse)
-library(glue)
+library(forcats)
 
 # Plotting
 library(plotly)
 library(DT)
+library(cowplot)
+library(ggridges)
 
 # Programming and debugging
 library(rlang)
+library(glue)
 # library(profvis)
 
 use_testing_mode <- FALSE
@@ -42,13 +45,8 @@ if (use_testing_mode) {
   message("TESTING ONE, TWO, THREE. IS THIS THING ON?")
   message("The app is currently in testing mode and will not use real data.")
   test_data <- readr::read_rds("test/test_data.rds")
-  test_SharedData <- crosstalk::SharedData$new(
-    test_data,
-    key = ~uncle_summary_id
-  )
 } else {
   test_data <- NULL
-  test_SharedData <- NULL
 }
 
 ##-------------------------------------------------------
