@@ -27,9 +27,12 @@ scatterPlotsUI <- function(id) {
         ##-----------------------------------------
         ##  Zoomed plot                          --
         ##-----------------------------------------
-        shiny::fluidRow(
-          shiny::h3("Selection Zoom")
-          # zoomed in plot
+        shiny::h3("Selection Zoom"),
+        shiny::helpText("Activated on click/drag selection."),
+        plotly::plotlyOutput(
+          ns("plot_zoom"),
+          width = "100%",
+          height = "400px"
         )
       ),
       shiny::column(
@@ -262,15 +265,67 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       }), 500)
       
       
-      ##-----------------------------------------
-      ##  Testing Outputs                      --
-      ##-----------------------------------------
-      # Testing - selected table output
-      output$test_selected <- shiny::renderTable({
-        shiny::req(grv$scatter_selected_event())
-        dplyr::select(grv$scatter_selected_event(), -c(curveNumber))
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Selected SharedData obj              <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      # Reactive object of collected data (filtered for plotly selection)
+      # `crosstalk` SharedData instance
+      grv$robj_selected_SharedData <- shiny::reactive({
+        shiny::req(module_data(), grv$scatter_selected_summary_ids())
+        crosstalk::SharedData$new(
+          dplyr::filter(
+            module_data(),
+            uncle_summary_id %in%
+              grv$scatter_selected_summary_ids()[["summary_ids"]]
+          ),
+          key = ~bit64::as.character.integer64(uncle_summary_id)
+        )
       })
       
+      ##-----------------------------------------
+      ##  Zoom Plot (selected callback)        --
+      ##-----------------------------------------
+      # Reactive object of SLS & DSF plot
+      plot_zoom <- shiny::reactive({
+        ggscatter(
+          data_shared = grv$robj_selected_SharedData(),
+          x_var = opts_obj$xvar3,
+          y_var = opts_obj$yvar3,
+          color_var = opts_obj$color_global,
+          color_encoded = TRUE,
+          palette_name = opts_obj$palette_global,
+          size = opts_obj$size_points(),
+          alpha = opts_obj$alpha_points(),
+          # show_vert_guides = opts_obj$show_guides_v2,
+          # vert_guides = opts_obj$guides_v2(),
+          # show_horiz_guides = opts_obj$show_guides_h2,
+          # horiz_guides = opts_obj$guides_h2(),
+          x_is_log = opts_obj$xvar2_is_log,
+          custom_data = "well_id",
+          show_legend = FALSE
+        )
+      })
+      
+      ##----------------------------------------
+      ##  Zoom Plotly Output                  --
+      ##----------------------------------------
+      # Plotly subplot output rendering
+      output$plot_zoom <- plotly::renderPlotly({
+        plot_zoom() |> 
+        plotly::ggplotly(source = "zoom", tooltip = "text") |>
+          plotly::layout(
+            legend = legendList
+          ) |>
+          plotly::highlight(
+            on = "plotly_selected", off = "plotly_deselect",
+            opacityDim = 0.15,
+            selected = plotly::attrs_selected(showlegend = FALSE)
+          ) |>
+          plotly::config(displaylogo = FALSE) |> 
+          plotly::event_register("plotly_selected") |> 
+          plotly::event_register("plotly_hover")
+      })
       
       
       
