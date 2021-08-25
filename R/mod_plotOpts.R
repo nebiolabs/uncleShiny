@@ -41,7 +41,7 @@ plotOptsUI <- function(id) {
             "<a target='_blank' href='https://colorbrewer2.org'>ColorBrewer</a> Palette:"
           ),
           choices = palChoices,
-          selected = "Spectral"
+          selected = "Set2"
         ),
         ##----------------------
         ##  Point size        --
@@ -235,7 +235,7 @@ plotOptsUI <- function(id) {
           ns("xvar3"),
           "X Variable:",
           choices = xvarChoices,
-          selected = "Z_D"
+          selected = "Tm1"
         )
       )
     )
