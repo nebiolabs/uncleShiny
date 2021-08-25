@@ -32,71 +32,74 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   ##  Data-derived values                  --
   ##-----------------------------------------
   # derived values from the data
-  spec_df <- shiny::reactive({
-    if (spec_var %in% colnames(data())) {
-      data()[[spec_var]][[1]] |> 
+  spec_df <- (function() {#shiny::reactive({
+    if (spec_var %in% colnames(data)) {
+      data[[spec_var]][[1]] |> 
         dplyr::mutate(!!y_var := (.data[[y_var]] - abs(min(.data[[y_var]]))) / 
                         (max(.data[[y_var]]) - abs(min(.data[[y_var]]))))
     } else {
       NULL
     }
-  })
+  })()
 
   # x intercept
-  summary_val <- shiny::reactive({
+  summary_val <- (function() {#shiny::reactive({
     if (is.na(summary_var)) {
       return(NA_real_)
     } else {
-      return(data()[[summary_var]][[1]])
+      return(data[[summary_var]][[1]])
     }
-  })
+  })()
 
   # y on spectra curve at x intercept
-  nearest_y <- shiny::reactive({
-    if (shiny::isTruthy(spec_df()) & shiny::isTruthy(summary_val())) {
-      spec_df()[which(abs(spec_df()[[x_var]] - 
-                            summary_val()) == 
-                        min(abs(spec_df()[[x_var]] - 
-                                  summary_val()))), ][[y_var]]
+  nearest_y <- (function() {#shiny::reactive({
+    if (shiny::isTruthy(spec_df) & shiny::isTruthy(summary_val)) {
+      spec_df[which(abs(spec_df[[x_var]] - 
+                            summary_val) == 
+                        min(abs(spec_df[[x_var]] - 
+                                  summary_val))), ][[y_var]]
     } else {
       NULL
     }
-  })
-
-
+  })()
+  
+  # shiny::req(spec_df)
+  
   ##----------------------------------------
   ##  Sparkline plot                      --
   ##----------------------------------------
   # Base plot of spectrum
-  if (shiny::isTruthy(spec_df())) {
+  if (shiny::isTruthy(spec_df)) {
     p <- ggplot2::ggplot(
-      data = spec_df(),
+      data = spec_df,
       ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]])
     ) +
       ggplot2::geom_area(fill = sparklineColors[color_n], alpha = alpha) +
       ggplot2::geom_line(color = "black", alpha = alpha)
-  } else {return(NULL)}
+  } else {
+    stop("No spectra data available.")
+  }
   
   # Overlay of summary value if it is present
-  if (shiny::isTruthy(nearest_y())) {
+  if (shiny::isTruthy(nearest_y)) {
     p <- p +
       ggplot2::geom_vline(
-        xintercept = summary_val(),
+        xintercept = summary_val,
         linetype = "dashed",
         alpha = 0.8
       ) +
       ggplot2::geom_point(
-        ggplot2::aes(x = summary_val(), y = nearest_y()),
+        ggplot2::aes(x = summary_val, y = nearest_y),
         color = "red",
         alpha = 0.8
       ) +
       ggplot2::geom_label(
         ggplot2::aes(
-          x = summary_val(),
-          y = 0.9 * max(spec_df()[[y_var]]),
+          x = summary_val,
+          y = 0.9 * max(.data[[y_var]]),
           label = summary_var
         ),
-        nudge_x = -0.02 * summary_val(),
+        nudge_x = -0.02 * summary_val,
         hjust = 1,
         vjust = 1
       )

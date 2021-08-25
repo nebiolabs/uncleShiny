@@ -78,13 +78,13 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
         purrr::pmap(
           sparkline_vars(),
           ~ggspark(
-            data = data_for_spark,
+            data = data_for_spark(),
             spec_var = ..1,
             spec_name = ..2,
             x_var = ..3,
             y_var = ..4,
             summary_var = ..5,
-            palette_name = opts_obj$palette_global,
+            palette_name = shiny::isolate(opts_obj$palette_global),
             color_n = ..6,
             alpha = 0.6
           )
@@ -111,7 +111,7 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
       #   plot_list <- purrr::pmap(
       #     sparkline_vars,
       #     ~ggspark(
-      #       data = data_for_spark,
+      #       data = data_for_spark(),
       #       spec_var = ..1,
       #       spec_name = ..2,
       #       x_var = ..3,
