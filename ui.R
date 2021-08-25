@@ -53,7 +53,7 @@ shiny::tagList(
       )
     ),
     ##-------------------------------------------------------
-    ##  NAVBAR TAB: SCATTER PLOTS                          --
+    ##  NAVBAR TAB: SUMMARY SCATTER PLOTS                  --
     ##-------------------------------------------------------
     shiny::tabPanel(
       "Summary Scatter Plots",
@@ -74,6 +74,38 @@ shiny::tagList(
           width = 10,
           scatterPlotsUI("scatter")
         )
+      )
+    ),
+    ##-------------------------------------------------------
+    ##  NAVBAR TAB: SPECTRA RIDGELINE PLOTS                --
+    ##-------------------------------------------------------
+    shiny::tabPanel(
+      "Spectra Ridgeline Plots",
+      icon = shiny::icon("chart-area"),
+      value = "tab_ridgeline",
+      shiny::sidebarLayout(
+        ##----------------------------------------
+        ##  Side panel                          --
+        ##----------------------------------------
+        shiny::sidebarPanel(
+          width = 2,
+          "Nothing to see here.."
+        ),
+        ##----------------------------------------
+        ##  Main panel                          --
+        ##----------------------------------------
+        shiny::mainPanel(
+          width = 10,
+          spectraViewerUI("ridgeline")
+        )
+      )
+    ),
+    shiny::navbarMenu(
+      "Tools",
+      icon = shiny::icon("tools"),
+      shiny::tabPanel(
+        "Database Troubleshooting",
+        icon = shiny::icon("database")
       )
     )
   )
