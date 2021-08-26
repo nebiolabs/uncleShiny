@@ -105,7 +105,8 @@ shiny::tagList(
       icon = shiny::icon("tools"),
       shiny::tabPanel(
         "Database Troubleshooting",
-        icon = shiny::icon("database")
+        icon = shiny::icon("database"),
+        dbDiagUI("ebase_diag")
       )
     )
   )
