@@ -262,7 +262,7 @@ dbDiagServer <- function(id, dbobj) {
                         WHERE sums.uncle_experiment_id = {input}
                         GROUP BY sums.uncle_experiment_id, sums.id
         )
-        SELECT sums.id AS sum_id, sums.uncle_experiment_id,
+        SELECT sums.uncle_experiment_id AS exp_id, sums.id AS sum_id, 
         cte_corrs.n_corrs, cte_intens.n_intens, cte_masses.n_masses,
         cte_sls266s.n_sls266s, cte_sls473s.n_sls473s, cte_dsfs.n_dsfs
         FROM uncle_summaries AS sums
