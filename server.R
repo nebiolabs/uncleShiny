@@ -40,8 +40,7 @@ function(input, output, session) {
   # Instantiates a global reactive values object to share amongst modules;
   # is is passed as an argument to the moduleServer functions
   grv <- shiny::reactiveValues()
-  # grv$testy_data <- reactive({test_data})
-  
+
   ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ##  Scatter plot options                >>
   ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

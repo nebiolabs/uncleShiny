@@ -130,11 +130,11 @@ if (use_testing_mode) {
 ##--------------------------------------------------------
 
 if (use_testing_mode) {
-  onStop(function() {
+  shiny::onStop(function() {
     message("Thanks for testing stuff. Goodbye.")
   })
 } else {
-  onStop(function() {
+  shiny::onStop(function() {
     pool::poolClose(ebase_dev)
     message("Connection closed? : ", !(DBI::dbIsValid(ebase_dev)))
   })
