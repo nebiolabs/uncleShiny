@@ -152,7 +152,7 @@ dbViewServer <- function(id, grv) {
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
-            dom = "ftip",
+            dom = "ift",
             # i - information
             # f - filter
             searchHighlight = TRUE,
