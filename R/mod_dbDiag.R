@@ -63,56 +63,81 @@ dbDiagUI <- function(id) {
       ##----------------------------------------
       shiny::mainPanel(
         width = 10,
-        shiny::fluidRow(
-          shiny::column(
-            width = 3,
-            shiny::h4("Products"),
-            shiny::actionButton(
-              ns("bttn_get_products"),
-              "Retrieve Products"
+        shiny::tabsetPanel(
+          id = ns("diag_outputs"),
+          shiny::tabPanel(
+            "Experiment and Summary Data",
+            value = "summary",
+            shiny::fluidRow(
+              shiny::column(
+                width = 3,
+                shiny::h4("Products"),
+                shiny::actionButton(
+                  ns("bttn_get_products"),
+                  "Retrieve Products"
+                ),
+                shiny::br(),
+                shiny::textInput(
+                  ns("filter_products"),
+                  "Filter product_id:"
+                )
+              ),
+              shiny::column(
+                width = 4,
+                shiny::h4("Experiment Sets"),
+                shiny::actionButton(
+                  ns("bttn_get_exp_sets"),
+                  "Retrieve All Sets"
+                ),
+                shiny::br(),
+                shiny::textInput(
+                  ns("filter_exp_sets"),
+                  "Filter exp_set_id:"
+                )
+              ),
+              shiny::column(
+                width = 5,
+                shiny::h4("Experiments"),
+                shiny::actionButton(
+                  ns("bttn_get_exps"),
+                  "Retrieve All Exps"
+                ),
+                shiny::br(),
+                shiny::div(
+                  style = "display: inline-block",
+                  shiny::textInput(
+                    ns("filter_exps"),
+                    "Select exp for spectra query:"
+                  )
+                ),
+                shiny::div(
+                  style = "display: inline-block",
+                  shiny::actionButton(
+                    ns("bttn_get_spectra"),
+                    "Retrieve Spectra"
+                  )
+                )
+              )
             ),
-            shiny::br(),
-            shiny::numericInput(
-              ns("filter_products"),
-              "Filter product_id:",
-              value = NA
+            shiny::fluidRow(
+              shiny::column(
+                width = 3,
+                DT::DTOutput(ns("products"))
+              ),
+              shiny::column(
+                width = 4,
+                DT::DTOutput(ns("exp_sets"))
+              ),
+              shiny::column(
+                width = 5,
+                DT::DTOutput(ns("exps"))
+              )
             )
           ),
-          shiny::column(
-            width = 4,
-            shiny::h4("Experiment Sets"),
-            shiny::actionButton(
-              ns("bttn_get_exp_sets"),
-              "Retrieve All Sets"
-            ),
-            shiny::br(),
-            shiny::numericInput(
-              ns("filter_exp_sets"),
-              "Filter exp_set_id:",
-              value = NA
-            )
-          ),
-          shiny::column(
-            width = 5,
-            shiny::h4("Experiments"),
-            shiny::actionButton(
-              ns("bttn_get_exps"),
-              "Retrieve All Exps"
-            )
-          )
-        ),
-        shiny::fluidRow(
-          shiny::column(
-            width = 3,
-            DT::DTOutput(ns("products"))
-          ),
-          shiny::column(
-            width = 4,
-            DT::DTOutput(ns("exp_sets"))
-          ),
-          shiny::column(
-            width = 5,
-            DT::DTOutput(ns("exps"))
+          shiny::tabPanel(
+            "Spectra",
+            value = "spectra",
+            DT::DTOutput(ns("spectra"))
           )
         )
       )
@@ -144,6 +169,18 @@ dbDiagServer <- function(id, dbobj) {
           })
         }
       })
+      
+      
+      ##----------------------------------------
+      ##  Interactive UI                      --
+      ##----------------------------------------
+      shiny::observeEvent(input$bttn_get_spectra, {
+        shiny::updateTabsetPanel(
+          session = session,
+          inputId = "diag_outputs",
+          selected = "spectra"
+        )
+      }) 
       
       
       ##-----------------------------------------
@@ -187,6 +224,63 @@ dbDiagServer <- function(id, dbobj) {
         ORDER BY exp_set_id"
       }
       
+      query_spectra <- {
+        "WITH cte_corrs AS (SELECT sums.id AS sum_id, COUNT(corrs.id) AS n_corrs
+                           FROM uncle_summaries AS sums
+                           INNER JOIN uncle_dls_correlations AS corrs
+                            ON corrs.uncle_summary_id = sums.id
+                           WHERE sums.uncle_experiment_id = {input}
+                           GROUP BY sums.uncle_experiment_id, sums.id
+        ), cte_intens AS (SELECT sums.id AS sum_id, COUNT(intens.id) AS n_intens
+                          FROM uncle_summaries AS sums
+                          INNER JOIN uncle_dls_intensities AS intens
+                            ON intens.uncle_summary_id = sums.id
+                          WHERE sums.uncle_experiment_id = {input}
+                          GROUP BY sums.uncle_experiment_id, sums.id
+        ), cte_masses AS (SELECT sums.id AS sum_id, COUNT(masses.id) AS n_masses
+                          FROM uncle_summaries AS sums
+                          INNER JOIN uncle_dls_masses AS masses
+                            ON masses.uncle_summary_id = sums.id
+                          WHERE sums.uncle_experiment_id = {input}
+                          GROUP BY sums.uncle_experiment_id, sums.id
+        ), cte_sls266s AS (SELECT sums.id AS sum_id, COUNT(sls266s.id) AS n_sls266s
+                           FROM uncle_summaries AS sums
+                           INNER JOIN uncle_sls266s AS sls266s
+                            ON sls266s.uncle_summary_id = sums.id
+                           WHERE sums.uncle_experiment_id = {input}
+                           GROUP BY sums.uncle_experiment_id, sums.id
+        ), cte_sls473s AS (SELECT sums.id AS sum_id, COUNT(sls473s.id) AS n_sls473s
+                           FROM uncle_summaries AS sums
+                           INNER JOIN uncle_sls473s AS sls473s
+                            ON sls473s.uncle_summary_id = sums.id
+                           WHERE sums.uncle_experiment_id = {input}
+                           GROUP BY sums.uncle_experiment_id, sums.id
+        ), cte_dsfs AS (SELECT sums.id AS sum_id, COUNT(dsfs.id) AS n_dsfs
+                        FROM uncle_summaries AS sums
+                        INNER JOIN uncle_dsfs AS dsfs
+                          ON dsfs.uncle_summary_id = sums.id
+                        WHERE sums.uncle_experiment_id = {input}
+                        GROUP BY sums.uncle_experiment_id, sums.id
+        )
+        SELECT sums.id AS sum_id, sums.uncle_experiment_id,
+        cte_corrs.n_corrs, cte_intens.n_intens, cte_masses.n_masses,
+        cte_sls266s.n_sls266s, cte_sls473s.n_sls473s, cte_dsfs.n_dsfs
+        FROM uncle_summaries AS sums
+        LEFT JOIN cte_corrs
+          ON cte_corrs.sum_id = sums.id
+        LEFT JOIN cte_intens
+          ON cte_intens.sum_id = sums.id
+        LEFT JOIN cte_masses
+          ON cte_masses.sum_id = sums.id
+        LEFT JOIN cte_sls266s
+          ON cte_sls266s.sum_id = sums.id
+        LEFT JOIN cte_sls473s
+          ON cte_sls473s.sum_id = sums.id
+        LEFT JOIN cte_dsfs
+          ON cte_dsfs.sum_id = sums.id
+        WHERE sums.uncle_experiment_id = {input}"
+      }
+      
       
       ##----------------------------------------
       ##  Helper functions                    --
@@ -221,22 +315,18 @@ dbDiagServer <- function(id, dbobj) {
         c(input$bttn_get_products, input$bttn_run_all),
         ignoreInit = TRUE, {
         if (db_is_valid()) {
-          DBI::dbGetQuery(
-            dbobj,
-            glue::glue_sql(
-              query_products,
-              .con = dbobj  
-            )
-          )
+          getQuery(dbobj, query_products)
         }
       })
       
       # Filter
       product_filter <- shiny::debounce(shiny::reactive({
-        if (is.na(input$filter_products)) {
-          return(unique(diag_products()$product_id))
+        ids <- stringr::str_split(input$filter_products, pattern = ",") |> 
+          {\(l) as.integer(do.call(c, l))}()
+        if (shiny::isTruthy(input$filter_products)) {
+          return(ids)
         } else {
-          return(input$filter_products)
+          return(unique(diag_products()$product_id))
         }
       }), 2000)
       
@@ -269,22 +359,18 @@ dbDiagServer <- function(id, dbobj) {
         c(input$bttn_get_exp_sets, input$bttn_run_all),
         ignoreInit = TRUE, {
         if (db_is_valid()) {
-          DBI::dbGetQuery(
-            dbobj,
-            glue::glue_sql(
-              query_exp_sets,
-              .con = dbobj  
-            )
-          )
+          getQuery(dbobj, query_exp_sets)
         }
       })
       
       # Filter
       exp_set_filter <- shiny::debounce(shiny::reactive({
-        if (is.na(input$filter_exp_sets)) {
-          return(unique(diag_exp_sets()$exp_set_id))
+        ids <- stringr::str_split(input$filter_exp_sets, pattern = ",") |> 
+          {\(l) as.integer(do.call(c, l))}()
+        if (shiny::isTruthy(input$filter_exp_sets)) {
+          return(ids)
         } else {
-          return(input$filter_exp_sets)
+          return(unique(diag_exp_sets()$exp_set_id))
         }
       }), 2000)
       
@@ -342,13 +428,7 @@ dbDiagServer <- function(id, dbobj) {
         c(input$bttn_get_exps, input$bttn_run_all),
         ignoreInit = TRUE, {
         if (db_is_valid()) {
-          DBI::dbGetQuery(
-            dbobj,
-            glue::glue_sql(
-              query_exps,
-              .con = dbobj  
-            )
-          )
+          getQuery(dbobj, query_exps)
         }
       })
       
@@ -391,6 +471,28 @@ dbDiagServer <- function(id, dbobj) {
             )
           )
       })
+      
+      
+      ##----------------------------------------
+      ##  Specs for exp_id                    --
+      ##----------------------------------------
+      # Query
+      diag_spectra <- shiny::eventReactive(input$bttn_get_spectra, {
+        shiny::req(input$filter_exps)
+          if (db_is_valid() & shiny::isTruthy(input$filter_exps)) {
+            input <- bit64::as.integer64.character(input$filter_exps)
+            getQuery(dbobj, query_spectra, input = input)
+          }
+        })
+      
+      # Output
+      output$spectra <- DT::renderDT({
+        shiny::req(diag_spectra())
+        df <- diag_spectra()
+        
+        myDT(df)
+      })
+      
     }
   )
 }
