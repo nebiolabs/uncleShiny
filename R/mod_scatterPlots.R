@@ -98,7 +98,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       # Reactive object of DLS plot
       plot_DLS <- shiny::reactive({
         ggscatter(
-          data_shared = module_SharedData(),
+          data = module_SharedData(),
           x_var = opts_obj$xvar1,
           y_var = opts_obj$yvar1,
           color_var = opts_obj$color_global,
@@ -123,7 +123,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       # Reactive object of SLS & DSF plot
       plot_SLS_DSF <- shiny::reactive({
         ggscatter(
-          data_shared = module_SharedData(),
+          data = module_SharedData(),
           x_var = opts_obj$xvar2,
           y_var = opts_obj$yvar2,
           color_var = opts_obj$color_global,
@@ -195,9 +195,9 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##  Plotly Callbacks                     --
       ##-----------------------------------------
       
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      ##  Scatter selected                    <<
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter selected plotly event        <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Scatter plot selected event data
       grv$scatter_selected_event <- shiny::debounce(shiny::reactive({
         plotly::event_data(event = "plotly_selected", source = "scatter")
@@ -219,7 +219,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       }), 100)
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      ##  Scatter clicked                      <<
+      ##  Scatter clicked plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Scatter plot click event data
       grv$scatter_click_event <- shiny::debounce(shiny::reactive({
@@ -241,9 +241,9 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
         )
       }), 500)
       
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      ##  Scatter hovered                     <<
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter hovered plotly event         <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Scatter plot hover event data
       grv$scatter_hover_event <- shiny::debounce(shiny::reactive({
         plotly::event_data(event = "plotly_hover", source = "scatter")
@@ -267,19 +267,14 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      ##  Selected SharedData obj              <<
+      ##  Scatter selected data                <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      # Reactive object of collected data (filtered for plotly selection)
-      # `crosstalk` SharedData instance
-      grv$robj_selected_SharedData <- shiny::reactive({
+      grv$robj_selected_data <- shiny::reactive({
         shiny::req(module_data(), grv$scatter_selected_summary_ids())
-        crosstalk::SharedData$new(
-          dplyr::filter(
-            module_data(),
-            uncle_summary_id %in%
-              grv$scatter_selected_summary_ids()[["summary_ids"]]
-          ),
-          key = ~bit64::as.character.integer64(uncle_summary_id)
+        dplyr::filter(
+          module_data(),
+          uncle_summary_id %in%
+            grv$scatter_selected_summary_ids()[["summary_ids"]]
         )
       })
       
@@ -289,7 +284,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       # Reactive object of SLS & DSF plot
       plot_zoom <- shiny::reactive({
         ggscatter(
-          data_shared = grv$robj_selected_SharedData(),
+          data = grv$robj_selected_data(),
           x_var = opts_obj$xvar3,
           y_var = opts_obj$yvar3,
           color_var = opts_obj$color_global,

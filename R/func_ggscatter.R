@@ -2,7 +2,7 @@
 ##--------------------------------------------------------------------------
 ##  Summary scatter plot building function                                --
 ##--------------------------------------------------------------------------
-ggscatter <- function(data_shared, x_var, y_var,
+ggscatter <- function(data, x_var, y_var,
                       color_var, color_encoded = FALSE, palette_name,
                       size = NULL, alpha = NULL,
                       show_vert_guides = FALSE, vert_guides = c(5,20),
@@ -29,6 +29,12 @@ ggscatter <- function(data_shared, x_var, y_var,
     color_var <- "color_hex"
   }
   
+  if (R6::is.R6(data)) {
+    data_static <- data$data()
+  } else {
+    data_static <- data
+  }
+  
   # Expression for generating hover tooltip (see text aesthetic below)
   tootip_glue_string <- quote(
     glue::glue(
@@ -41,7 +47,7 @@ ggscatter <- function(data_shared, x_var, y_var,
 
   p <- ggplot2::ggplot(
     # A shared data object passed to the function
-    data = data_shared,
+    data = data,
     # Aesthetic mapping, using aes and the .data pronoun,
     # see https://dplyr.tidyverse.org/articles/programming.html
     ggplot2::aes(
@@ -70,9 +76,9 @@ ggscatter <- function(data_shared, x_var, y_var,
         name = color_var,
         breaks = mycolors(
           palette_name,
-          length(unique(data_shared$origData()[[color_var]]))
+          length(unique(data_static[[color_var]]))
         ),
-        labels = levels(data_shared$origData()[[color_var]]),
+        labels = levels(data_static[[color_var]]),
         guide = "legend"
       )
   } else {
@@ -81,7 +87,7 @@ ggscatter <- function(data_shared, x_var, y_var,
       ggplot2::scale_color_manual(
         values = mycolors(
           palette_name,
-          length(unique(data_shared$origData()[[color_var]]))
+          length(unique(data_static[[color_var]]))
         )
       )
   }
