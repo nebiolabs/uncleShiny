@@ -42,9 +42,12 @@ library(glue)
 use_testing_mode <- FALSE
 
 if (use_testing_mode) {
+  source("R/func_normalizeSpectra.R")
+  source("R/util_vars.R")
   message("TESTING ONE, TWO, THREE. IS THIS THING ON?")
   message("The app is currently in testing mode and will not use real data.")
-  test_data <- readr::read_rds("test/test_data.rds")
+  test_data <- readr::read_rds("test/test_data.rds") |> 
+    normalizeSpectra()
 } else {
   test_data <- NULL
 }

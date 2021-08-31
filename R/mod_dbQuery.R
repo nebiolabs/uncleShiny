@@ -186,7 +186,6 @@ dbQueryServer <- function(id, grv, dbobj) {
           ) |> 
           dplyr::mutate(residuals = purrr::map(residuals, parse_float8)) |>
           dplyr::rename(uncle_summary_id = id) |> 
-          tibble::as_tibble() |> 
           dplyr::select(-tidyselect::any_of(c(
             "experiment_condition_id",
             "condition_id",
@@ -243,7 +242,10 @@ dbQueryServer <- function(id, grv, dbobj) {
         spec_tbls <- get_spec_tbls(dbobj, spec_tbl_list, summary_ids)
         
         # Join nested spectra tables to summary data and return
-        return(nest_spectra(summary_cond_unit_join, spec_tbls))
+        return(
+          nest_spectra(summary_cond_unit_join, spec_tbls) |> 
+            normalizeSpectra()
+        )
       })
       
       

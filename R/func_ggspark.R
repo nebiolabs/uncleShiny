@@ -34,9 +34,7 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   # derived values from the data
   spec_df <- (function() {#shiny::reactive({
     if (spec_var %in% colnames(data)) {
-      data[[spec_var]][[1]] |> 
-        dplyr::mutate(!!y_var := (.data[[y_var]] - abs(min(.data[[y_var]]))) / 
-                        (max(.data[[y_var]]) - abs(min(.data[[y_var]]))))
+      data[[spec_var]][[1]]
     } else {
       NULL
     }
