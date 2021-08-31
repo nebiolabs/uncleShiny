@@ -83,22 +83,7 @@ shiny::tagList(
       "Spectra Ridgeline Plots",
       icon = shiny::icon("chart-area"),
       value = "tab_ridgeline",
-      shiny::sidebarLayout(
-        ##----------------------------------------
-        ##  Side panel                          --
-        ##----------------------------------------
-        shiny::sidebarPanel(
-          width = 2,
-          "Nothing to see here.."
-        ),
-        ##----------------------------------------
-        ##  Main panel                          --
-        ##----------------------------------------
-        shiny::mainPanel(
-          width = 10,
-          spectraViewerUI("ridgeline")
-        )
-      )
+      spectraViewerUI("ridgeline")
     ),
     shiny::navbarMenu(
       "Tools",
@@ -108,6 +93,11 @@ shiny::tagList(
         icon = shiny::icon("database"),
         dbDiagUI("ebase_diag")
       )
+    ),
+    shiny::tabPanel(
+      "About this App",
+      icon = shiny::icon("info-circle")
+      # about module with source code access for license compliance
     )
   )
 )
