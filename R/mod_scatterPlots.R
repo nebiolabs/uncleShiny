@@ -13,8 +13,9 @@ scatterPlotsUI <- function(id) {
       shiny::column(
         width = 9,
         shiny::h3("Summary Data"),
-        shiny::helpText("Click/drag to select for zoom. Double-click to deselect.
-                    Click a point to show all spectra."),
+        shiny::helpText("Click/drag to select for zoom.
+                        Double-click to deselect.
+                        Click a point to show all spectra."),
         ##-----------------------------------------
         ##  Scatter plots                        --
         ##-----------------------------------------

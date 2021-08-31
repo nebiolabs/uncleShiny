@@ -81,11 +81,8 @@ function(input, output, session) {
   ##////////////////////////////////////////
   ##  Scatter plots module                //
   ##////////////////////////////////////////
-  scatterPlotsServer(
-    "scatter",
-    scatter_opts,
-    grv
-  )
+  scatterPlotsServer("scatter", scatter_opts, grv)
+
   
 }
 ##--------------------------------------------------------------------------
