@@ -82,13 +82,14 @@ theme_light <- bslib::bs_theme(
   bootswatch = "flatly",
   base_font = rlang::eval_tidy(google_base_font),
   heading_font = rlang::eval_tidy(google_heading_font),
-  font_scale = 1.05
+  font_scale = 0.7
 )
 theme_dark <- bslib::bs_theme(
   version = 4,
   bootswatch = "solar",
   base_font = rlang::eval_tidy(google_base_font),
-  heading_font = rlang::eval_tidy(google_heading_font)
+  heading_font = rlang::eval_tidy(google_heading_font),
+  font_scale = 0.7
 )
 
 # Fonts for plots
