@@ -41,25 +41,31 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   })()
 
   # x intercept
-  summary_val <- (function() {#shiny::reactive({
-    if (is.na(summary_var)) {
-      return(NA_real_)
-    } else {
-      return(data[[summary_var]][[1]])
-    }
-  })()
+  if (is.na(summary_var)) {
+    summary_val <- NA_real_
+  } else {
+    summary_val <- data[[summary_var]][[1]]
+  }
 
   # y on spectra curve at x intercept
-  nearest_y <- (function() {#shiny::reactive({
-    if (shiny::isTruthy(spec_df) & shiny::isTruthy(summary_val)) {
-      spec_df[which(abs(spec_df[[x_var]] - 
-                            summary_val) == 
-                        min(abs(spec_df[[x_var]] - 
-                                  summary_val))), ][[y_var]]
-    } else {
-      NULL
-    }
-  })()
+  # nearest_y <- (function() {#shiny::reactive({
+  #   if (shiny::isTruthy(spec_df) & shiny::isTruthy(summary_val)) {
+  #     spec_df[which(abs(spec_df[[x_var]] - 
+  #                           summary_val) == 
+  #                       min(abs(spec_df[[x_var]] - 
+  #                                 summary_val))), ][[y_var]]
+  #   } else {
+  #     NULL
+  #   }
+  # })()
+  if (shiny::isTruthy(spec_df) & shiny::isTruthy(summary_val)) {
+    nearest_y <- spec_df[which(abs(spec_df[[x_var]] - 
+                                     summary_val) == 
+                                 min(abs(spec_df[[x_var]] - 
+                                           summary_val))), ][[y_var]]
+  } else {
+    nearest_y <- NULL
+  }
   
   # shiny::req(spec_df)
   
