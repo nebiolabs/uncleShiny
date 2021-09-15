@@ -95,9 +95,14 @@ dbViewServer <- function(id, grv) {
       
       # Render experiment sets table for db inspection
       output$table_experiment_sets_available <- DT::renderDT({
+        data_with_urls <- grv$robj_experiment_sets() |> 
+          dplyr::mutate(benchling_url = glue::glue(
+            "<a href='{benchling_url}' target='_blank'>click to open</a>"
+          ))
+        
         shiny::req(grv$robj_experiment_sets())
         DT::datatable(
-          data = grv$robj_experiment_sets(),
+          data = data_with_urls,
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
@@ -114,8 +119,9 @@ dbViewServer <- function(id, grv) {
             # t - table
             # fixedColumns = list(leftColumns = 5),
             # order = list(list(3, "asc")),
-            # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
-          )
+            # columnDefs = list(list(visible = FALSE, targets = c(1, 2))),
+          ),
+          escape = FALSE
         )
       })
       
