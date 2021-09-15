@@ -19,21 +19,33 @@ dbViewUI <- function(id) {
         value = "inspection",
         shiny::fluidRow(
           column(
-            width = 12,
-            shiny::h5("Products available on server:"),
-            DT::DTOutput(ns("table_products_available"), width = "100%")
+            width = 5,
+            shiny::h4("Products available on server:"),
+            DT::DTOutput(
+              ns("table_products_available"),
+              width = "100%",
+              height = "375px"
+            )
           ),
+          shiny::column(
+            width = 7,
+            shiny::h4("Experiments sets available for selected product:"),
+            DT::DTOutput(
+              ns("table_experiment_sets_available"),
+              width = "100%",
+              height = "375px"
+            )
+          )
         ),
         shiny::fluidRow(
           shiny::column(
-            width = 6,
-            shiny::h5("Experiments sets available for selected product:"),
-            DT::DTOutput(ns("table_experiment_sets_available"), width = "100%")
-          ),
-          shiny::column(
-            width = 6,
-            shiny::h5("Experiments in experiment sets:"),
-            DT::DTOutput(ns("table_experiments_available"), width = "100%")
+            width = 12,
+            shiny::h4("Experiments in experiment sets:"),
+            DT::DTOutput(
+              ns("table_experiments_available"),
+              width = "100%",
+              height = "275px"
+            )
           )
         )
       ),
@@ -63,14 +75,14 @@ dbViewServer <- function(id, grv) {
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
-            dom = "tip",
+            dom = "itp",
             # i - information
             # f - filter
             # searchHighlight = TRUE,
             # p - pagination
             scrollX = FALSE,
-            # scrollY = "250px",
-            paging = TRUE,
+            scrollY = "300px",
+            paging = FALSE,
             pageLength = 10,
             scrollCollapse = TRUE#,
             # t - table
@@ -89,13 +101,13 @@ dbViewServer <- function(id, grv) {
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
-            dom = "tip",
+            dom = "itp",
             # i - information
             # f - filter
             # searchHighlight = TRUE,
             # p - pagination
             scrollX = TRUE,
-            scrollY = "400px",
+            scrollY = "300px",
             paging = FALSE,
             pageLength = 20,
             scrollCollapse = TRUE#,
@@ -115,13 +127,13 @@ dbViewServer <- function(id, grv) {
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
-            dom = "tip",
+            dom = "itp",
             # i - information
             # f - filter
             # searchHighlight = TRUE,
             # p - pagination
             scrollX = TRUE,
-            scrollY = "400px",
+            scrollY = "200px",
             paging = FALSE,
             pageLength = 80,
             scrollCollapse = TRUE#,

@@ -31,7 +31,7 @@ dbQueryUI <- function(id) {
       "Select product:",
       choices = NULL
     ),
-    shiny::textOutput(ns("raw_product_selection")),
+    # shiny::textOutput(ns("raw_product_selection")),
     shiny::br(),
     shiny::helpText("Once a product is selected, associated Uncle experiments
                     will be listed in the dropdown below. Select one, or
@@ -43,7 +43,7 @@ dbQueryUI <- function(id) {
       choices = NULL,
       multiple = TRUE
     ),
-    shiny::textOutput(ns("raw_experiment_set_selection")),
+    # shiny::textOutput(ns("raw_experiment_set_selection")),
     shiny::br(),
     shiny::helpText("Once a selection of experiments has been made,
                     click 'Collect Data' to gather the data from ebase."),
@@ -52,8 +52,8 @@ dbQueryUI <- function(id) {
       ns("bttn_collect"),
       "Collect Data",
       icon = shiny::icon("sync-alt")
-    ),
-    shiny::textOutput(ns("raw_bttn_collect"))
+    )#,
+    # shiny::textOutput(ns("raw_bttn_collect"))
   )
 }
 
@@ -128,7 +128,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         updated_choices <- grv$robj_experiment_sets() |>
           tidyr::unite(
             col = "experiment",
-            exp_type, gen, exp_set_id, well_set_id,
+            plate, exp_set_id, well_set_id,
             sep = "_",
             remove = FALSE
           ) |> 

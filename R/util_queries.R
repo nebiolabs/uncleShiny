@@ -48,7 +48,8 @@ sql_queries$products <- {
 # Experiment sets for user-selected product {input}
 sql_queries$experiment_sets <-  {
   "SELECT id AS exp_set_id, product_id,
-    exp_type, plate_generation AS gen, well_set_id
+    CONCAT(exp_type, '_', plate_generation) AS plate, well_set_id, 
+    processing_status AS status, benchling_url
   FROM uncle_experiment_sets
   WHERE product_id = {input}"
 }
@@ -61,7 +62,8 @@ sql_queries$experiment_sets <-  {
 # Note that for glue::glue_sql, * does argument expansion for server
 sql_queries$experiments <- {
   "SELECT id AS exp_id, uncle_experiment_set_id AS exp_set_id,
-    uncle_instrument_id AS inst_id, plate_side AS side, date
+    uncle_instrument_id AS instrument, plate_side AS side, date,
+    processing_errors AS errors
   FROM uncle_experiments
   WHERE uncle_experiment_set_id IN ({input*})"
 }
@@ -82,7 +84,8 @@ sql_queries$summary_data <- {
                     AND sum.uncle_experiment_id = exps.id)
     )
   SELECT p.name AS product_name, p.id AS product_id,
-    exp_sets.id AS exp_set_id, exp_sets.exp_type, exp_sets.plate_generation,
+    exp_sets.id AS exp_set_id,
+    CONCAT(exp_sets.exp_type, '_', exp_sets.plate_generation) AS plate,
     exps.id AS exp_id, cte_sum.*
   FROM cte_sum
   INNER JOIN uncle_experiments AS exps
