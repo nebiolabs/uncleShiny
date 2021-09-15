@@ -32,13 +32,11 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   ##  Data-derived values                  --
   ##-----------------------------------------
   # derived values from the data
-  spec_df <- (function() {#shiny::reactive({
-    if (spec_var %in% colnames(data)) {
-      data[[spec_var]][[1]]
-    } else {
-      NULL
-    }
-  })()
+  if (spec_var %in% colnames(data)) {
+    spec_df <- data[[spec_var]][[1]]
+  } else {
+    spec_df <- NULL
+  }
 
   # x intercept
   if (is.na(summary_var)) {
@@ -48,26 +46,19 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   }
 
   # y on spectra curve at x intercept
-  # nearest_y <- (function() {#shiny::reactive({
-  #   if (shiny::isTruthy(spec_df) & shiny::isTruthy(summary_val)) {
-  #     spec_df[which(abs(spec_df[[x_var]] - 
-  #                           summary_val) == 
-  #                       min(abs(spec_df[[x_var]] - 
-  #                                 summary_val))), ][[y_var]]
-  #   } else {
-  #     NULL
-  #   }
-  # })()
   if (shiny::isTruthy(spec_df) & shiny::isTruthy(summary_val)) {
-    nearest_y <- spec_df[which(abs(spec_df[[x_var]] - 
-                                     summary_val) == 
-                                 min(abs(spec_df[[x_var]] - 
-                                           summary_val))), ][[y_var]]
+    nearest_y <- spec_df[which(
+      abs(spec_df[[x_var]] - summary_val) == 
+        min(abs(spec_df[[x_var]] - summary_val))
+    ), ][[y_var]]
   } else {
     nearest_y <- NULL
   }
   
-  # shiny::req(spec_df)
+  # limiting data range to quell ggplot errors
+  if (grepl("specDLS_I|specDLS_M", spec_var, perl = TRUE)) {
+  spec_df <- dplyr::filter(spec_df, between(.data[[x_var]], 1, 1000))
+  }
   
   ##----------------------------------------
   ##  Sparkline plot                      --
