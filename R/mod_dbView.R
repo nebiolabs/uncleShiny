@@ -19,7 +19,7 @@ dbViewUI <- function(id) {
         value = "inspection",
         shiny::fluidRow(
           column(
-            width = 5,
+            width = 4,
             shiny::h4("Products available on server:"),
             DT::DTOutput(
               ns("table_products_available"),
@@ -28,7 +28,7 @@ dbViewUI <- function(id) {
             )
           ),
           shiny::column(
-            width = 7,
+            width = 8,
             shiny::h4("Experiments sets available for selected product:"),
             DT::DTOutput(
               ns("table_experiment_sets_available"),
@@ -84,11 +84,11 @@ dbViewServer <- function(id, grv) {
             scrollY = "300px",
             paging = FALSE,
             pageLength = 10,
-            scrollCollapse = TRUE#,
+            scrollCollapse = TRUE,
             # t - table
             # fixedColumns = list(leftColumns = 5),
             # order = list(list(3, "asc")),
-            # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
+            columnDefs = list(list(visible = FALSE, targets = c(0)))
           )
         )
       })
@@ -115,11 +115,11 @@ dbViewServer <- function(id, grv) {
             scrollY = "300px",
             paging = FALSE,
             pageLength = 20,
-            scrollCollapse = TRUE#,
+            scrollCollapse = TRUE,
             # t - table
             # fixedColumns = list(leftColumns = 5),
             # order = list(list(3, "asc")),
-            # columnDefs = list(list(visible = FALSE, targets = c(1, 2))),
+            columnDefs = list(list(visible = FALSE, targets = c(0)))
           ),
           escape = FALSE
         )
@@ -142,11 +142,11 @@ dbViewServer <- function(id, grv) {
             scrollY = "200px",
             paging = FALSE,
             pageLength = 80,
-            scrollCollapse = TRUE#,
+            scrollCollapse = TRUE,
             # t - table
             # fixedColumns = list(leftColumns = 5),
             # order = list(list(3, "asc")),
-            # columnDefs = list(list(visible = FALSE, targets = c(1, 2)))
+            columnDefs = list(list(visible = FALSE, targets = c(0)))
           )
         )
       })
@@ -176,7 +176,7 @@ dbViewServer <- function(id, grv) {
             searchHighlight = TRUE,
             # p - pagination
             scrollX = TRUE,
-            scrollY = "800px",
+            scrollY = "600px",
             paging = FALSE,
             pageLength = 80,
             scrollCollapse = TRUE#,

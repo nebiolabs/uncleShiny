@@ -49,7 +49,7 @@ sql_queries$products <- {
 sql_queries$experiment_sets <-  {
   "SELECT id AS exp_set_id, product_id,
     CONCAT(exp_type, '_', plate_generation) AS plate, well_set_id, 
-    processing_status AS status, benchling_url
+    processing_status AS status, benchling_url, notes
   FROM uncle_experiment_sets
   WHERE product_id = {input}"
 }
