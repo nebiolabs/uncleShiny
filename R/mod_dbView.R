@@ -169,9 +169,12 @@ dbViewServer <- function(id, grv) {
           ),
           selection = "none",
           # extensions = c("FixedColumns"),
+          extensions = c("Buttons"),
           options = list(
-            dom = "ift",
+            dom = "iBft",
             # i - information
+            # B - buttons
+            buttons = c("copy", "excel", "csv"),
             # f - filter
             searchHighlight = TRUE,
             # p - pagination
