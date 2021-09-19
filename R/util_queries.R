@@ -123,6 +123,3 @@ sql_queries$conditions_units <- {
                   FROM cte_sum
                   WHERE cte_sum.well_id = exp_conds.well_id)"
 }
-
-
-# return(sql_queries)

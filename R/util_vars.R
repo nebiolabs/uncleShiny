@@ -1,3 +1,8 @@
+
+##--------------------------------------------------------------------------
+##  Global variables                                                      --
+##--------------------------------------------------------------------------
+
 wellOrder <- purrr::map2_chr(rep(c(LETTERS[1:8]), 12), purrr::flatten_chr(purrr::map(c(1:12), rep, 8)), paste0)
 uniOrder <- purrr::map2_chr(rep(c(LETTERS[1:16]), 3), purrr::flatten_chr(purrr::map(c(1:3), rep, 16)), paste0)
 
