@@ -100,13 +100,13 @@ sysfonts::font_add_google(the_base_font, regular.wt = the_weight)
 showtext::showtext_auto()
 
 # `ggplot2` theme defaults (also controlled by `thematic`)
-theme_set(
-  theme_bw() +
-    theme(
-      panel.grid = element_blank(),
-      panel.border = element_blank(),
-      axis.line = element_line(),
-      axis.text = element_text(face = "bold")
+ggplot2::theme_set(
+  ggplot2::theme_bw() +
+    ggplot2::theme(
+      panel.grid = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank(),
+      axis.line = ggplot2::element_line(),
+      axis.text = ggplot2::element_text(face = "bold")
     )
 )
 
