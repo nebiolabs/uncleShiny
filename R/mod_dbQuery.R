@@ -177,6 +177,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         ) |> 
           # dplyr::mutate(sharedKey = id) |> 
           dplyr::rename(
+            dls_temperature = temperature,
             Tagg266 = t_agg_266,
             Tagg473 = t_agg_473,
             Tm1 = t_m_1,
