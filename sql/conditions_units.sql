@@ -7,7 +7,7 @@ INNER JOIN wells
   ON sum.well_id = wells.id
 WHERE EXISTS (SELECT *
               FROM uncle_experiments exps
-              WHERE exps.uncle_experiment_set_id IN (29)
+              WHERE exps.uncle_experiment_set_id IN (47)
                 AND sum.uncle_experiment_id = exps.id)
 )
 SELECT exp_conds.well_id, exp_conds.raw_value AS unit_value, units.name AS unit_name,
