@@ -5,6 +5,7 @@
   shiny::tagList(
     # Adds the NEB logo to the navbar
     tags$head(tags$script(type = "text/javascript", src = "code.js")),
+    tags$style(type="text/css", "body {padding-top: 70px;}"),
     ##-------------------------------------------------------
     ##  NAVBAR PAGE                                        --
     ##-------------------------------------------------------
@@ -12,6 +13,7 @@
       title = "Uncle Dashboard",
       id = "dashboard_navbar",
       selected = "tab_database",
+      position = "fixed-top",
       ##----------------------------------------
       ##  Dark mode controls                  --
       ##----------------------------------------
