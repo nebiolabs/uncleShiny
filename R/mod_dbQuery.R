@@ -90,9 +90,9 @@ dbQueryServer <- function(id, grv, dbobj) {
       })
       
       # Raw output of product_id for debugging
-      output$raw_product_selection <- shiny::renderPrint({
-        print(input$product_selection)
-      })
+      # output$raw_product_selection <- shiny::renderPrint({
+      #   print(input$product_selection)
+      # })
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Available exp_sets                  <<
@@ -144,9 +144,9 @@ dbQueryServer <- function(id, grv, dbobj) {
       })
       
       # Raw output of experiment_set_id for debugging
-      output$raw_experiment_set_selection <- shiny::renderPrint({
-        print(input$experiment_set_selection)
-      })
+      # output$raw_experiment_set_selection <- shiny::renderPrint({
+      #   print(input$experiment_set_selection)
+      # })
       
       ##-------------------------------------------------------
       ##  Data collection                                    --
@@ -160,9 +160,9 @@ dbQueryServer <- function(id, grv, dbobj) {
       })
       
       # Raw output of bttn_collect state for debugging
-      output$raw_bttn_collect <- shiny::renderPrint({
-        print(grv$state_bttn_collect)
-      })
+      # output$raw_bttn_collect <- shiny::renderPrint({
+      #   print(grv$state_bttn_collect)
+      # })
       
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -234,7 +234,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         summary_cond_unit_join <- purrr::reduce(
           list(summary_data, cond_join, unit_join),
           dplyr::left_join,
-          on = c("well_id")
+          by = c("well_id")
         )
         # return(summary_cond_unit_join)
         
