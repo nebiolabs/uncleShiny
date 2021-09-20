@@ -82,6 +82,11 @@ function(input, output, session) {
   ##  Scatter plots module                //
   ##////////////////////////////////////////
   scatterPlotsServer("scatter", scatter_opts, grv)
+  
+  ##/////////////////////////////////////////
+  ##  Spectra viewer module                //
+  ##/////////////////////////////////////////
+  spectraViewerServer("ridgeline", grv)
 
   
 }

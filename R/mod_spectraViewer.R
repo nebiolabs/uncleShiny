@@ -1,369 +1,278 @@
 
-##-------------------------------------------------------------------------------
-##  Spectra Viewer Module                                                      --
-##-------------------------------------------------------------------------------
+##-------------------------------------------------------------------------
+##  mod_spectraViewer - spectra ridgeline plots                          --
+##-------------------------------------------------------------------------
 
-
-library(shiny)
-library(shinyWidgets)
-library(tidyverse)
-library(DT)
-library(ggridges)
-library(rlang)
-
-# source("R/vars.R")
-# source("R/funs.R")
-
-spectraTheme <- function() {
+ridgelineTheme <- function() {
   list(
-    theme(
-      axis.line = element_line(),
-      axis.title = element_text(),
-      axis.text.y = element_text(face = "bold"),
-      axis.ticks.y = element_line(),
+    ggplot2::theme_minimal(),
+    ggplot2::theme(
+      panel.grid = ggplot2::element_blank(),
+      axis.title = ggplot2::element_text(hjust = 0.95, size = 15),
+      axis.text = ggplot2::element_text(size = 11),
+      axis.text.y = ggplot2::element_text(face = "bold"),
+      axis.line.x.bottom = ggplot2::element_line(),
+      plot.margin = ggplot2::margin(0.5,0.5,0.5,0.5, "cm"),
+      legend.position = "left",
       legend.justification = "top"
     )
   )
 }
 
-
-
-# UI
+##-------------------------------------------------------
+##  UI COMPONENTS                                      --
+##-------------------------------------------------------
 spectraViewerUI <- function(id) {
   ns <- NS(id)
-  optcol1 <- 4
-  optcol2 <- (12-optcol1)
-  optcoladj <- 4
   
-  tagList(
-    tabsetPanel(
-      type = "pills",
-      tabPanel(
-        "DLS",
-        value = "DLSpanel",
-        fluidRow(
-          plotOutput(ns("plotDLSspec"), height = "350px")
+  shiny::tagList(
+    shiny::sidebarLayout(
+      ##----------------------------------------
+      ##  Side panel                          --
+      ##----------------------------------------
+      shiny::sidebarPanel(
+        width = 2,
+        shiny::h5("Well Exclusion:"),
+        shiny::selectInput(
+          ns("filter_wells"),
+          label = NULL,
+          choices = c(" ", wellOrder),
+          selected = NULL,
+          multiple = TRUE,
+          selectize = TRUE
         )
       ),
-      tabPanel(
-        "SLS",
-        value = "SLSpanel",
-        fluidRow(
-          plotOutput(ns("plotSLSspec"), height = "350px")
-        )
-      ),
-      tabPanel(
-        "NanoDSF",
-        value = "nanoDSFpanel",
-        fluidRow(
-          plotOutput(ns("plotNanoDSF"), height = "350px")
-        )
-      ),
-      tabPanel(
-        "Data",
-        value = "specData",
-        fluidRow(
-          DTOutput(ns("selectRef"), width = "100%")
-        )
-      ),
-      tabPanel(
-        "Options",
-        value = "specOpts",
-        br(),
-        fluidRow(
-          column(
-            width = optcol1,
-            h5("DLS Type:")
-          ),
-          column(
-            width = optcol2,
-            radioGroupButtons(
-              inputId = ns("DLStype"),
+      ##----------------------------------------
+      ##  Main panel                          --
+      ##----------------------------------------
+      shiny::mainPanel(
+        width = 10,
+        shiny::fluidRow(
+          shiny::column(
+            width = 5,
+            shiny::h4("Dynamic Method Spectra"),
+            shinyWidgets::radioGroupButtons(
+              ns("type_dynamic"),
               label = NULL,
-              choices = c(
+              choices = list(
                 "Intensity" = "specDLS_I",
                 "Mass" = "specDLS_M"
               ),
-              justified = FALSE
+              selected = "specDLS_I"
+            )
+          ),
+          shiny::column(
+            width = 5,
+            offset = 2,
+            shiny::h4("Static Method Spectra"),
+            shinyWidgets::radioGroupButtons(
+              ns("type_static"),
+              label = NULL,
+              # choiceNames = list("SLS", "nanoDSF"),
+              # choiceValues = list(
+              #   rlang::expr(c("specSLS266", "specSLS473")),
+              #   rlang::expr("specTm")
+              # )
+              # choices = list(
+              #   "SLS" = c("specSLS266", "specSLS473"),
+              #   "nanoDSF" = "specTm"
+              # )
+              choices = list(
+                "SLS",
+                "nanoDSF"
+              )
             )
           )
         ),
-        fluidRow(
-          column(
-            width = optcol1,
-            h5("SLS Type:")
+        shiny::fluidRow(
+          shiny::column(
+            width = 5,
+            shiny::plotOutput(ns("dls"), height = "700px")
           ),
-          column(
-            width = optcol2,
-            radioGroupButtons(
-              inputId = ns("SLStype"),
-              label = NULL,
-              choices = c(
-                "266nm" = "specSLS266",
-                "473nm" = "specSLS473"
-              ),
-              justified = FALSE
-            )
+          shiny::column(
+            width = 2,
+            shiny::plotOutput(ns("corr"), height = "700px")
+          ),
+          shiny::column(
+            width = 5,
+            shiny::plotOutput(ns("sls"), height = "700px")
           )
-        ),
-        fluidRow(
-          column(
-            width = optcol1,
-            h5("Color Traces By:")
-          ),
-          column(
-            width = optcol2 - optcoladj,
-            pickerInput(
-              inputId = ns("fillColor"),
-              label = NULL,
-              choices = c("Well" = "well", colorvarChoices),
-              selected = "well"
-            )
-          ),
-          column(
-            width = optcoladj,
-            materialSwitch(
-              inputId = ns("showLegend"),
-              label = "Legend?",
-              right = TRUE
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            width = optcol1,
-            h5("Add Label:")
-          ),
-          column(
-            width = optcol2 - optcoladj,
-            pickerInput(
-              inputId = ns("label"),
-              label = NULL,
-              choices = c(colorvarChoices),
-              selected = "buffer"
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            width = optcol1,
-            h5("Ridgeline Scale:")
-          ),
-          column(
-            width = optcol2,
-            sliderInput(
-              ns("ridgeScale"),
-              label = NULL,
-              min = 0.5,
-              max = 3,
-              value = 1.2,
-              step = 0.1
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            width = optcol1,
-            h5("Well Exclusion:")
-          ),
-          column(
-            width = optcol2,
-            selectInput(
-              ns("wellExclusion"),
-              label = NULL,
-              choices = c(" ", wellOrder),
-              selected = NULL,
-              multiple = TRUE,
-              selectize = TRUE,
-              width = NULL,
-              size = NULL
-            )
-          )
-        )
+        ) 
       )
     )
   )
 }
 
 
-
-# SERVER
-spectraViewerServer <- function(id, data, pal) {
+##-------------------------------------------------------
+##  SERVER FUNCTION                                    --
+##-------------------------------------------------------
+spectraViewerServer <- function(id, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
-      selectedData <- reactive({
-        data
+      ##----------------------------------------
+      ##  Data instance for module            --
+      ##----------------------------------------
+      unnest_conflicts <- c("created_at", "updated_at")
+      
+      if (use_testing_mode) {
+        module_data <- shiny::reactive({
+          # shiny::req(grv$scatter_selected_summary_ids())
+          test_data |> 
+            dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
+            dplyr::filter(
+              uncle_summary_id %in% 
+                grv$scatter_selected_summary_ids()[["summary_ids"]]
+            )
+        })
+      } else {
+        module_data <- shiny::reactive({
+          # shiny::req(grv$scatter_selected_summary_ids())
+          grv$robj_collected_data() |> 
+            dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
+            dplyr::filter(
+              uncle_summary_id %in% 
+                grv$scatter_selected_summary_ids()[["summary_ids"]]
+            )
+        })
+      }
+      
+      
+      ##----------------------------------------
+      ##  Dynamic spectra plot                --
+      ##----------------------------------------
+      output$dls <- shiny::renderPlot({
+        # shiny::req(module_data())
+        xvar <- do.call(switch, as.list(c(input$type_dynamic, spec_x_switch)))
+        yvar <- do.call(switch, as.list(c(input$type_dynamic, spec_y_switch)))
+        module_data() |>
+          tidyr::unnest(input$type_dynamic) |>
+          ggplot2::ggplot(ggplot2::aes(x = .data[[xvar]])) +
+          ggridges::geom_ridgeline(
+            ggplot2::aes(
+              y = .data[["well"]],
+              height = .data[[yvar]],
+              fill = .data[["well"]]
+            ),
+            scale = 0.9,
+            alpha = 0.7
+          ) +
+          ggplot2::annotate(
+            "rect",
+            xmin = 1,
+            xmax = 2,
+            ymin = 0,
+            ymax = Inf,
+            fill = "yellow",
+            alpha = 0.1
+          ) +
+          ggplot2::annotate(
+            "rect",
+            xmin = 20,
+            xmax = Inf,
+            ymin = 0,
+            ymax = Inf,
+            fill = "red",
+            alpha = 0.1
+          ) +
+          ggplot2::geom_vline(xintercept = 2, linetype = "dotted", alpha = 0.5) +
+          ggplot2::geom_vline(xintercept = 20, linetype = "dotted", alpha = 0.5) +
+          ggplot2::scale_x_log10(
+            limits = c(1, 1000),
+            breaks = c(1, 2, 5, 20, 100, 1000), 
+            labels = scales::label_comma(accuracy = 1)
+          ) +
+          ggplot2::annotation_logticks(sides = "b", alpha = 0.5) + 
+          ridgelineTheme()
       })
       
-      observeEvent(selectedData(), {
-        updateSelectInput(
-          session = session,
-          inputId = "wellExclusion",
-          choices = c(" ", wellOrder[wellOrder %in% unique(data[["well"]])]),
-          selected = c(" ")
-        )
-      }, priority = 200)
       
-      # I made the observe above higher priority and the separate selected data reactive
-      # in order to avoid the updating of the select input trigger a plot redraw due to
-      # invalidating the plot data itself..
-      
-      plotData <- debounce(reactive({
-        req(selectedData)
-        selectedData() %>% 
-          filter(!(well %in% input$wellExclusion))
-      }), 200)
-      
-      
-      # SELECTION PRINTS
-      output$selectRef <- DT::renderDT({
-        req(selectedData())
-        datatable(
-          selectedData() %>%
-            select(sharedKey, well, buffer:date) %>%
-            select(-date),
-          selection = "none",
-          rownames = FALSE,
-          extensions = c("FixedColumns"),
-          options = list(
-            dom = "fti",
-            # f - filter
-            searchHighlight = TRUE,
-            # p - pagination
-            scrollX = TRUE,
-            scrollY = "250px",
-            paging = FALSE,
-            # pageLength = 16,
-            scrollCollapse = TRUE,
-            # t - table
-            fixedColumns = list(leftColumns = 3),
-            order = list(list(2, "desc")),
-            # columnDefs = list(list(visible = FALSE, targets = c(1)))
-            columns = list(list(visible = FALSE))
-          )
-        )
+      ##-----------------------------------------
+      ##  Correlation function plot            --
+      ##-----------------------------------------
+      output$corr <- shiny::renderPlot({
+        xvar <- do.call(switch, as.list(c("specDLS_C", spec_x_switch)))
+        yvar <- do.call(switch, as.list(c("specDLS_C", spec_y_switch)))
+        module_data() |>
+          tidyr::unnest("specDLS_C") |>
+          ggplot2::ggplot(ggplot2::aes(x = .data[[xvar]])) +
+          ggridges::geom_ridgeline(
+            ggplot2::aes(
+              y = .data[["well"]],
+              height = .data[[yvar]],
+              fill = .data[["well"]]
+            ),
+            scale = 0.9,
+            alpha = 0.7,
+            show.legend = FALSE
+          ) +
+          ggplot2::scale_x_log10() +
+          ggplot2::annotation_logticks(sides = "b") + 
+          ridgelineTheme()
       })
       
-      specColors <- reactive({
-        source("R/funs.R", local = TRUE)
-        if (is.na(pal) | pal == "Default") {
-          pal <- "Spectral"
+      
+      ##-----------------------------------------
+      ##  Static spectra plot                  --
+      ##-----------------------------------------
+      output$sls <- renderPlot({
+        # shiny::req(module_data())
+        
+        if (input$type_static == "SLS") {
+          module_data() |>
+            tidyr::unnest(
+              cols = c("specSLS266", "specSLS473"),
+              names_sep = "_"
+            ) |> 
+            dplyr::mutate(temperature = map2_dbl(
+              specSLS266_temperature,
+              specSLS473_temperature,
+              \(x, y) median(c(x,y))
+            )) |> 
+            ggplot2::ggplot(ggplot2::aes(
+              x = .data[["temperature"]],
+              y = .data[["well"]],
+              color = .data[["well"]]
+            )) +
+            ggridges::geom_ridgeline(
+              ggplot2::aes(height = .data[["specSLS266_sls_266"]]),
+              fill = NA,
+              stat = "identity",
+              linetype = "solid",
+              show.legend = TRUE
+            ) +
+            ggridges::geom_ridgeline(
+              ggplot2::aes(height = .data[["specSLS473_sls_473"]]),
+              fill = NA,
+              stat = "identity",
+              linetype = "dashed",
+              show.legend = TRUE
+            ) +
+            ridgelineTheme()
+        } else if (input$type_static == "nanoDSF") {
+          module_data() |>
+            tidyr::unnest(
+              cols = c("specTm"),
+              names_sep = "_"
+            ) |> 
+            dplyr::rename(temperature = specTm_temperature) |> 
+            ggplot2::ggplot(ggplot2::aes(
+              x = .data[["temperature"]],
+              y = .data[["well"]],
+              color = .data[["well"]]
+            )) +
+            ggridges::geom_ridgeline(
+              ggplot2::aes(height = .data[["specTm_bcm"]]),
+              fill = NA,
+              stat = "identity",
+              linetype = "solid",
+              show.legend = TRUE
+            ) +
+            ridgelineTheme()
+        } else {
+          return(NULL)
         }
-        mycolors(pal, length(unique(plotData()[[input$fillColor]])))
-      })
-      
-      # fillColor <- reactive({
-      #   rlang::sym(input$fillColor)
-      # })
-      
-      # PLOTS
-      output$plotDLSspec <- renderPlot({
-        opts <- c("specDLS_M" = "Mass", "specDLS_I" = "Intensity")
-        type <- opts[input$DLStype]
-        req(plotData(), cancelOutput = TRUE)
-        plotData() %>%
-          unnest(input$DLStype) %>%
-          ggplot(aes(x = hydroDia_x)) +
-          geom_vline(xintercept = 5, linetype = "dashed", alpha = 0.5) +
-          geom_vline(xintercept = 20, linetype = "dashed", alpha = 0.5) +
-          ggridges::geom_density_ridges(
-            # aes_q(y = ~well, height = ~amp_y, group = ~sharedKey, fill = as.symbol(input$fillColor)),
-            aes(y = well, height = amp_y, group = sharedKey, fill = !!sym(input$fillColor)),
-            stat = "identity",
-            scale = input$ridgeScale,
-            show.legend = input$showLegend,
-            alpha = 0.4
-          ) +
-          geom_text(
-            data = plotData() %>% select(well, buffer:albumin_mgml),
-            aes(
-              label = !!sym(input$label),
-              x = Inf,
-              y = well
-            ),
-            vjust = 0,
-            hjust = 1,
-            family = "Roboto Condensed"
-          ) +
-          scale_fill_manual(values = specColors()) +
-          scale_x_log10(limits = c(1, 100000), breaks = c(1, 5, 10, 100, 1000), labels = scales::label_comma(accuracy = 1)) +
-          annotation_logticks(sides = "b") +
-          spectraTheme() + 
-          labs(
-            title = glue("{type} DLS Spectra"),
-            x = "Hydrodynamic Diameter (nm)",
-            y = "Amplitude"
-          )
-      })
-      
-      output$plotSLSspec <- renderPlot({
-        opts <- c("specSLS266" = "266nm", "specSLS473" = "473nm")
-        lambda <- opts[input$SLStype]
-        req(plotData())
-        plotData() %>%
-          unnest(input$SLStype) %>%
-          ggplot(aes(x = temp_x)) +
-          ggridges::geom_density_ridges(
-            aes(y = well, height = intensity_y, group = sharedKey, fill = !!sym(input$fillColor)),
-            stat = "identity",
-            scale = input$ridgeScale,
-            show.legend = input$showLegend,
-            alpha = 0.5
-          ) +
-          geom_text(
-            data = plotData() %>% select(well, buffer:albumin_mgml),
-            aes(
-              label = !!sym(input$label),
-              x = Inf,
-              y = well
-            ),
-            vjust = 0,
-            hjust = 1,
-            family = "Roboto Condensed"
-          ) +
-          scale_fill_manual(values = specColors()) +
-          spectraTheme() + 
-          labs(
-            title = glue("SLS Spectra @ {lambda}"),
-            x = "Temp (°C)",
-            y = "Intensity"
-          )
-      })
-      
-      output$plotNanoDSF <- renderPlot({
-        req(plotData())
-        plotData() %>%
-          unnest(specTm) %>%
-          # group_by(well) %>%
-          mutate(BCM_y = (BCM_y - min(BCM_y)) / (max(BCM_y) - min(BCM_y))) %>%
-          ggplot(aes(x = temp_x)) +
-          ggridges::geom_density_ridges(
-            aes(y = well, height = BCM_y, group = sharedKey, fill = !!sym(input$fillColor)),
-            stat = "identity",
-            scale = input$ridgeScale,
-            show.legend = input$showLegend,
-            alpha = 0.5,
-            position = position_nudge(y = -0.5)
-          ) +
-          geom_text(
-            data = plotData() %>% select(well, buffer:albumin_mgml),
-            aes(
-              label = !!sym(input$label),
-              x = Inf,
-              y = well
-            ),
-            vjust = 0,
-            hjust = 1,
-            family = "Roboto Condensed"
-          ) +
-          scale_fill_manual(values = specColors()) +
-          spectraTheme() + 
-          labs(
-            title = "Tm Fluorescence Spectra",
-            x = "Temp (°C)",
-            y = "First Derivative of BCM"
-          )
       })
     }
   )
