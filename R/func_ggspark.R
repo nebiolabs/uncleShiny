@@ -6,9 +6,8 @@
 ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
                     palette_name = "Spectral", color_n = 1, alpha = 0.6) {
   ##----------------------------------------
-  ##  Sparkline ggplot theme              --
+  ##  Sparkline formatting                --
   ##----------------------------------------
-  # ggplot theme
   sparklineTheme <- function() {
     list(
       ggplot2::theme(
