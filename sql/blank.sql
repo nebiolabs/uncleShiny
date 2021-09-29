@@ -17,3 +17,22 @@ SELECT DISTINCT(uncle_experiment_id)
 FROM cte_sls266s
 WHERE n_sls266s > 140
 ORDER BY uncle_experiment_id;*/
+
+/*SELECT DISTINCT exp_conds.condition_id,
+  conds.name
+FROM experimental_conditions exp_conds
+INNER JOIN uncle_summaries sums
+  ON exp_conds.well_id = sums.well_id
+INNER JOIN conditions conds
+  ON conds.id = exp_conds.condition_id
+WHERE conds.type IS NULL;*/
+
+SELECT exp_conds.condition_id,
+  conds.name, conds.type
+FROM experimental_conditions exp_conds
+INNER JOIN uncle_summaries sums
+  ON exp_conds.well_id = sums.well_id
+INNER JOIN conditions conds
+  ON conds.id = exp_conds.condition_id
+WHERE conds.type IS NULL
+GROUP BY condition_id, name, type;
