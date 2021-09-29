@@ -11,9 +11,6 @@ dbQueryUI <- function(id) {
   shiny::tagList(
     shiny::div(style = "display: inline-block", shiny::icon("database")),
     shiny::div(style = "display: inline-block", shiny::h4("Database")),
-    shiny::helpText("Click 'Connect/Refresh' to establish or refresh
-                    the connection to ebase and explore available 
-                    Uncle datasets for analysis."),
     shiny::br(),
     shiny::actionButton(
       ns("bttn_refresh"),
@@ -21,21 +18,22 @@ dbQueryUI <- function(id) {
       icon = shiny::icon("sync-alt")
     ),
     shiny::br(),
+    shiny::helpText("Click to establish/refresh
+                    the connection to ebase and explore
+                    datasets available for analysis."),
     shiny::br(),
-    shiny::helpText("Available products with correspoding Uncle datasets
-                    are listed in the dropdown menu below. Select one to view
-                    experiments associated with that product."),
     shiny::br(),
     shiny::selectInput(
       ns("product_selection"),
       "Select product:",
       choices = NULL
     ),
+    # shiny::br(),
+    shiny::helpText("Products with correspoding Uncle datasets
+                    are listed in the dropdown menu above. Select one to view
+                    experiments associated with that product."),
     # shiny::textOutput(ns("raw_product_selection")),
     shiny::br(),
-    shiny::helpText("Once a product is selected, associated Uncle experiments
-                    will be listed in the dropdown below. Select one, or
-                    multiple experiments for visualization and analysis."),
     shiny::br(),
     shiny::selectInput(
       ns("experiment_set_selection"),
@@ -43,16 +41,21 @@ dbQueryUI <- function(id) {
       choices = NULL,
       multiple = TRUE
     ),
+    # shiny::br(),
+    shiny::helpText("Once a product is selected, associated Uncle experiments
+                    will be listed in the dropdown above. Select one (or
+                    multiple) experiment(s) for visualization and analysis."),
     # shiny::textOutput(ns("raw_experiment_set_selection")),
     shiny::br(),
-    shiny::helpText("Once a selection of experiments has been made,
-                    click 'Collect Data' to gather the data from ebase."),
     shiny::br(),
     shiny::actionButton(
       ns("bttn_collect"),
       "Collect Data",
       icon = shiny::icon("sync-alt")
-    )#,
+    ),
+    shiny::br(),
+    shiny::helpText("Once a selection of experiments has been made,
+                    click to request/load the data from ebase.")#,
     # shiny::textOutput(ns("raw_bttn_collect"))
   )
 }

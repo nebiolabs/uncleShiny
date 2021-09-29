@@ -18,7 +18,7 @@
       ##  Dark mode controls                  --
       ##----------------------------------------
       # Theme default on app load
-      theme = theme_dark,
+      theme = theme_light,
       bg = "#073642",
       header = shiny::tagList(
         # shiny::div(style = "display: inline-block", shiny::icon("adjust")),
@@ -28,7 +28,7 @@
           shinyWidgets::prettySwitch(
             inputId = "dark_mode",
             label = "Dark mode.",
-            value = TRUE # set to match the default theme on app load
+            value = FALSE # set to match the default theme on app load
           )
         )
       ),

@@ -50,7 +50,7 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
         plotOutput_list <- purrr::map(
           spec_vars,
           function(var) {
-            shiny::plotOutput(ns(var), height = "100px")
+            shiny::plotOutput(ns(var), height = "80px")
           }
         )
         do.call(tagList, plotOutput_list)

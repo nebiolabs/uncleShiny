@@ -85,7 +85,9 @@ theme_light <- bslib::bs_theme(
   bootswatch = "cosmo",
   base_font = rlang::eval_tidy(google_base_font),
   heading_font = rlang::eval_tidy(google_heading_font),
-  font_scale = 0.7
+  font_scale = 0.7,
+  primary = "#586e75",
+  secondary = "#eee8d5"
 )
 theme_dark <- bslib::bs_theme(
   version = 5,
