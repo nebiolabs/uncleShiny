@@ -5,11 +5,11 @@
   shiny::tagList(
     # Adds the NEB logo to the navbar
     tags$head(tags$script(type = "text/javascript", src = "code.js")),
-    tags$style(type="text/css", "body {padding-top: 70px;}"),
+    tags$style(type = "text/css", "body {padding-top: 60px;}"),
     ##-------------------------------------------------------
     ##  NAVBAR PAGE                                        --
     ##-------------------------------------------------------
-    shiny::navbarPage(
+    bslib::page_navbar(
       title = "Uncle Dashboard",
       id = "dashboard_navbar",
       selected = "tab_database",
@@ -19,14 +19,17 @@
       ##----------------------------------------
       # Theme default on app load
       theme = theme_dark,
-      shiny::div(style = "display: inline-block", shiny::icon("adjust")),
-      shiny::div(style = "display: inline-block", " "),
-      shiny::div(
-        style = "display: inline-block",
-        shinyWidgets::prettySwitch(
-          inputId = "dark_mode",
-          label = "Dark mode.",
-          value = TRUE # set to match the default theme on app load
+      bg = "#073642",
+      header = shiny::tagList(
+        # shiny::div(style = "display: inline-block", shiny::icon("adjust")),
+        # shiny::div(style = "display: inline-block", " "),
+        shiny::div(
+          style = "display: inline-block",
+          shinyWidgets::prettySwitch(
+            inputId = "dark_mode",
+            label = "Dark mode.",
+            value = TRUE # set to match the default theme on app load
+          )
         )
       ),
       ##--------------------------------------------------------

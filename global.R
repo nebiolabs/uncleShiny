@@ -81,14 +81,14 @@ google_heading_font <- rlang::expr(bslib::font_google(
 
 # App themes
 theme_light <- bslib::bs_theme(
-  version = 4,
-  bootswatch = "flatly",
+  version = 5,
+  bootswatch = "cosmo",
   base_font = rlang::eval_tidy(google_base_font),
   heading_font = rlang::eval_tidy(google_heading_font),
   font_scale = 0.7
 )
 theme_dark <- bslib::bs_theme(
-  version = 4,
+  version = 5,
   bootswatch = "solar",
   base_font = rlang::eval_tidy(google_base_font),
   heading_font = rlang::eval_tidy(google_heading_font),
