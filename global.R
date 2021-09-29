@@ -126,7 +126,7 @@ if (use_testing_mode) {
   message("Database connection will not be established in testing mode.")
 } else {
   # Instantiate db pool
-  ebase_dev <- pool::dbPool(
+  db_pool_obj <- pool::dbPool(
     drv = RPostgres::Postgres(),
     dbname = "ebase_production",
     host = "ebase-db-c.neb.com",
@@ -134,8 +134,8 @@ if (use_testing_mode) {
     user = Sys.getenv("ebase_uid"),
     password = Sys.getenv("ebase_pwd")
   )
-  message("Connection established? : ", DBI::dbIsValid(ebase_dev))
-  print(ebase_dev)
+  message("Connection established? : ", DBI::dbIsValid(db_pool_obj))
+  print(db_pool_obj)
 }
 
 
@@ -148,8 +148,8 @@ if (use_testing_mode) {
   })
 } else {
   shiny::onStop(function() {
-    pool::poolClose(ebase_dev)
-    message("Connection closed? : ", !(DBI::dbIsValid(ebase_dev)))
+    pool::poolClose(db_pool_obj)
+    message("Connection closed? : ", !(DBI::dbIsValid(db_pool_obj)))
   })
 }
 ##--------------------------------------------------------------------------

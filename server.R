@@ -55,17 +55,17 @@ function(input, output, session) {
   ##////////////////////////////////////////
   ##  Query module                        //
   ##////////////////////////////////////////
-  dbQueryServer("ebase_query", grv, ebase_dev)
+  dbQueryServer("db_query", grv, db_pool_obj)
   
   ##////////////////////////////////////////
   ##  Print module                        //
   ##////////////////////////////////////////
-  dbViewServer("ebase_view", grv)
+  dbViewServer("db_view", grv)
   
   ##////////////////////////////////////////
   ##  Diagnostics module                  //
   ##////////////////////////////////////////
-  dbDiagServer("ebase_diag", ebase_dev)
+  dbDiagServer("db_diag", db_pool_obj)
   
   
   

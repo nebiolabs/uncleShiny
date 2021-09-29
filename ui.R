@@ -45,14 +45,14 @@
           ##----------------------------------------
           shiny::sidebarPanel(
             width = 2,
-            dbQueryUI("ebase_query")
+            dbQueryUI("db_query")
           ),
           ##----------------------------------------
           ##  Main panel                          --
           ##----------------------------------------
           shiny::mainPanel(
             width = 10,
-            dbViewUI("ebase_view")
+            dbViewUI("db_view")
           )
         )
       ),
@@ -95,7 +95,7 @@
         shiny::tabPanel(
           "Database Troubleshooting",
           icon = shiny::icon("database"),
-          dbDiagUI("ebase_diag")
+          dbDiagUI("db_diag")
         )
       ),
       shiny::tabPanel(
