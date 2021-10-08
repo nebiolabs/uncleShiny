@@ -45,4 +45,24 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   x_var <- do.call(switch, c(spec_type, x_switch))
   y_var <- do.call(switch, c(spec_type, y_switch))
   summary_var <- do.call(switch, c(spec_type, summary_switch))
+  
+  ##----------------------------------------
+  ##  Ridgeline formatting                --
+  ##----------------------------------------
+  ridgelineTheme <- function() {
+    list(
+      ggplot2::theme_minimal(base_family = google_base_font),
+      ggplot2::theme(
+        panel.grid = ggplot2::element_blank(),
+        strip.text.y.left = element_text(size = 14, angle = 0, vjust = 0.2),
+        axis.title = ggplot2::element_text(hjust = 0.95, size = 15),
+        axis.text.x = ggplot2::element_text(size = 11),
+        axis.text.y = ggplot2::element_blank(),
+        axis.line.x.bottom = ggplot2::element_line(),
+        plot.margin = ggplot2::margin(0.1,0.1,0.1,0.1, "cm"),
+        legend.position = "left",
+        legend.justification = "top"
+      )
+    )
+  }
 }
