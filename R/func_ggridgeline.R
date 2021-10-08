@@ -263,5 +263,40 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       )
   }
   
+  ##-----------------------
+  ##  NanoDSF            --
+  ##-----------------------
+  if (spec_type == "dsf") {
+    p <- p +
+      ggplot2::geom_line(
+        data = tidyr::unnest(data, tidyselect::all_of(spec_var)),
+        ggplot2::aes(
+          x = .data[[x_var]],
+          y = .data[[y_var]],
+          color = .data[[color_var]]
+        )
+      ) +
+      ggplot2::geom_vline(
+        data = data,
+        ggplot2::aes(xintercept = .data[[summary_var]]),
+        color = "red"
+      ) +
+      ggplot2::facet_grid(
+        rows = vars(.data[[facet_var]]),
+        switch = "y"
+      ) +
+      ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
+      ggplot2::scale_color_manual(
+        values = mycolors(palette_name, length(unique(data[[color_var]])))
+      ) +
+      ggplot2::theme(
+        axis.title.y = ggplot2::element_blank()
+      ) +
+      ggplot2::labs(
+        title = glue::glue("NanoDSF"),
+        subtitle = glue::glue("with {summary_var} overlays in red")
+      )
+  }
+  
   return(p)
 }
