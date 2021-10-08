@@ -76,4 +76,65 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       .fns = ~forcats::fct_reorder(.data[[facet_var]], .data[[summary_var]])
     ), 
   )
+  
+  ##----------------------------------------
+  ##  Ridgeline plot                      --
+  ##----------------------------------------
+  p <- ggplot2::ggplot(
+    data = data
+  )
+  
+  ##-----------------------
+  ##  DLS                --
+  ##-----------------------
+  if (spec_type == "dls" & dls_type == "intensity") {
+    dls_var = spec_var[[1]]
+  } else if (spec_type == "dls" & dls_type == "mass") {
+    dls_var = spec_var[[2]]
+  } else {
+    dls_var = spec_switch[["dls"]][[1]]
+  }
+  if (spec_type == "dls") {
+    dls_data <- unnest(data, tidyselect::all_of(dls_var))
+    p <- p +
+      ggplot2::geom_area(
+        data = dls_data,
+        ggplot2::aes(
+          x = .data[[x_var]],
+          y = .data[[y_var]],
+          fill = .data[[color_var]]
+        ),
+        show.legend = show_legend
+      ) +
+      ggplot2::geom_line(
+        data = dls_data,
+        ggplot2::aes(
+          x = .data[[x_var]],
+          y = .data[[y_var]]
+        ),
+        color = "black",
+        show.legend = FALSE
+      ) +
+      ggplot2::geom_vline(
+        data = data,
+        ggplot2::aes(xintercept = .data[[summary_var]]),
+        color = "red"
+      ) +
+      ggplot2::facet_grid(
+        rows = vars(.data[[facet_var]]),
+        switch = "y"
+      ) +
+      ggplot2::scale_x_log10(limits = c(1, 1000), expand = c(0,0)) +
+      ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
+      ggplot2::annotation_logticks(sides = "b") +
+      ggplot2::scale_fill_manual(
+        values = mycolors(palette_name, length(unique(data[[color_var]])))
+      ) +
+      ggplot2::labs(
+        title = glue::glue("DLS ({dls_type} distribution)"),
+        subtitle = glue::glue("with {summary_var} overlay in red")
+      )
+  }
+  
+  return(p + ridgelineTheme())
 }
