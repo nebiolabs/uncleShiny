@@ -42,7 +42,6 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
     "corr" = NA_character_
   )
   spec_var <- do.call(switch, c(spec_type, spec_switch))
-  print(spec_var)
   x_var <- do.call(switch, c(spec_type, x_switch))
   y_var <- do.call(switch, c(spec_type, y_switch))
   summary_var <- do.call(switch, c(spec_type, summary_switch))
@@ -196,7 +195,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         rows = vars(.data[[facet_var]]),
         switch = "y"
       ) +
-      ggplot2::scale_x_log10(expand = c(0,0)) +
+      ggplot2::scale_x_log10(limits = c(0.000001, 0.1), expand = c(0,0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::annotation_logticks(sides = "b") +
       ggplot2::scale_color_manual(
