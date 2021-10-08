@@ -14,8 +14,8 @@ normalizeSpectra <- function(df) {
               switch,
               as.list(c(dplyr::cur_column(), spec_y_switch))
             )
-            col[[yvar]] <- (col[[yvar]] - abs(min(col[[yvar]]))) /
-              (max(col[[yvar]]) - abs(min(col[[yvar]])))
+            col[[yvar]] <- (col[[yvar]] - min(col[[yvar]])) /
+              (max(col[[yvar]]) - min(col[[yvar]]))
             return(col)
           }, function(col) return(col), quiet = FALSE)
         )
