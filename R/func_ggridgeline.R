@@ -39,7 +39,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
     "dsf" = "Tm1",
     "sls" = list("Tagg266", "Tagg473"),
     "dls" = "Z_D",
-    "corr" = "Z_D"
+    "corr" = NA_character_
   )
   spec_var <- do.call(switch, c(spec_type, spec_switch))
   print(spec_var)
@@ -70,13 +70,43 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##----------------------------------------
   ##  Data factor manipulation            --
   ##----------------------------------------
-  data <- dplyr::mutate(
-    data,
-    dplyr::across(
-      .data[[facet_var]],
-      .fns = ~forcats::fct_reorder(.data[[facet_var]], .data[[summary_var]])
-    ), 
-  )
+  if (spec_type == "sls") {
+    data <- dplyr::mutate(
+      data,
+      dplyr::across(
+        .data[[facet_var]],
+        .fns = ~forcats::fct_reorder(
+          .data[[facet_var]],
+          # sort by Tagg266
+          .data[[summary_switch[["sls"]][[1]]]]
+        )
+      ), 
+    )
+  } else if (spec_type == "corr") {
+    data <- dplyr::mutate(
+      data,
+      dplyr::across(
+        .data[[facet_var]],
+        .fns = ~forcats::fct_reorder(
+          .data[[facet_var]],
+          # sort by average hydrodynamic diameter
+          .data[[summary_switch[["dls"]]]]
+        )
+      ), 
+    )
+  } else {
+    data <- dplyr::mutate(
+      data,
+      dplyr::across(
+        .data[[facet_var]],
+        .fns = ~forcats::fct_reorder(
+          .data[[facet_var]],
+          .data[[summary_var]]
+        )
+      ), 
+    )
+  }
+  
   
   ##----------------------------------------
   ##  Ridgeline plot                      --
