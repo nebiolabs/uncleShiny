@@ -39,9 +39,10 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
     "dsf" = "Tm1",
     "sls" = list("Tagg266", "Tagg473"),
     "dls" = "Z_D",
-    "corr" = NA_character_
+    "corr" = "Z_D"
   )
   spec_var <- do.call(switch, c(spec_type, spec_switch))
+  print(spec_var)
   x_var <- do.call(switch, c(spec_type, x_switch))
   y_var <- do.call(switch, c(spec_type, y_switch))
   summary_var <- do.call(switch, c(spec_type, summary_switch))
@@ -59,7 +60,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         axis.text.x = ggplot2::element_text(size = 11),
         axis.text.y = ggplot2::element_blank(),
         axis.line.x.bottom = ggplot2::element_line(),
-        plot.margin = ggplot2::margin(0.1,0.1,0.1,0.1, "cm"),
+        plot.margin = ggplot2::margin(0.1,1,0.1,0.1, "cm"),
         legend.position = "left",
         legend.justification = "top"
       )
@@ -80,9 +81,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##----------------------------------------
   ##  Ridgeline plot                      --
   ##----------------------------------------
-  p <- ggplot2::ggplot(
-    data = data
-  )
+  p <- ggplot2::ggplot(data = data) + ridgelineTheme()
   
   ##-----------------------
   ##  DLS                --
@@ -136,5 +135,51 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       )
   }
   
-  return(p + ridgelineTheme())
+  ##-----------------------
+  ##  Correlation        --
+  ##-----------------------
+  if (spec_type == "corr") {
+    corr_data <- tidyr::unnest(data, tidyselect::all_of(spec_var))
+    p <- p +
+      ggplot2::geom_line(
+        data = corr_data,
+        ggplot2::aes(
+          x = .data[[x_var]],
+          y = .data[[y_var]],
+          color = .data[[color_var]]
+        ),
+        show.legend = show_legend
+      ) +
+      ggplot2::geom_line(
+        data = corr_data,
+        ggplot2::aes(
+          x = .data[[x_var]],
+          y = .data[[y_var]],
+          color = .data[[color_var]]
+        ),
+        stat = "smooth",
+        alpha = 0.8,
+        linetype = "dashed",
+        show.legend = show_legend
+      ) +
+      ggplot2::facet_grid(
+        rows = vars(.data[[facet_var]]),
+        switch = "y"
+      ) +
+      ggplot2::scale_x_log10(expand = c(0,0)) +
+      ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
+      ggplot2::annotation_logticks(sides = "b") +
+      ggplot2::scale_color_manual(
+        values = mycolors(palette_name, length(unique(data[[color_var]])))
+      ) +
+      ggplot2::theme(
+        axis.title.y = ggplot2::element_blank()
+      ) +
+      ggplot2::labs(
+        title = glue::glue("DLS (correlation function)"),
+        subtitle = glue::glue("no overlay available")
+      )
+  }
+  
+  return(p)
 }
