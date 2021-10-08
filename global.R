@@ -67,24 +67,37 @@ if (use_testing_mode) {
 ##  Theme                                --
 ##-----------------------------------------
 # Reusable variables for below
-the_base_font <- "Noto Sans"
-the_heading_font <- "Roboto Condensed"
+google_base_font <- "Noto Sans"
+google_heading_font <- "Roboto Condensed"
 the_weight <- 400
-google_base_font <- rlang::expr(bslib::font_google(
-  the_base_font,
-  local = TRUE
-))
-google_heading_font <- rlang::expr(bslib::font_google(
-  the_heading_font,
-  local = TRUE
-))
+# Using `font_collection` provides backup in the absence of internet connection
+the_base_font <- rlang::expr(
+  bslib::font_collection(
+    bslib::font_google(
+      google_base_font,
+      local = TRUE
+    ),
+    "Arial",
+    "sans-serif"
+  )
+)
+the_heading_font <- rlang::expr(
+  bslib::font_collection(
+    bslib::font_google(
+      google_heading_font,
+      local = TRUE
+    ),
+    "Arial",
+    "sans-serif"
+  )
+)
 
 # App themes
 theme_light <- bslib::bs_theme(
   version = 5,
   bootswatch = "cosmo",
-  base_font = rlang::eval_tidy(google_base_font),
-  heading_font = rlang::eval_tidy(google_heading_font),
+  base_font = rlang::eval_tidy(the_base_font),
+  heading_font = rlang::eval_tidy(the_heading_font),
   font_scale = 0.7,
   primary = "#586e75",
   secondary = "#eee8d5"
@@ -92,18 +105,18 @@ theme_light <- bslib::bs_theme(
 theme_dark <- bslib::bs_theme(
   version = 5,
   bootswatch = "solar",
-  base_font = rlang::eval_tidy(google_base_font),
-  heading_font = rlang::eval_tidy(google_heading_font),
+  base_font = rlang::eval_tidy(the_base_font),
+  heading_font = rlang::eval_tidy(the_heading_font),
   font_scale = 0.7
 )
 
 # Fonts for plots
-sysfonts::font_add_google(the_base_font, regular.wt = the_weight)
+sysfonts::font_add_google(google_base_font, regular.wt = the_weight)
 showtext::showtext_auto()
 
 # `ggplot2` theme defaults (also controlled by `thematic`)
 ggplot2::theme_set(
-  ggplot2::theme_bw() +
+  ggplot2::theme_bw(base_family = google_base_font) +
     ggplot2::theme(
       panel.grid = ggplot2::element_blank(),
       panel.border = ggplot2::element_blank(),

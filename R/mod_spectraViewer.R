@@ -5,7 +5,7 @@
 
 ridgelineTheme <- function() {
   list(
-    ggplot2::theme_minimal(),
+    ggplot2::theme_minimal(base_family = google_base_font),
     ggplot2::theme(
       panel.grid = ggplot2::element_blank(),
       axis.title = ggplot2::element_text(hjust = 0.95, size = 15),
