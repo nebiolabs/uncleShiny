@@ -188,7 +188,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           color = .data[[color_var]]
         ),
         stat = "smooth",
-        alpha = 0.8,
+        alpha = alpha,
         linetype = "dashed",
         show.legend = show_legend
       ) +
@@ -232,7 +232,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           color = .data[[color_var]]
         ),
         linetype = "dashed",
-        alpha = 0.8
+        alpha = alpha
       ) +
       ggplot2::geom_vline(
         data = data,
@@ -244,7 +244,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         ggplot2::aes(xintercept = .data[[summary_var[[2]]]]),
         color = "red",
         linetype = "dashed",
-        alpha = 0.5
+        alpha = alpha
       ) +
       ggplot2::facet_grid(
         rows = vars(.data[[facet_var]]),
