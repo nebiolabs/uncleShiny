@@ -65,4 +65,15 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       )
     )
   }
+  
+  ##----------------------------------------
+  ##  Data factor manipulation            --
+  ##----------------------------------------
+  data <- dplyr::mutate(
+    data,
+    dplyr::across(
+      .data[[facet_var]],
+      .fns = ~forcats::fct_reorder(.data[[facet_var]], .data[[summary_var]])
+    ), 
+  )
 }
