@@ -5,7 +5,7 @@
 
 ggridgeline <- function(data, spec_type, dls_type = "intensity", 
                         facet_var, color_var, palette_name = "Set2",
-                        show_legend = TRUE, alpha = 0.8) {
+                        show_legend = TRUE, alpha = 0.6) {
   # source("R/util_vars.R", local = TRUE)
   if (!(spec_type %in% c("dls", "corr", "sls", "dsf"))) {
     stop("Warning: invalid spec_type; use 'dls', 'corr', 'sls' or 'dsf'.")
@@ -141,6 +141,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           y = .data[[y_var]]
         ),
         color = "black",
+        size = 1,
         show.legend = FALSE
       ) +
       ggplot2::geom_vline(
@@ -177,6 +178,8 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           y = .data[[y_var]],
           color = .data[[color_var]]
         ),
+        size = 1,
+        alpha = alpha,
         show.legend = show_legend
       ) +
       ggplot2::geom_line(
@@ -187,8 +190,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           color = .data[[color_var]]
         ),
         stat = "smooth",
-        alpha = alpha,
         linetype = "dashed",
+        size = 1,
+        # alpha = alpha,
         show.legend = show_legend
       ) +
       ggplot2::facet_grid(
@@ -221,7 +225,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           x = .data[[x_var]],
           y = .data[[y_var[[1]]]],
           color = .data[[color_var]]
-        )
+        ),
+        size = 1,
+        show.legend = show_legend
       ) +
       ggplot2::geom_line(
         data = tidyr::unnest(data, tidyselect::all_of(spec_var[[2]])),
@@ -231,7 +237,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           color = .data[[color_var]]
         ),
         linetype = "dashed",
-        alpha = alpha
+        size = 1,
+        alpha = alpha,
+        show.legend = show_legend
       ) +
       ggplot2::geom_vline(
         data = data,
@@ -243,6 +251,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         ggplot2::aes(xintercept = .data[[summary_var[[2]]]]),
         color = "red",
         linetype = "dashed",
+        size = 1,
         alpha = alpha
       ) +
       ggplot2::facet_grid(
@@ -273,7 +282,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           x = .data[[x_var]],
           y = .data[[y_var]],
           color = .data[[color_var]]
-        )
+        ),
+        size = 1,
+        show.legend = show_legend
       ) +
       ggplot2::geom_vline(
         data = data,
