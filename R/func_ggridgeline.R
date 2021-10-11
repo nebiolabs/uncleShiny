@@ -4,8 +4,9 @@
 ##-------------------------------------------------------------------------
 
 ggridgeline <- function(data, spec_type, dls_type = "intensity", 
-                        facet_var, color_var, palette_name = "Set2",
-                        show_legend = TRUE, alpha = 0.8) {
+                        facet_var, sort_var,
+                        color_var, palette_name = "Set2",
+                        show_legend = TRUE, alpha = 0.6) {
   # source("R/util_vars.R", local = TRUE)
   if (!(spec_type %in% c("dls", "corr", "sls", "dsf"))) {
     stop("Warning: invalid spec_type; use 'dls', 'corr', 'sls' or 'dsf'.")
@@ -55,6 +56,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       ggplot2::theme(
         panel.grid = ggplot2::element_blank(),
         strip.text.y.left = element_text(size = 14, angle = 0, vjust = 0.2),
+        strip.text.y.right = element_text(size = 14, angle = 0, vjust = 0.2),
         axis.title = ggplot2::element_text(hjust = 0.95, size = 15),
         axis.text.x = ggplot2::element_text(size = 11),
         axis.text.y = ggplot2::element_blank(),
@@ -69,42 +71,16 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##----------------------------------------
   ##  Data factor manipulation            --
   ##----------------------------------------
-  if (spec_type == "sls") {
-    data <- dplyr::mutate(
-      data,
-      dplyr::across(
+  data <- dplyr::mutate(
+    data,
+    dplyr::across(
+      .data[[facet_var]],
+      .fns = ~forcats::fct_reorder(
         .data[[facet_var]],
-        .fns = ~forcats::fct_reorder(
-          .data[[facet_var]],
-          # sort by Tagg266
-          .data[[summary_switch[["sls"]][[1]]]]
-        )
-      ), 
-    )
-  } else if (spec_type == "corr") {
-    data <- dplyr::mutate(
-      data,
-      dplyr::across(
-        .data[[facet_var]],
-        .fns = ~forcats::fct_reorder(
-          .data[[facet_var]],
-          # sort by average hydrodynamic diameter
-          .data[[summary_switch[["dls"]]]]
-        )
-      ), 
-    )
-  } else {
-    data <- dplyr::mutate(
-      data,
-      dplyr::across(
-        .data[[facet_var]],
-        .fns = ~forcats::fct_reorder(
-          .data[[facet_var]],
-          .data[[summary_var]]
-        )
-      ), 
-    )
-  }
+        .data[[sort_var]]
+      )
+    ), 
+  )
   
   
   ##----------------------------------------
@@ -141,6 +117,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           y = .data[[y_var]]
         ),
         color = "black",
+        size = 1,
         show.legend = FALSE
       ) +
       ggplot2::geom_vline(
@@ -160,7 +137,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       ) +
       ggplot2::labs(
         title = glue::glue("DLS ({dls_type} distribution)"),
-        subtitle = glue::glue("with {summary_var} overlay in red")
+        subtitle = glue::glue("with {summary_var} overlay in red"),
+        y = "signal intenisty",
+        x = "average hydrodynamic diameter (nm)"
       )
   }
   
@@ -177,6 +156,8 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           y = .data[[y_var]],
           color = .data[[color_var]]
         ),
+        size = 1,
+        alpha = alpha,
         show.legend = show_legend
       ) +
       ggplot2::geom_line(
@@ -187,8 +168,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           color = .data[[color_var]]
         ),
         stat = "smooth",
-        alpha = alpha,
         linetype = "dashed",
+        size = 1,
+        # alpha = alpha,
         show.legend = show_legend
       ) +
       ggplot2::facet_grid(
@@ -202,11 +184,14 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         values = mycolors(palette_name, length(unique(data[[color_var]])))
       ) +
       ggplot2::theme(
-        axis.title.y = ggplot2::element_blank()
+        axis.title.y = ggplot2::element_blank(),
+        strip.text.y.left = ggplot2::element_blank()
       ) +
       ggplot2::labs(
         title = glue::glue("DLS (correlation function)"),
-        subtitle = glue::glue("no overlay available")
+        subtitle = glue::glue("no overlay available"),
+        x = "time (s)",
+        
       )
   }
   
@@ -221,7 +206,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           x = .data[[x_var]],
           y = .data[[y_var[[1]]]],
           color = .data[[color_var]]
-        )
+        ),
+        size = 1,
+        show.legend = show_legend
       ) +
       ggplot2::geom_line(
         data = tidyr::unnest(data, tidyselect::all_of(spec_var[[2]])),
@@ -231,7 +218,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           color = .data[[color_var]]
         ),
         linetype = "dashed",
-        alpha = alpha
+        size = 1,
+        alpha = alpha,
+        show.legend = show_legend
       ) +
       ggplot2::geom_vline(
         data = data,
@@ -243,6 +232,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         ggplot2::aes(xintercept = .data[[summary_var[[2]]]]),
         color = "red",
         linetype = "dashed",
+        size = 1,
         alpha = alpha
       ) +
       ggplot2::facet_grid(
@@ -254,11 +244,13 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         values = mycolors(palette_name, length(unique(data[[color_var]])))
       ) +
       ggplot2::theme(
-        axis.title.y = ggplot2::element_blank()
+        strip.text.y.left = ggplot2::element_blank()
       ) +
       ggplot2::labs(
         title = glue::glue("SLS ({spec_var[[1]]} solid, {spec_var[[2]]} dashed)"),
-        subtitle = glue::glue("with {summary_var[[1]]} overlays in red")
+        subtitle = glue::glue("with {summary_var[[1]]} overlays in red"),
+        y = "light scattering intensity @ \u03bb",
+        x = "temperature (°C)"
       )
   }
   
@@ -273,7 +265,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
           x = .data[[x_var]],
           y = .data[[y_var]],
           color = .data[[color_var]]
-        )
+        ),
+        size = 1,
+        show.legend = show_legend
       ) +
       ggplot2::geom_vline(
         data = data,
@@ -282,18 +276,19 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       ) +
       ggplot2::facet_grid(
         rows = vars(.data[[facet_var]]),
-        switch = "y"
+        # switch = "y"
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::scale_color_manual(
         values = mycolors(palette_name, length(unique(data[[color_var]])))
       ) +
       ggplot2::theme(
-        axis.title.y = ggplot2::element_blank()
       ) +
       ggplot2::labs(
         title = glue::glue("NanoDSF"),
-        subtitle = glue::glue("with {summary_var} overlays in red")
+        subtitle = glue::glue("with {summary_var} overlays in red"),
+        y = "330/350nm fluorescence barycentric mean",
+        x = "temperature (°C)"
       )
   }
   
