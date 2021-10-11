@@ -119,6 +119,7 @@ spectraViewerServer <- function(id, grv) {
           spec_type = "dls",
           dls_type = input$type_dynamic,
           facet_var = "well",
+          sort_var = "Z_D",
           color_var = "well",
           palette_name = "Set2",
           show_legend = TRUE
@@ -134,6 +135,7 @@ spectraViewerServer <- function(id, grv) {
           data = module_data(),
           spec_type = "corr",
           facet_var = "well",
+          sort_var = "Z_D",
           color_var = "well",
           palette_name = "Set2",
           show_legend = FALSE
@@ -149,9 +151,10 @@ spectraViewerServer <- function(id, grv) {
           data = module_data(),
           spec_type = "sls",
           facet_var = "well",
+          sort_var = "Z_D",
           color_var = "well",
           palette_name = "Set2",
-          show_legend = TRUE
+          show_legend = FALSE
         )
       })
       output$dsf <- renderPlot({
@@ -159,6 +162,7 @@ spectraViewerServer <- function(id, grv) {
           data = module_data(),
           spec_type = "dsf",
           facet_var = "well",
+          sort_var = "Z_D",
           color_var = "well",
           palette_name = "Set2",
           show_legend = FALSE
