@@ -9,64 +9,60 @@
 scatterPlotsUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::fluidRow(
-      shiny::column(
-        width = 9,
-        shiny::h3("Summary Data"),
-        shiny::helpText("Click/drag to select for zoom.
+    shiny::tabsetPanel(
+      shiny::tabPanel(
+        title = "Summary Scatter Plots",
+        icon = shiny::icon("braille"),
+        shiny::fluidRow(
+          shiny::column(
+            width = 9,
+            ##-----------------------------------------
+            ##  Scatter plots                        --
+            ##-----------------------------------------
+            shiny::h3("Summary Data"),
+            shiny::helpText("Click/drag to select for zoom.
                         Double-click to deselect.
                         Click a point to show all spectra."),
-        ##-----------------------------------------
-        ##  Scatter plots                        --
-        ##-----------------------------------------
-        # shiny::verbatimTextOutput(ns("data_shared_group")),
-        plotly::plotlyOutput(
-          ns("plot_scatter"),
-          width = "100%",
-          height = "480"
-        ),
-        ##-----------------------------------------
-        ##  Zoomed plot                          --
-        ##-----------------------------------------
-        shiny::h3("Selection Zoom"),
-        shiny::helpText("Activated on click/drag selection."),
-        plotly::plotlyOutput(
-          ns("plot_zoom"),
-          width = "100%",
-          height = "400px"
+            plotly::plotlyOutput(
+              ns("plot_scatter"),
+              width = "100%",
+              height = "500"
+            ),
+            ##----------------------------------------
+            ##  Spectra sparklines                  --
+            ##----------------------------------------
+            shiny::fluidRow(
+              shiny::h3("Spectra Quickview"),
+              shiny::helpText("Activated on click.")
+            ),
+            spectraSparksUI(ns("spectraSparks"))
+          )
         )
       ),
-      shiny::column(
-        width = 3,
-        ##----------------------------------------
-        ##  Spectra sparks                      --
-        ##----------------------------------------
-        shiny::h3("Spectra Quickview"),
-        shiny::helpText("Activated on click."),
-        spectraSparksUI(ns("spectraSparks"))
+      shiny::tabPanel(
+        title = "Selected Spectra Ridgeline Plots",
+        icon = shiny::icon("chart-area"),
+        shiny::fluidRow(
+          shiny::column(
+            width = 4,
+            shiny::h3("Selection Zoom"),
+            shiny::helpText("Activated on click/drag selection."),
+            ##-----------------------------------------
+            ##  Zoomed plot                          --
+            ##-----------------------------------------
+            plotly::plotlyOutput(
+              ns("plot_zoom"),
+              width = "100%",
+              height = "400px"
+            )
+          ),
+          shiny::column(
+            width = 8,
+            spectraViewerUI(ns("ridgeline"))
+          )
+        )
       )
-    )#,
-    # ##----------------------------------------
-    # ##  Test outputs                        --
-    # ##----------------------------------------
-    # shiny::fluidRow(shiny::h4("Direct Output (Debugging)")),
-    # shiny::fluidRow(
-    #   shiny::column(
-    #     width = 4,
-    #     shiny::h6("Hovered:"),
-    #     shiny::verbatimTextOutput(ns("test_hover_summary_id")),
-    #   ),
-    #   shiny::column(
-    #     width = 4,
-    #     shiny::h6("Clicked:"),
-    #     shiny::verbatimTextOutput(ns("test_click_summary_id")),
-    #   ),
-    #   shiny::column(
-    #     width = 4,
-    #     shiny::h6("Selected:"),
-    #     shiny::verbatimTextOutput(ns("test_selected_summary_ids")),
-    #   )
-    # )
+    )
   )
 }
 
@@ -367,14 +363,14 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       
       
       ##////////////////////////////////////////
-      ##  Sparkline Module                    //
+      ##  Sparkline module                    //
       ##////////////////////////////////////////
-      spectraSparksServer(
-        "spectraSparks",
-        grv,
-        opts_obj,
-        "click"
-      )
+      spectraSparksServer("spectraSparks", grv, opts_obj, "click")
+      
+      ##/////////////////////////////////////////
+      ##  Spectra viewer module                //
+      ##/////////////////////////////////////////
+      spectraViewerServer("ridgeline", grv)
       
     }
   )

@@ -83,12 +83,6 @@ function(input, output, session) {
   ##////////////////////////////////////////
   scatterPlotsServer("scatter", scatter_opts, grv)
   
-  ##/////////////////////////////////////////
-  ##  Spectra viewer module                //
-  ##/////////////////////////////////////////
-  spectraViewerServer("ridgeline", grv)
-
-  
 }
 ##--------------------------------------------------------------------------
 ##  end server.R                                                          --
