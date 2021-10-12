@@ -80,15 +80,9 @@
           )
         )
       ),
-      ##-------------------------------------------------------
-      ##  NAVBAR TAB: SPECTRA RIDGELINE PLOTS                --
-      ##-------------------------------------------------------
-      shiny::tabPanel(
-        "Spectra Ridgeline Plots",
-        icon = shiny::icon("chart-area"),
-        value = "tab_ridgeline",
-        spectraViewerUI("ridgeline")
-      ),
+      ##--------------------------------------------------------
+      ##  NAVBAR DROPDOWN: TOOLS                              --
+      ##--------------------------------------------------------
       shiny::navbarMenu(
         "Tools",
         icon = shiny::icon("tools"),
@@ -98,6 +92,9 @@
           dbDiagUI("db_diag")
         )
       ),
+      ##-------------------------------------------------------
+      ##  NAVBAR TAB: ABOUT THE APP                          --
+      ##-------------------------------------------------------
       shiny::tabPanel(
         "About this App",
         icon = shiny::icon("info-circle")

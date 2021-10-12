@@ -12,6 +12,7 @@ scatterPlotsUI <- function(id) {
     shiny::tabsetPanel(
       shiny::tabPanel(
         title = "Summary Scatter Plots",
+        icon = shiny::icon("braille"),
         shiny::fluidRow(
           shiny::column(
             width = 9,
@@ -40,9 +41,10 @@ scatterPlotsUI <- function(id) {
       ),
       shiny::tabPanel(
         title = "Selected Spectra Ridgeline Plots",
+        icon = shiny::icon("chart-area"),
         shiny::fluidRow(
           shiny::column(
-            width = 6,
+            width = 4,
             shiny::h3("Selection Zoom"),
             shiny::helpText("Activated on click/drag selection."),
             ##-----------------------------------------
@@ -53,6 +55,10 @@ scatterPlotsUI <- function(id) {
               width = "100%",
               height = "400px"
             )
+          ),
+          shiny::column(
+            width = 8,
+            spectraViewerUI(ns("ridgeline"))
           )
         )
       )
@@ -357,14 +363,14 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       
       
       ##////////////////////////////////////////
-      ##  Sparkline Module                    //
+      ##  Sparkline module                    //
       ##////////////////////////////////////////
-      spectraSparksServer(
-        "spectraSparks",
-        grv,
-        opts_obj,
-        "click"
-      )
+      spectraSparksServer("spectraSparks", grv, opts_obj, "click")
+      
+      ##/////////////////////////////////////////
+      ##  Spectra viewer module                //
+      ##/////////////////////////////////////////
+      spectraViewerServer("ridgeline", grv)
       
     }
   )
