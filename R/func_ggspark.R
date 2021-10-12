@@ -93,8 +93,8 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
           y = 0.9 * max(.data[[y_var]]),
           label = summary_var
         ),
-        nudge_x = -0.02 * summary_val,
-        hjust = 1,
+        nudge_x = 0.01 * summary_val,
+        hjust = 0,
         vjust = 1
       )
   }
@@ -133,7 +133,7 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   # X-axis transform for DLS C
   if (grepl("DLS_C", spec_var, perl = TRUE)) {
     p <- p +
-      ggplot2::scale_x_log10() +
+      ggplot2::scale_x_log10(limits = c(0.000001, 0.1)) +
       ggplot2::annotation_logticks(sides = "b")
   }
   
