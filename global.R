@@ -46,7 +46,8 @@ library(glue)
 ##----------------------------------------
 ##  Testing flag                        --
 ##----------------------------------------
-use_testing_mode <- FALSE
+use_testing_mode <- TRUE
+# TODO change back to FALSE before merge
 
 if (use_testing_mode) {
   source("R/util_normalizeSpectra.R")
