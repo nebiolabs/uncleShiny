@@ -79,12 +79,26 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
     function(input, output, session) {
       if (use_testing_mode) {
         module_data <- shiny::reactive({
-          test_data |> 
+          test_data |>
+            dplyr::mutate(
+              Buffer = dplyr::if_else(
+                stringr::str_detect(Buffer, "Neutral Buffer"),
+                "Neutral Buffer",
+                Buffer
+              )
+            ) |> 
             cbindColors(opts_obj$color_global, opts_obj$palette_global)
         })
       } else {
         module_data <- shiny::reactive({
           grv$robj_collected_data() |> 
+            dplyr::mutate(
+              Buffer = dplyr::if_else(
+                stringr::str_detect(Buffer, "Neutral Buffer"),
+                "Neutral Buffer",
+                Buffer
+              )
+            ) |> 
             cbindColors(opts_obj$color_global, opts_obj$palette_global)
         })
       }
