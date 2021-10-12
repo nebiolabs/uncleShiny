@@ -60,7 +60,7 @@
       ##  NAVBAR TAB: SUMMARY SCATTER PLOTS                  --
       ##-------------------------------------------------------
       shiny::tabPanel(
-        "Summary Scatter Plots",
+        "Summary Data Visualization",
         icon = shiny::icon("braille"),
         value = "tab_scatter",
         shiny::sidebarLayout(

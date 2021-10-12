@@ -10,65 +10,43 @@ spectraViewerUI <- function(id) {
   ns <- NS(id)
   
   shiny::tagList(
-    shiny::sidebarLayout(
-      ##----------------------------------------
-      ##  Side panel                          --
-      ##----------------------------------------
-      shiny::sidebarPanel(
-        width = 2,
-        shiny::h5("Well Exclusion:"),
-        shiny::selectInput(
-          ns("filter_wells"),
+    shiny::tabsetPanel(
+      type = "pills",
+      shiny::tabPanel(
+        title = "Dynamic Method Spectra",
+        shiny::radioButtons(
+          ns("type_dynamic"),
           label = NULL,
-          choices = c(" ", wellOrder),
-          selected = NULL,
-          multiple = TRUE,
-          selectize = TRUE
-        )
-      ),
-      ##----------------------------------------
-      ##  Main panel                          --
-      ##----------------------------------------
-      shiny::mainPanel(
-        width = 10,
-        shiny::fluidRow(
-          shiny::column(
-            width = 6,
-            shiny::h4("Dynamic Method Spectra"),
-            shiny::radioButtons(
-              ns("type_dynamic"),
-              label = NULL,
-              choices = list(
-                "Intensity" = "intensity",
-                "Mass" = "mass"
-              ),
-              selected = "intensity",
-              inline = TRUE
-            )
+          choices = list(
+            "Intensity" = "intensity",
+            "Mass" = "mass"
           ),
-          shiny::column(
-            width = 6,
-            shiny::h4("Static Method Spectra")
-          )
+          selected = "intensity",
+          inline = TRUE
         ),
         shiny::fluidRow(
           shiny::column(
-            width = 4,
+            width = 7,
             shiny::plotOutput(ns("dls"), height = "800px")
           ),
           shiny::column(
-            width = 2,
+            width = 5,
             shiny::plotOutput(ns("corr"), height = "800px")
-          ),
+          )
+        )
+      ),
+      shiny::tabPanel(
+        title = "Static Method Spectra",
+        shiny::fluidRow(
           shiny::column(
-            width = 3,
+            width = 6,
             shiny::plotOutput(ns("sls"), height = "800px")
           ),
           shiny::column(
-            width = 3,
+            width = 6,
             shiny::plotOutput(ns("dsf"), height = "800px")
           )
-        ) 
+        )
       )
     )
   )
