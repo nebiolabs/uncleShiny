@@ -104,49 +104,49 @@ palChoices <- names(palnList)
 
 # Spectra to plot in the sparkline QuickView..
 spec_vars <- c(# previously specList
-  "NanoDSF" = "specTm",
-  "SLS 266nm" = "specSLS266",
-  "SLS 473nm" = "specSLS473",
+  "Correlation Function" = "specDLS_C",
   "DLS (Intensity)" = "specDLS_I",
   "DLS (Mass)" = "specDLS_M",
-  "Correlation Function" = "specDLS_C"
+  "SLS 266nm" = "specSLS266",
+  "SLS 473nm" = "specSLS473",
+  "NanoDSF" = "specTm"
 )
 
 # Summary values corresponding to each spectra type
 summary_vars <- c(# previously specDerived
-  "specTm" = "Tm1",
-  "specSLS266" = "Tagg266",
-  "specSLS473" = "Tagg473",
+  "specDLS_C" = NA_character_,
   "specDLS_I" = "Z_D",
   "specDLS_M" = "Z_D",
-  "specDLS_C" = NA_character_
+  "specSLS266" = "Tagg266",
+  "specSLS473" = "Tagg473",
+  "specTm" = "Tm1"
 )
 
 # Spectra X variables
 spec_x_switch <- c(
-  "specTm" = "temperature",
-  "specSLS266" = "temperature",
-  "specSLS473" = "temperature",
+  "specDLS_C" = "time",
   "specDLS_I" = "hydrodynamic_diameter",
   "specDLS_M" = "hydrodynamic_diameter",
-  "specDLS_C" = "time"
+  "specSLS266" = "temperature",
+  "specSLS473" = "temperature",
+  "specTm" = "temperature"
 )
 
 # Spectra Y variables
 spec_y_switch <- c(
-  "specTm" = "bcm",
-  "specSLS266" = "sls_266",
-  "specSLS473" = "sls_473",
+  "specDLS_C" = "amplitude",
   "specDLS_I" = "amplitude",
   "specDLS_M" = "amplitude",
-  "specDLS_C" = "amplitude"
+  "specSLS266" = "sls_266",
+  "specSLS473" = "sls_473",
+  "specTm" = "bcm"
 )
 
 spec_tbl_list <- c(
-  specTm = "uncle_dsfs",
-  specSLS266 = "uncle_sls266s",
-  specSLS473 = "uncle_sls473s",
   specDLS_C = "uncle_dls_correlations",
   specDLS_I = "uncle_dls_intensities",
-  specDLS_M = "uncle_dls_masses"
+  specDLS_M = "uncle_dls_masses",
+  specSLS266 = "uncle_sls266s",
+  specSLS473 = "uncle_sls473s",
+  specTm = "uncle_dsfs"
 )
