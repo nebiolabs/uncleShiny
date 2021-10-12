@@ -8,10 +8,8 @@
 ##-------------------------------------------------------
 spectraSparksUI <- function(id) {
   ns <- NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("spectra_plots"))
-    # shiny::plotOutput(ns("spectra_cowplot"), height = "600px")
-  )
+    shiny::uiOutput(ns("spectra_plots"), inline = TRUE)
+    # shiny::fluidRow(shiny::plotOutput(ns("spectra_cowplot"), height = "75px"))
 }
 
 ##-------------------------------------------------------
@@ -48,12 +46,16 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
       output$spectra_plots <- shiny::renderUI({
         ns <- session$ns
         plotOutput_list <- purrr::map(
-          spec_vars,
+          # `as.vector` required; named list affects `fluidRow` div assignment
+          as.vector(spec_vars),
           function(var) {
-            shiny::plotOutput(ns(var), height = "80px")
+            shiny::column(
+              width = 2,
+              shiny::plotOutput(ns(var), height = "100px")
+            )
           }
         )
-        do.call(tagList, plotOutput_list)
+        do.call(shiny::fluidRow, plotOutput_list)
       })
 
       plot_list <- shiny::reactive({
@@ -117,7 +119,7 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
       #     )
       #   )
       # 
-      #   cowplot::plot_grid(plotlist = plot_list, ncol = 1)
+      #   cowplot::plot_grid(plotlist = plot_list, nrow = 1)
       # })
     }
   )
