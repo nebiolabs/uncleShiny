@@ -4,8 +4,7 @@
 ##-------------------------------------------------------------------------
 
 ggridgeline <- function(data, spec_type, dls_type = "intensity", 
-                        facet_var, sort_var,
-                        color_var, palette_name = "Set2",
+                        sort_var, color_var, palette_name = "Set2",
                         show_legend = TRUE, alpha = 0.6) {
   # source("R/util_vars.R", local = TRUE)
   if (!(spec_type %in% c("dls", "corr", "sls", "dsf"))) {
@@ -48,6 +47,13 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   summary_var <- do.call(switch, c(spec_type, summary_switch))
   
   ##----------------------------------------
+  ##  Data factor manipulation            --
+  ##----------------------------------------
+  plot_data <- data |> 
+    dplyr::mutate(well_id = bit64::as.character.integer64(well_id)) |> 
+    dplyr::mutate(well_id = forcats::fct_reorder(well_id, .data[[sort_var]]))
+  
+  ##----------------------------------------
   ##  Ridgeline formatting                --
   ##----------------------------------------
   ridgelineTheme <- function() {
@@ -69,24 +75,23 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   }
   
   ##----------------------------------------
-  ##  Data factor manipulation            --
+  ##  Facet labeller                      --
   ##----------------------------------------
-  data <- dplyr::mutate(
-    data,
-    dplyr::across(
-      .data[[facet_var]],
-      .fns = ~forcats::fct_reorder(
-        .data[[facet_var]],
-        .data[[sort_var]]
-      )
-    ), 
-  )
-  
+  custom_labeller <- function(facet_var) {
+    switch_list <- rlang::as_list(rlang::set_names(
+      glue::glue_data(
+        plot_data,
+        "{well}_{plate}({bit64::as.character.integer64(exp_set_id)})",
+      ),
+      nm = plot_data[["well_id"]]
+    ))
+    rlang::inject(dplyr::recode(facet_var, !!!switch_list))
+  }
   
   ##----------------------------------------
   ##  Ridgeline plot                      --
   ##----------------------------------------
-  p <- ggplot2::ggplot(data = data) + ridgelineTheme()
+  p <- ggplot2::ggplot(data = plot_data) + ridgelineTheme()
   
   ##-----------------------
   ##  DLS                --
@@ -99,7 +104,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
     dls_var = spec_switch[["dls"]][[1]]
   }
   if (spec_type == "dls") {
-    dls_data <- unnest(data, tidyselect::all_of(dls_var))
+    dls_data <- unnest(plot_data, tidyselect::all_of(dls_var))
     p <- p +
       ggplot2::geom_area(
         data = dls_data,
@@ -121,19 +126,20 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         show.legend = FALSE
       ) +
       ggplot2::geom_vline(
-        data = data,
+        data = plot_data,
         ggplot2::aes(xintercept = .data[[summary_var]]),
         color = "red"
       ) +
       ggplot2::facet_grid(
-        rows = vars(.data[[facet_var]]),
+        rows = vars(well_id),
+        labeller = ggplot2::as_labeller(custom_labeller),
         switch = "y"
       ) +
       ggplot2::scale_x_log10(limits = c(1, 1000), expand = c(0,0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::annotation_logticks(sides = "b") +
       ggplot2::scale_fill_manual(
-        values = mycolors(palette_name, length(unique(data[[color_var]])))
+        values = mycolors(palette_name, length(unique(plot_data[[color_var]])))
       ) +
       ggplot2::labs(
         title = glue::glue("DLS ({dls_type} distribution)"),
@@ -147,7 +153,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##  Correlation        --
   ##-----------------------
   if (spec_type == "corr") {
-    corr_data <- tidyr::unnest(data, tidyselect::all_of(spec_var))
+    corr_data <- tidyr::unnest(plot_data, tidyselect::all_of(spec_var))
     p <- p +
       ggplot2::geom_line(
         data = corr_data,
@@ -174,18 +180,17 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         show.legend = show_legend
       ) +
       ggplot2::facet_grid(
-        rows = vars(.data[[facet_var]]),
-        switch = "y"
+        rows = vars(well_id),
+        labeller = ggplot2::as_labeller(custom_labeller)
       ) +
       ggplot2::scale_x_log10(limits = c(0.000001, 0.1), expand = c(0,0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::annotation_logticks(sides = "b") +
       ggplot2::scale_color_manual(
-        values = mycolors(palette_name, length(unique(data[[color_var]])))
+        values = mycolors(palette_name, length(unique(plot_data[[color_var]])))
       ) +
       ggplot2::theme(
-        axis.title.y = ggplot2::element_blank(),
-        strip.text.y.left = ggplot2::element_blank()
+        axis.title.y = ggplot2::element_blank()
       ) +
       ggplot2::labs(
         title = glue::glue("DLS (correlation function)"),
@@ -201,7 +206,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   if (spec_type == "sls") {
     p <- p +
       ggplot2::geom_line(
-        data = tidyr::unnest(data, tidyselect::all_of(spec_var[[1]])),
+        data = tidyr::unnest(plot_data, tidyselect::all_of(spec_var[[1]])),
         ggplot2::aes(
           x = .data[[x_var]],
           y = .data[[y_var[[1]]]],
@@ -211,7 +216,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         show.legend = show_legend
       ) +
       ggplot2::geom_line(
-        data = tidyr::unnest(data, tidyselect::all_of(spec_var[[2]])),
+        data = tidyr::unnest(plot_data, tidyselect::all_of(spec_var[[2]])),
         ggplot2::aes(
           x = .data[[x_var]],
           y = .data[[y_var[[2]]]],
@@ -223,12 +228,12 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         show.legend = show_legend
       ) +
       ggplot2::geom_vline(
-        data = data,
+        data = plot_data,
         ggplot2::aes(xintercept = .data[[summary_var[[1]]]]),
         color = "red"
       ) +
       ggplot2::geom_vline(
-        data = data,
+        data = plot_data,
         ggplot2::aes(xintercept = .data[[summary_var[[2]]]]),
         color = "red",
         linetype = "dashed",
@@ -236,15 +241,13 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         alpha = alpha
       ) +
       ggplot2::facet_grid(
-        rows = vars(.data[[facet_var]]),
+        rows = vars(well_id),
+        labeller = ggplot2::as_labeller(custom_labeller),
         switch = "y"
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::scale_color_manual(
-        values = mycolors(palette_name, length(unique(data[[color_var]])))
-      ) +
-      ggplot2::theme(
-        strip.text.y.left = ggplot2::element_blank()
+        values = mycolors(palette_name, length(unique(plot_data[[color_var]])))
       ) +
       ggplot2::labs(
         title = glue::glue("SLS ({spec_var[[1]]} solid, {spec_var[[2]]} dashed)"),
@@ -260,7 +263,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   if (spec_type == "dsf") {
     p <- p +
       ggplot2::geom_line(
-        data = tidyr::unnest(data, tidyselect::all_of(spec_var)),
+        data = tidyr::unnest(plot_data, tidyselect::all_of(spec_var)),
         ggplot2::aes(
           x = .data[[x_var]],
           y = .data[[y_var]],
@@ -270,19 +273,17 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         show.legend = show_legend
       ) +
       ggplot2::geom_vline(
-        data = data,
+        data = plot_data,
         ggplot2::aes(xintercept = .data[[summary_var]]),
         color = "red"
       ) +
       ggplot2::facet_grid(
-        rows = vars(.data[[facet_var]]),
-        # switch = "y"
+        rows = vars(well_id),
+        labeller = ggplot2::as_labeller(custom_labeller)
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::scale_color_manual(
-        values = mycolors(palette_name, length(unique(data[[color_var]])))
-      ) +
-      ggplot2::theme(
+        values = mycolors(palette_name, length(unique(plot_data[[color_var]])))
       ) +
       ggplot2::labs(
         title = glue::glue("NanoDSF"),
