@@ -307,7 +307,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
           # vert_guides = opts_obj$guides_v2(),
           # show_horiz_guides = opts_obj$show_guides_h2,
           # horiz_guides = opts_obj$guides_h2(),
-          x_is_log = opts_obj$xvar2_is_log,
+          x_is_log = opts_obj$xvar3_is_log,
           custom_data = "well_id",
           show_legend = FALSE
         )

@@ -95,7 +95,7 @@ plotOptsUI <- function(id) {
         ),
         shiny::sliderInput(
           ns("guides_h1"),
-          label = "Size of points:",
+          label = "Guide locations:",
           min = 0,
           max = 2,
           value = c(0,0.8),
@@ -111,6 +111,9 @@ plotOptsUI <- function(id) {
           choices = xvarChoices,
           selected = "Z_D"
         ),
+        ##-----------------------
+        ##  Log transform      --
+        ##-----------------------
         shiny::checkboxInput(
           ns("xvar1_is_log"),
           "Transform axis with log()?",
@@ -126,7 +129,7 @@ plotOptsUI <- function(id) {
         ),
         shiny::sliderInput(
           ns("guides_v1"),
-          label = "Size of points:",
+          label = "Guide locations:",
           min = 2,
           max = 50,
           value = c(5,20),
@@ -139,7 +142,7 @@ plotOptsUI <- function(id) {
       ##----------------------------------------
       shiny::tabPanel(
         title = NULL,
-        value = "plot1Opts",
+        value = "plot2Opts",
         icon = shiny::icon("arrow-alt-circle-right"),
         shiny::h5("Right Plot Settings"),
         ##-----------------------
@@ -161,7 +164,7 @@ plotOptsUI <- function(id) {
         ),
         shiny::sliderInput(
           ns("guides_h2"),
-          label = "Size of points:",
+          label = "Guide locations:",
           min = 1,
           max = 100,
           value = c(10,70),
@@ -195,7 +198,7 @@ plotOptsUI <- function(id) {
         ),
         shiny::sliderInput(
           ns("guides_v2"),
-          label = "Size of points:",
+          label = "Guide locations:",
           min = 1,
           max = 100,
           value = c(10,70),
@@ -210,32 +213,41 @@ plotOptsUI <- function(id) {
         title = NULL,
         value = "plot3Opts",
         icon = shiny::icon("search-plus"),
-        # shiny::div(
-        #   style = "display: inline-block",
-        #   shiny::icon("search-plus")
-        # ),
-        # shiny::div(
-        #   style = "display: inline-block",
-        #   shiny::h5("Zoomed Plot Settings")
-        # ),
         shiny::h5("Zoomed Plot Settings"),
+        ##-----------------------
+        ##  Color              --
+        ##-----------------------
         shiny::selectInput(
           ns("color_zoom"),
           "Color Points By:",
           choices = colorvarChoices,
           selected = "buffer"
         ),
+        ##-----------------------
+        ##  Y-var              --
+        ##-----------------------
         shiny::selectInput(
           ns("yvar3"),
           "Y Variable:",
           choices = yvarChoices,
           selected = "Tagg266"
         ),
+        ##-----------------------
+        ##  X-var              --
+        ##-----------------------
         shiny::selectInput(
           ns("xvar3"),
           "X Variable:",
           choices = xvarChoices,
-          selected = "Tm1"
+          selected = "Z_D"
+        ),
+        ##-----------------------
+        ##  Log transform      --
+        ##-----------------------
+        shiny::checkboxInput(
+          ns("xvar3_is_log"),
+          "Transform axis with log()?",
+          value = TRUE
         )
       )
     )
@@ -316,6 +328,9 @@ plotOptsServer <- function(id, opts_obj, grv) {
       # xvar3
       shiny::observe({
         opts_obj$xvar3 <- input$xvar3
+      })
+      shiny::observe({
+        opts_obj$xvar3_is_log <- input$xvar3_is_log
       })
       
       
