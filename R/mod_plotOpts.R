@@ -3,8 +3,6 @@
 ##  mod_plotOpts - plot options                                          --
 ##-------------------------------------------------------------------------
 
-
-
 ##-------------------------------------------------------
 ##  UI COMPONENTS                                      --
 ##-------------------------------------------------------
@@ -364,53 +362,6 @@ plotOptsServer <- function(id, opts_obj, grv) {
       shiny::observe({
         opts_obj$yvar3 <- input$yvar3
       })
-
-      # observe({
-      #   # xvar choices
-      #   updateSelectInput(
-      #     inputId = "xvar1",
-      #     choices = x_choices
-      #   )
-      #   updateSelectInput(
-      #     inputId = "xvar2",
-      #     choices = x_choices
-      #   )
-      #   updateSelectInput(
-      #     inputId = "xvar3",
-      #     choices = x_choices
-      #   )
-      #   # yvar choices
-      #   updateSelectInput(
-      #     inputId = "yvar1",
-      #     choices = y_choices
-      #   )
-      #   updateSelectInput(
-      #     inputId = "yvar2",
-      #     choices = y_choices
-      #   )
-      #   updateSelectInput(
-      #     inputId = "yvar3",
-      #     choices = y_choices
-      #   )
-      # })
-      
-      # # dynamically updated filters for plots
-      # observeEvent(dataList(), {
-      #   req(dataList())
-      #   # update filter options
-      #   updateSelectInput(
-      #     session, "bufferFilter",
-      #     choices = purrr::map(dataList(), ~ dplyr::pull(dplyr::distinct(.x, buffer))) %>% purrr::flatten_chr()
-      #   )
-      #   updateSelectInput(
-      #     session, "saltFilter",
-      #     choices = purrr::map(dataList(), ~ dplyr::pull(dplyr::distinct(.x, salt))) %>% purrr::flatten_chr()
-      #   )
-      # })
-      # 
-      # output$dataName <- renderText({
-      #   stringr::str_extract(dataName, "(?<=./data/).*(?=_data.rds)")
-      # })
     }
   )
 }
