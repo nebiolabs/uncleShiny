@@ -2,7 +2,7 @@
 ##--------------------------------------------------------------------------
 ##  Summary scatter plot building function                                --
 ##--------------------------------------------------------------------------
-ggscatter <- function(data, x_var, y_var,
+ggscatter <- function(data, x_var, y_var, label = NULL,
                       color_var, color_encoded = FALSE, palette_name,
                       size = NULL, alpha = NULL,
                       show_vert_guides = FALSE, vert_guides = c(5,20),
@@ -89,6 +89,16 @@ ggscatter <- function(data, x_var, y_var,
           palette_name,
           length(unique(data_static[[color_var]]))
         )
+      )
+  }
+  
+  # Add labels
+  if (shiny::isTruthy(label)) {
+    p <- p +
+      ggplot2::geom_text(
+        aes(label = .data[[label]]),
+        hjust = 0,
+        vjust = 1
       )
   }
   

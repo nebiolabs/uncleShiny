@@ -298,7 +298,8 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
           data = grv$robj_selected_data(),
           x_var = opts_obj$xvar3,
           y_var = opts_obj$yvar3,
-          color_var = opts_obj$color_global,
+          label = "well",
+          color_var = opts_obj$color_zoom,
           color_encoded = TRUE,
           palette_name = opts_obj$palette_global,
           size = opts_obj$size_points(),
@@ -307,7 +308,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
           # vert_guides = opts_obj$guides_v2(),
           # show_horiz_guides = opts_obj$show_guides_h2,
           # horiz_guides = opts_obj$guides_h2(),
-          x_is_log = opts_obj$xvar2_is_log,
+          x_is_log = opts_obj$xvar3_is_log,
           custom_data = "well_id",
           show_legend = FALSE
         )
