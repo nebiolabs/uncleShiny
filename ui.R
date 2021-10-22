@@ -86,7 +86,8 @@
       shiny::tabPanel(
         "Plate Inspector",
         icon = shiny::icon("search"),
-        value = "tab_inspector"
+        value = "tab_inspector",
+        plateInspectorUI("inspector")
       ),
       ##--------------------------------------------------------
       ##  NAVBAR DROPDOWN: TOOLS                              --

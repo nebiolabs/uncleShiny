@@ -83,6 +83,11 @@ function(input, output, session) {
   ##////////////////////////////////////////
   scatterPlotsServer("scatter", scatter_opts, grv)
   
+  ##////////////////////////////////////////
+  ##  Plate inspector module              //
+  ##////////////////////////////////////////
+  plateInspectorServer("inspector", grv)
+  
 }
 ##--------------------------------------------------------------------------
 ##  end server.R                                                          --
