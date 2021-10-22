@@ -25,7 +25,7 @@ function(input, output, session) {
   
   # Navigate directly to plots when in testing mode
   if (use_testing_mode) {
-    updateNavbarPage(inputId = "dashboard_navbar", selected = "tab_scatter")
+    updateNavbarPage(inputId = "dashboard_navbar", selected = "tab_inspector")
   }
   
   

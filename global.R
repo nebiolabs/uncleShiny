@@ -46,7 +46,8 @@ library(glue)
 ##----------------------------------------
 ##  Testing flag                        --
 ##----------------------------------------
-use_testing_mode <- FALSE
+use_testing_mode <- TRUE
+# TODO switch back to production mode before merging into dev
 
 if (use_testing_mode) {
   source("R/util_normalizeSpectra.R")
