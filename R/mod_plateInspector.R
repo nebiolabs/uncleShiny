@@ -104,6 +104,40 @@ plateInspectorServer <- function(id, grv) {
         rlang::inject(shiny::tabsetPanel(!!!unname(tab_list), type = "pills"))
       })
       
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Inspector selected plotly event      <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      grv$inspector_selected_event <- shiny::debounce(shiny::reactive({
+        sources <- purrr::map_chr(names(module_data()), paste0, "_source")
+        purrr::map(
+          sources,
+          function(plot_source) {
+            event <- plotly::event_data(
+              event = "plotly_selected",
+              source = plot_source
+            )
+            if (is.null(event)) {
+              return(NULL)
+            } else {
+              event |> 
+                dplyr::filter(!is.na(customdata)) |> 
+                dplyr::pull(customdata) |> 
+                as.character()
+            }
+          }
+        ) |> purrr::flatten_chr()
+      }), 1000)
+      
+      output$inspector_selected <- shiny::renderPrint({
+        shiny::req(grv$inspector_selected_event())
+        event <- grv$inspector_selected_event()
+        if (isTruthy(event)) {
+          return(event)
+        } else {
+          "Nothing is selected."
+        }
+      })
+      
       
     }
   )
