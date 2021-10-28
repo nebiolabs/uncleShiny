@@ -67,13 +67,13 @@ plateInspectorServer <- function(id, grv) {
             output[[paste0(nm, "_plot")]] <- plotly::renderPlotly({
               buildPlateLayout(
                 format = 96, overlay_data = df,
-                source = paste0(nm, "_plot"), customdata = "well_id"
+                source = paste0(nm, "_source"), customdata = "well_id"
               )
             })
             output[[paste0(nm, "_selection")]] <- shiny::renderPrint({
               event <- plotly::event_data(
                 event = "plotly_selected",
-                source = paste0(nm, "_plot")
+                source = paste0(nm, "_source")
               )
               if (isTruthy(event)) {
                 dplyr::filter(event, !is.na(customdata))
