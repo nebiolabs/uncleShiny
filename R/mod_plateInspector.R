@@ -9,7 +9,16 @@
 plateInspectorUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("plate_tabs"))
+    shiny::sidebarLayout(
+      sidebarPanel = shiny::sidebarPanel(
+        width = 2,
+        shiny::verbatimTextOutput(ns("inspector_selected"))
+      ),
+      mainPanel = shiny::mainPanel(
+        width = 10,
+        shiny::uiOutput(ns("plate_tabs"))
+      )
+    )
   )
 }
 
