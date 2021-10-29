@@ -80,6 +80,15 @@
           )
         )
       ),
+      ##-------------------------------------------------------
+      ##  NAVBAR TAB: PLATE LAYOUT SAMPLE INSPECTOR          --
+      ##-------------------------------------------------------
+      shiny::tabPanel(
+        "Plate Inspector",
+        icon = shiny::icon("search"),
+        value = "tab_inspector",
+        plateInspectorUI("inspector")
+      ),
       ##--------------------------------------------------------
       ##  NAVBAR DROPDOWN: TOOLS                              --
       ##--------------------------------------------------------

@@ -1,0 +1,99 @@
+
+##--------------------------------------------------------------------------
+##  Construct plate layout with plotly                                    --
+##--------------------------------------------------------------------------
+
+buildPlateLayout <- function(format = NULL, overlay_data = NULL, 
+                              source = NULL, customdata = "well") {
+  base_plate <- makeBasePlate(format = format)
+  
+  if (is.null(overlay_data)) {
+    overlay_data <- dplyr::slice_sample(base_plate, n = 24)
+  }
+  
+  p <- plotly::plot_ly(
+    data = base_plate,
+    type = "scatter",
+    mode = "markers",
+    x = ~well_number,
+    y = ~well_letter,
+    marker = list(
+      symbol = "circle",
+      size = 25,
+      color = "white",
+      opacity = 0,
+      line = list(
+        color = "black",
+        width = 2
+      )
+    ),
+    text = ~well,
+    hoverinfo = "text",
+    source = source
+  ) 
+  
+  if (shiny::isTruthy(overlay_data)) {
+    p <- p |>
+      plotly::add_trace(
+        data = overlay_data,
+        inherit = FALSE,
+        type = "scatter",
+        mode = "markers",
+        x = ~well_number,
+        y = ~well_letter,
+        showlegend = FALSE,
+        marker = list(
+          symbol = "circle",
+          size = 24,
+          color = "lightpurple",
+          opacity = 0.9
+        ),
+        text = ~well,
+        hoverinfo = "text",
+        customdata = rlang::new_formula(NULL, rlang::sym(customdata)),
+        selected = list(
+          marker = list(
+            color = "lightgreen"
+          )
+        )
+      )
+  }
+  
+  p |> 
+    plotly::layout(
+      modebar = list(
+        orientation = "v"
+      ),
+      dragmode = "select",
+      yaxis = list(
+        title = NA,
+        showgrid = TRUE,
+        tickson = "boundaries",
+        zeroline = FALSE,
+        showline = FALSE,
+        autorange = "reversed",
+        categoryorder = "array",
+        categoryarray = LETTERS[1:8]
+      ),
+      xaxis = list(
+        type = "category",
+        side = "top",
+        title = NA,
+        showgrid = TRUE,
+        tickson = "boundaries",
+        zeroline = FALSE,
+        showline = FALSE,
+        tickmode = "array",
+        # tickvals = c(1:12),
+        ticktext = as.character(c(1:12)),
+        categoryorder = "array",
+        categoryarray = as.character(c(1:12))
+      )
+    ) |>
+    plotly::config(
+      displayModeBar = TRUE,
+      modeBarButtonsToRemove = c("zoom", "pan", "zoomIn", "zoomOut", "toImage",
+                                 "resetScale")
+    ) |> 
+    plotly::event_register("plotly_selected")
+}
