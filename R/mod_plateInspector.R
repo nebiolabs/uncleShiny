@@ -11,12 +11,13 @@ plateInspectorUI <- function(id) {
   shiny::tagList(
     shiny::sidebarLayout(
       sidebarPanel = shiny::sidebarPanel(
-        width = 5,
-        shiny::uiOutput(ns("plate_layouts"))
+        width = 4,
+        shiny::uiOutput(ns("plate_layouts"))#,
+        # shiny::verbatimTextOutput(ns("inspector_selected"))
       ),
       mainPanel = shiny::mainPanel(
-        width = 7,
-        shiny::verbatimTextOutput(ns("inspector_selected"))
+        width = 8,
+        spectraViewerUI(ns("inspector_ridgeline"))
       )
     )
   )
@@ -125,7 +126,8 @@ plateInspectorServer <- function(id, grv) {
           function(df, nm) {
             shiny::fluidRow(
               shiny::h4(nm),
-              plotly::plotlyOutput(ns(paste0(nm, "_plot")), height = "400px")
+              plotly::plotlyOutput(ns(paste0(nm, "_plot")), height = "400px")#,
+              # shiny::verbatimTextOutput(ns(paste0(nm, "_selection")))
             )
           }
         )
@@ -162,13 +164,30 @@ plateInspectorServer <- function(id, grv) {
         shiny::req(grv$inspector_selected_event())
         event <- grv$inspector_selected_event()
         if (isTruthy(event)) {
-          return(event)
+          print(bit64::as.integer64.character(event))
         } else {
           "Nothing is selected."
         }
       })
       
+      ##----------------------------------------
+      ##  Reactive selection                  --
+      ##----------------------------------------
+      robj_inspector_selected <- shiny::reactive({
+        bit64::as.integer64.character(
+          grv$inspector_selected_event()
+        )
+      })
       
+      ##/////////////////////////////////////////
+      ##  Spectra viewer module                //
+      ##/////////////////////////////////////////
+      spectraViewerServer(
+        "inspector_ridgeline",
+        grv,
+        "well_id",
+        robj_inspector_selected
+      )
     }
   )
 }
