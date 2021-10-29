@@ -68,6 +68,9 @@ plateInspectorServer <- function(id, grv) {
         })
       }
       
+      ##-----------------------------------------
+      ##  Dynamic outputs                      --
+      ##-----------------------------------------
       shiny::observe({
         purrr::iwalk(
           module_data(),
@@ -96,6 +99,9 @@ plateInspectorServer <- function(id, grv) {
         )
       })
       
+      ##-----------------------------------------
+      ##  Dynamic UI generation                --
+      ##-----------------------------------------
       output$plate_tabs <- shiny::renderUI({
         ns <- session$ns
         tab_list <- purrr::imap(
@@ -135,6 +141,9 @@ plateInspectorServer <- function(id, grv) {
         ) |> purrr::flatten_chr()
       }), 1000)
       
+      ##----------------------------------------
+      ##  Raw selection output                --
+      ##----------------------------------------
       output$inspector_selected <- shiny::renderPrint({
         shiny::req(grv$inspector_selected_event())
         event <- grv$inspector_selected_event()
