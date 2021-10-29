@@ -58,7 +58,7 @@ scatterPlotsUI <- function(id) {
           ),
           shiny::column(
             width = 8,
-            spectraViewerUI(ns("ridgeline"))
+            spectraViewerUI(ns("scatter_ridgeline"))
           )
         )
       )
@@ -368,10 +368,22 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##////////////////////////////////////////
       spectraSparksServer("spectraSparks", grv, opts_obj, "click")
       
+      ##----------------------------------------
+      ##  Reactive selection                  --
+      ##----------------------------------------
+      robj_scatter_selected <- shiny::reactive({
+        grv$scatter_selected_summary_ids()[["summary_ids"]]
+      })
+      
       ##/////////////////////////////////////////
       ##  Spectra viewer module                //
       ##/////////////////////////////////////////
-      spectraViewerServer("ridgeline", grv)
+      spectraViewerServer(
+        "scatter_ridgeline",
+        grv,
+        "uncle_summary_id",
+        robj_scatter_selected
+      )
       
     }
   )
