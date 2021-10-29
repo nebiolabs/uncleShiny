@@ -11,12 +11,12 @@ plateInspectorUI <- function(id) {
   shiny::tagList(
     shiny::sidebarLayout(
       sidebarPanel = shiny::sidebarPanel(
-        width = 2,
-        shiny::verbatimTextOutput(ns("inspector_selected"))
+        width = 5,
+        shiny::uiOutput(ns("plate_layouts"))
       ),
       mainPanel = shiny::mainPanel(
-        width = 10,
-        shiny::uiOutput(ns("plate_tabs"))
+        width = 7,
+        shiny::verbatimTextOutput(ns("inspector_selected"))
       )
     )
   )
@@ -102,20 +102,34 @@ plateInspectorServer <- function(id, grv) {
       ##-----------------------------------------
       ##  Dynamic UI generation                --
       ##-----------------------------------------
-      output$plate_tabs <- shiny::renderUI({
+      # output$plate_tabs <- shiny::renderUI({
+      #   ns <- session$ns
+      #   tab_list <- purrr::imap(
+      #     module_data(),
+      #     function(df, nm) {
+      #       shiny::tabPanel(
+      #         title = nm,
+      #         plotly::plotlyOutput(ns(paste0(nm, "_plot"))),
+      #         shiny::verbatimTextOutput(ns(paste0(nm, "_selection"))),
+      #         shiny::verbatimTextOutput(ns(paste0(nm, "_df")))
+      #       )
+      #     }
+      #   )
+      #   rlang::inject(shiny::tabsetPanel(!!!unname(tab_list), type = "pills"))
+      # })
+      
+      output$plate_layouts <- shiny::renderUI({
         ns <- session$ns
-        tab_list <- purrr::imap(
+        layout_list <- purrr::imap(
           module_data(),
           function(df, nm) {
-            shiny::tabPanel(
-              title = nm,
-              plotly::plotlyOutput(ns(paste0(nm, "_plot"))),
-              shiny::verbatimTextOutput(ns(paste0(nm, "_selection"))),
-              shiny::verbatimTextOutput(ns(paste0(nm, "_df")))
+            shiny::fluidRow(
+              shiny::h4(nm),
+              plotly::plotlyOutput(ns(paste0(nm, "_plot")), height = "400px")
             )
           }
         )
-        rlang::inject(shiny::tabsetPanel(!!!unname(tab_list), type = "pills"))
+        rlang::inject(shiny::tagList(!!!unname(layout_list)))
       })
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
