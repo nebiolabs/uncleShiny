@@ -56,7 +56,7 @@ spectraViewerUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-spectraViewerServer <- function(id, grv) {
+spectraViewerServer <- function(id, grv, select_var, select_vals) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
@@ -71,8 +71,7 @@ spectraViewerServer <- function(id, grv) {
           test_data |> 
             dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
             dplyr::filter(
-              uncle_summary_id %in% 
-                grv$scatter_selected_summary_ids()[["summary_ids"]]
+              .data[[select_var]] %in% select_vals()
             )
         })
       } else {
@@ -81,8 +80,7 @@ spectraViewerServer <- function(id, grv) {
           grv$robj_collected_data() |> 
             dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
             dplyr::filter(
-              uncle_summary_id %in% 
-                grv$scatter_selected_summary_ids()[["summary_ids"]]
+              .data[[select_var]] %in% select_vals()
             )
         })
       }
