@@ -42,6 +42,10 @@ plateInspectorServer <- function(id, grv) {
                 Buffer
               )
             ) |> 
+            dplyr::mutate(dplyr::across(
+              c("well_id"),
+              .fns = bit64::as.character.integer64
+            )) |> 
             formatPlateOverlay()
             # cbindColors(opts_obj$color_global, opts_obj$palette_global)
         })
@@ -55,6 +59,10 @@ plateInspectorServer <- function(id, grv) {
                 Buffer
               )
             ) |> 
+            dplyr::mutate(dplyr::across(
+              c("well_id"),
+              .fns = bit64::as.character.integer64
+            )) |> 
             formatPlateOverlay()
             # cbindColors(opts_obj$color_global, opts_obj$palette_global)
         })
@@ -121,8 +129,7 @@ plateInspectorServer <- function(id, grv) {
             } else {
               event |> 
                 dplyr::filter(!is.na(customdata)) |> 
-                dplyr::pull(customdata) |> 
-                as.character()
+                dplyr::pull(customdata)
             }
           }
         ) |> purrr::flatten_chr()
