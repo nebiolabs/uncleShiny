@@ -165,7 +165,7 @@ dbDiagServer <- function(id, dbobj) {
       db_is_valid <- reactiveVal(value = FALSE)
       
       shiny::observeEvent(input$bttn_check_db, {
-        if (exists(rlang::as_name(rlang::enquo(dbobj)))) {
+        if (exists(quote(dbobj))) {
           db_is_valid(DBI::dbIsValid(dbobj))
           output$raw_db_is_valid <- shiny::renderText({print(db_is_valid())})
           output$dbobj_print <- shiny::renderPrint({DBI::dbGetInfo(dbobj)})
