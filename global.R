@@ -144,7 +144,7 @@ if (use_testing_mode) {
   # Instantiate db pool
   db_pool_obj <- pool::dbPool(
     drv = RPostgres::Postgres(),
-    dbname = "ebase_production",
+    dbname = "ebase_dev",
     host = "ebase-db-c.neb.com",
     port = 5432,
     user = Sys.getenv("ebase_uid"),
