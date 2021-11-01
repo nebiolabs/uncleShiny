@@ -40,6 +40,12 @@ dbDiagUI <- function(id) {
         ),
         shiny::br(),
         shiny::br(),
+        shiny::actionButton(
+          ns("bttn_apply_filters"),
+          "Apply Filters"
+        ),
+        shiny::br(),
+        shiny::br(),
         shiny::selectInput(
           ns("palette1"),
           "Palette 1:",
@@ -320,7 +326,7 @@ dbDiagServer <- function(id, dbobj) {
       })
       
       # Filter
-      product_filter <- shiny::debounce(shiny::reactive({
+      product_filter <- shiny::eventReactive(c(input$bttn_run_all, input$bttn_apply_filters), {
         ids <- stringr::str_split(input$filter_products, pattern = ",") |> 
           {\(l) as.integer(do.call(c, l))}()
         if (shiny::isTruthy(input$filter_products)) {
@@ -328,11 +334,11 @@ dbDiagServer <- function(id, dbobj) {
         } else {
           return(unique(diag_products()$product_id))
         }
-      }), 2000)
+      })
       
       # Output
       output$products <- DT::renderDT({
-        shiny::req(diag_products(), product_filter())
+        shiny::req(diag_products())
         df <- diag_products() |> 
           dplyr::filter(product_id %in% product_filter())
         
@@ -364,7 +370,7 @@ dbDiagServer <- function(id, dbobj) {
       })
       
       # Filter
-      exp_set_filter <- shiny::debounce(shiny::reactive({
+      exp_set_filter <- shiny::eventReactive(c(input$bttn_run_all, input$bttn_apply_filters), {
         ids <- stringr::str_split(input$filter_exp_sets, pattern = ",") |> 
           {\(l) as.integer(do.call(c, l))}()
         if (shiny::isTruthy(input$filter_exp_sets)) {
@@ -372,11 +378,11 @@ dbDiagServer <- function(id, dbobj) {
         } else {
           return(unique(diag_exp_sets()$exp_set_id))
         }
-      }), 2000)
+      })
       
       # Output
       output$exp_sets <- DT::renderDT({
-        shiny::req(diag_exp_sets(), product_filter(), exp_set_filter())
+        shiny::req(diag_exp_sets())
         df <- diag_exp_sets() |> 
           dplyr::filter(
             product_id %in% product_filter(),
@@ -434,7 +440,7 @@ dbDiagServer <- function(id, dbobj) {
       
       # Output
       output$exps <- DT::renderDT({
-        shiny::req(diag_exps(), product_filter(), exp_set_filter())
+        shiny::req(diag_exps())
         df <- diag_exps() |> 
           dplyr::filter(
             product_id %in% product_filter(),
