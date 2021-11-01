@@ -98,6 +98,7 @@
         shiny::tabPanel(
           "Database Troubleshooting",
           icon = shiny::icon("database"),
+          value = "tab_diag",
           dbDiagUI("db_diag")
         )
       ),
