@@ -77,8 +77,10 @@ colorvarChoices <- c(
   "Amino Acid" = "Amino Acid",
   "[Amino Acid](mM)" = "Amino Acid_mM",
   # "Z Modality" = "mode_Z",
-  "Exp. Type" = "exp_type",
-  "Well" = "well"
+  "Plate Type" = "plate",
+  "Exp. ID" = "exp_id",
+  "Well" = "well",
+  "Instrument" = "instrument"
 )
 
 

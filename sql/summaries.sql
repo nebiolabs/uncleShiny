@@ -12,7 +12,7 @@ WITH cte_sum AS
     )
   SELECT p.name AS product_name, p.id AS product_id,
     exp_sets.id AS exp_set_id, exp_sets.exp_type, exp_sets.plate_generation,
-    exps.id AS exp_id, cte_sum.*
+    exps.id AS exp_id, exps.uncle_instrument_id AS instrument, cte_sum.*
   FROM cte_sum
   INNER JOIN uncle_experiments AS exps
     ON cte_sum.uncle_experiment_id = exps.id
