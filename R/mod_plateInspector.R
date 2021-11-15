@@ -37,10 +37,13 @@ plateInspectorServer <- function(id, grv) {
         module_data <- shiny::reactive({
           test_data |>
             dplyr::mutate(
-              Buffer = dplyr::if_else(
-                stringr::str_detect(Buffer, "Neutral Buffer"),
+              Buffer_condition_name = dplyr::if_else(
+                stringr::str_detect(
+                  Buffer_condition_name,
+                  "(Neutral Buffer)|(NB)"
+                ),
                 "Neutral Buffer",
-                Buffer
+                Buffer_condition_name
               )
             ) |> 
             dplyr::mutate(dplyr::across(
@@ -54,10 +57,13 @@ plateInspectorServer <- function(id, grv) {
         module_data <- shiny::reactive({
           grv$robj_collected_data() |> 
             dplyr::mutate(
-              Buffer = dplyr::if_else(
-                stringr::str_detect(Buffer, "Neutral Buffer"),
+              Buffer_condition_name = dplyr::if_else(
+                stringr::str_detect(
+                  Buffer_condition_name,
+                  "(Neutral Buffer)|(NB)"
+                ),
                 "Neutral Buffer",
-                Buffer
+                Buffer_condition_name
               )
             ) |> 
             dplyr::mutate(dplyr::across(
