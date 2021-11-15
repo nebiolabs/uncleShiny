@@ -78,7 +78,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##  Facet labeller                      --
   ##----------------------------------------
   custom_labeller <- function(facet_var) {
-    switch_list <- rlang::as_list(rlang::set_names(
+    switch_list <- as.list(rlang::set_names(
       glue::glue_data(
         plot_data,
         "{well}_{plate}({bit64::as.character.integer64(exp_set_id)})",
