@@ -107,8 +107,9 @@
       ##-------------------------------------------------------
       shiny::tabPanel(
         "About this App",
-        icon = shiny::icon("info-circle")
-        # about module with source code access for license compliance
+        icon = shiny::icon("info-circle"),
+        value = "tab_about",
+        aboutUI("about")
       )
     )
   )
