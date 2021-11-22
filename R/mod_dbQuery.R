@@ -205,9 +205,6 @@ dbQueryServer <- function(id, grv, dbobj) {
           sql_queries$conditions_units,
           input = input$experiment_set_selection
         ) |> 
-          dplyr::mutate(
-            group_name = recode(group_name, "BufferComponent" = "Buffer")
-          ) |> 
           pivot_conditions()
         
         # Join summary data with conditions and units
