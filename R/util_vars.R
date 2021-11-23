@@ -6,25 +6,26 @@
 wellOrder <- purrr::map2_chr(rep(c(LETTERS[1:8]), 12), purrr::flatten_chr(purrr::map(c(1:12), rep, 8)), paste0)
 uniOrder <- purrr::map2_chr(rep(c(LETTERS[1:16]), 3), purrr::flatten_chr(purrr::map(c(1:3), rep, 16)), paste0)
 
-tooltipVars <- c(
-  "buffer",
-  "buffer_mM",
-  "pH", 
-  "salt",
-  "salt_mM",
-  "additive1",
-  "additive1_conc",
-  "additive1_unit",
-  "additive2",
-  "additive2_conc",
-  "additive2_unit", 
-  "DTT_mM",
-  "TCEP_mM",
-  "glycerol",
-  "albumin",
-  "albumin_mgml",
-  "comment"
-)
+## TODO update for tooltip variable check
+# tooltipVars <- c(
+#   "buffer",
+#   "Buffer_unit_value",
+#   "pH", 
+#   "salt",
+#   "salt_mM",
+#   "additive1",
+#   "additive1_conc",
+#   "additive1_unit",
+#   "additive2",
+#   "additive2_conc",
+#   "additive2_unit", 
+#   "DTT_mM",
+#   "TCEP_mM",
+#   "glycerol",
+#   "albumin",
+#   "albumin_mgml",
+#   "comment"
+# )
 
 xvarChoices <- c(
   "Tagg @ 266nm" = "Tagg266",
@@ -32,15 +33,8 @@ xvarChoices <- c(
   "Tm" = "Tm1",
   "Z Diameter (nm)" = "Z_D",
   "Peak 1 Diameter (nm)" = "peak1_D",
-  "Activity (Rate)" = "act_rate",
-  "pH" = "pH",
-  "Salt Conc. (mM)" = "salt_mM",
-  "Additive 1 Conc." = "additive1_conc",
-  "Additive 2 Conc." = "additive2_conc",
-  "DTT (mM)" = "DTT_mM",
-  "TCEP (mM)" = "TCEP_mM",
-  "Glycerol (%)" = "glycerol",
-  "Albumin (mg/mL)" = "albumin_mgml"
+  "pH" = "pH_unit_value",
+  "Buffer" = "Buffer_condition_name"
 )
 
 yvarChoices <- c(
@@ -48,34 +42,29 @@ yvarChoices <- c(
   "Tagg @ 473nm" = "Tagg473",
   "Tm" = "Tm1",
   "Polydispersity Index" = "PdI",
-  "Z Modality" = "mode_Z",
-  "Activity (Endpoint)" = "act_endpoint",
-  "Activity (Rate)" = "act_rate",
-  "Buffer" = "buffer",
-  "pH" = "pH",
-  "Salt" = "salt",
-  "Additive 1" = "additive1",
-  "Additive 2" = "additive2",
-  "DTT (mM)" = "DTT_mM",
-  "TCEP (mM)" = "TCEP_mM",
-  "Glycerol (%)" = "glycerol",
-  "Albumin (mg/mL)" = "albumin_mgml"
+  # "Z Modality" = "mode_Z",
+  "pH" = "pH_unit_value",
+  "Buffer" = "Buffer_condition_name"
 )
 
 colorvarChoices <- c(
-  "Buffer" = "Buffer",
-  "pH" = "pH_pH",
-  "Buffer Salt" = "Buffer Salt",
-  "[Buffer Salt](mM)" = "Buffer Salt_mM",
-  "Metal Sal" = "Metal Salt",
-  "[Metal Salt](mM)" = "Metal Salt_mM",
-  # "Additive 1" = "additive1",
-  # "Additive 1 Conc." = "additive1_conc",
-  # "Additive 2" = "additive2",
-  # "Additive 2 Conc." = "additive2_conc",
-  "Glycerol" = "Glycerol",
-  "Amino Acid" = "Amino Acid",
-  "[Amino Acid](mM)" = "Amino Acid_mM",
+  "Buffer" = "Buffer_condition_name",
+  "pH" = "pH_unit_value",
+  "Buffer Salt" = "BufferSalt_condition_name",
+  "[Buffer Salt]" = "BufferSalt_unit_value",
+  "Metal Salt" = "MetalSalt_condition_name",
+  "[Metal Salt]" = "MetalSalt_unit_value",
+  "Additive" = "Additive_condition_name",
+  "Albumin" = "Albumin_condition_name",
+  "Amino Acid" = "AminoAcid_condition_name",
+  "[Amino Acid]" = "AminoAcid_unit_value",
+  "Chelator" = "Chelator_condition_name",
+  "ReducingAgent" = "ReducingAgent_condition_name",
+  "Sugar" = "Sugar_condition_name",
+  "Surfactant" = "Surfactant_condition_name",
+  "[Surfactant]" = "Surfactant_unit_value",
+  "Thickening Agent" = "ThickeningAgent_condition_name",
+  "[Thickening Agent]" = "ThickeningAgent_unit_value",
   # "Z Modality" = "mode_Z",
   "Plate Type" = "plate",
   "Exp. ID" = "exp_id",

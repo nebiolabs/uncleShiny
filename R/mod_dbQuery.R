@@ -199,48 +199,20 @@ dbQueryServer <- function(id, grv, dbobj) {
         # uncle_summary_id keys for spectra table query
         summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
         
-        # Recode values as temporary fix until condition_type added to ebase
-        cond_recode_vals <- readr::read_csv("data/condition_types.csv") |> 
-          dplyr::select(name, type) |> 
-          tibble::deframe()
-        
         # Base table for condition and unit join manipulations; join on well_id
         conditions_units <- getQuery(
           dbobj,
           sql_queries$conditions_units,
           input = input$experiment_set_selection
         ) |> 
-          dplyr::mutate(
-            condition_type = purrr::map_chr(
-              condition_name,
-              \(nm) rlang::exec(dplyr::recode, nm, !!!cond_recode_vals)
-            )
-          )
-        
-        # Pivoted join table for conditions
-        cond_join <- conditions_units |> 
-          dplyr::select(-c(unit_value, unit_name)) |> 
-          tidyr::pivot_wider(
-            names_from = condition_type,
-            values_from = condition_name
-          )
-        
-        # Pivoted join table for units
-        unit_join <- conditions_units |> 
-          dplyr::select(-c(condition_name)) |> 
-          tidyr::pivot_wider(
-            names_from = c(condition_type, unit_name),
-            values_from = unit_value,
-            names_sep = "_"
-          )
+          pivot_conditions()
         
         # Join summary data with conditions and units
         summary_cond_unit_join <- purrr::reduce(
-          list(summary_data, cond_join, unit_join),
+          list(summary_data, conditions_units),
           dplyr::left_join,
           by = c("well_id")
         )
-        # return(summary_cond_unit_join)
         
         # Retrieve nested spectra tables for selected summary data
         spec_tbls <- get_spec_tbls(dbobj, spec_tbl_list, summary_ids)

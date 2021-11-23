@@ -12,10 +12,8 @@ WITH cte_sum AS
                   )
     )
 SELECT exp_conds.well_id, exp_conds.raw_value AS unit_value,
-  units.name AS unit_name,
-  conds.name AS condition_name, conds.id AS condition_id,
-  grps.name AS group_name, grps.id AS group_id,
-  grpings.included, grpings.id AS grouping_id
+  units.name AS unit_name, conds.name AS condition_name,
+  grps.name AS group_name, grpings.*
 FROM experimental_conditions AS exp_conds
 INNER JOIN units
  ON exp_conds.unit_id = units.id
@@ -29,4 +27,4 @@ WHERE EXISTS (SELECT *
               FROM cte_sum
               WHERE cte_sum.well_id = exp_conds.well_id
               )
---ORDER BY exp_conds.well_id
+ORDER BY exp_conds.well_id
