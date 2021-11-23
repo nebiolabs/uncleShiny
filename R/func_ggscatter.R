@@ -35,16 +35,6 @@ ggscatter <- function(data, x_var, y_var, label = NULL,
     data_static <- data
   }
   
-  # Expression for generating hover tooltip (see text aesthetic below)
-  tootip_glue_string <- quote(
-    glue::glue(
-      "<em>Plate Well: {well} </em><br>",
-      "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",
-      "<b>Salt: </b> {`BufferSalt_condition_name`} {`BufferSalt_unit_value`}{BufferSalt_unit_name}<br>"
-      # "<b>Metal: </b> {`Metal Salt`} {`Metal Salt_mM`}mM<br>"
-    )
-  )
-
   p <- ggplot2::ggplot(
     # A shared data object passed to the function
     data = data,
