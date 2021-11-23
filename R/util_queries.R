@@ -98,6 +98,15 @@ sql_queries$summary_data <- {
 
 
 ##--------------------------------------------------------
+##  Table of distinct condition groups                  --
+##--------------------------------------------------------
+sql_queries$condition_groups <- {
+  "SELECT DISTINCT name
+  FROM condition_groups"
+}
+
+
+##--------------------------------------------------------
 ##  Table of conditions/units for joining to summary    --
 ##--------------------------------------------------------
 sql_queries$conditions_units <- {

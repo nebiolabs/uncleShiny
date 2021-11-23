@@ -141,3 +141,23 @@ spec_tbl_list <- c(
   specSLS473 = "uncle_sls473s",
   specTm = "uncle_dsfs"
 )
+
+# Expression for generating hover tooltip
+tootip_glue_string <- quote(
+  glue::glue(
+    "<em>Plate Well: {well} </em><br>",
+    "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",
+    "<b>Salt: </b> {`BufferSalt_unit_value`}{BufferSalt_unit_name} {`BufferSalt_condition_name`}<br>",
+    "<b>Additives: </b> <br>",
+    "    <em>Metal: </em>{`MetalSalt_unit_value`}{MetalSalt_unit_name} {`MetalSalt_condition_name`}<br>",
+    "    <em>Amino Acid: </em>{`AminoAcid_unit_value`}{AminoAcid_unit_name} {`AminoAcid_condition_name`}<br>",
+    "    <em>Sugar: </em>{`Sugar_unit_value`}{Sugar_unit_name} {`Sugar_condition_name`}<br>",
+    "    <em>Surfactant: </em>{`Surfactant_unit_value`}{Surfactant_unit_name} {`Surfactant_condition_name`}<br>",
+    "    <em>Albumin: </em>{`Albumin_unit_value`}{Albumin_unit_name} {`Albumin_condition_name`}<br>",
+    "    <em>Chelator: </em>{`Chelator_unit_value`}{Chelator_unit_name} {`Chelator_condition_name`}<br>",
+    "    <em>Reducing Agent: </em>{`ReducingAgent_unit_value`}{ReducingAgent_unit_name} {`ReducingAgent_condition_name`}<br>",
+    "    <em>Thickener: </em>{`ThickeningAgent_unit_value`}{ThickeningAgent_unit_name} {`ThickeningAgent_condition_name`}<br>",
+    "    <em>General: </em>{`Additive_unit_value`}{Additive_unit_name} {`Additive_condition_name`}<br>",
+    "    <em>Chaperone: </em>{`Chaperone_unit_value`}{Chaperone_unit_name} {`Chaperone_condition_name`}<br>",
+  )
+)

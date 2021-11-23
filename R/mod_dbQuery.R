@@ -199,6 +199,12 @@ dbQueryServer <- function(id, grv, dbobj) {
         # uncle_summary_id keys for spectra table query
         summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
         
+        # vector of distinct groups for tooltip variable check
+        condition_groups <- dplyr::pull(
+          getQuery(dbobj, sql_queries$condition_groups),
+          name
+        )
+        
         # Base table for condition and unit join manipulations; join on well_id
         conditions_units <- getQuery(
           dbobj,
@@ -220,6 +226,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         # Join nested spectra tables to summary data and return
         return(
           nest_spectra(summary_cond_unit_join, spec_tbls) |> 
+            add_missing_tooltip_vars(condition_groups) |> 
             normalizeSpectra()
         )
       })
