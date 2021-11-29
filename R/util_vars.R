@@ -67,6 +67,8 @@ colorvarChoices <- c(
   "[Thickening Agent]" = "ThickeningAgent_unit_value",
   # "Z Modality" = "mode_Z",
   "Plate Type" = "plate",
+  "Exp. Set ID" = "exp_set_id",
+  "Notes" = "notes",
   "Exp. ID" = "exp_id",
   "Well" = "well",
   "Instrument" = "instrument"

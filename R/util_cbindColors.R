@@ -10,7 +10,7 @@ cbindColors <- function(df, color_var, palette_name) {
     dplyr::mutate(
       # convert 64-bit integers to character strings before factoring
       dplyr::across(
-        .cols = tidyselect::any_of(c("exp_id", "instrument")),
+        .cols = tidyselect::any_of(c("exp_id", "exp_set_id", "instrument")),
         .fns = bit64::as.character.integer64
       )
     ) |> 
