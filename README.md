@@ -1,0 +1,30 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# uncleShiny
+
+### Frontend
+
+`uncleShiny` is a dashboard for Unchained Labs Uncle data visualization.
+This app is written in R using the [`shiny`](https://shiny.rstudio.com/)
+package.
+
+Database access utilizes the
+[`RPostgres`](https://cran.r-project.org/web/packages/RPostgres/index.html)
+driver package and all data manipulations are heavily reliant on core
+packages from the [Tidyverse](https://www.tidyverse.org/) including
+`tidyr`, `dplyr`, and `purrr.`
+
+Visualization of data is mostly performed with Plotly and also
+`ggplot2.` Theming of this app was done using the
+[`bslib`](https://rstudio.github.io/bslib/),
+[`thematic`](https://rstudio.github.io/thematic/), and
+[`showtext`](https://github.com/yixuan/showtext) packages.
+
+### Backend
+
+[`unclePy`](https://github.com/eric-hunt/unclePy) is the parser which
+extracts meaningful experimental results and metadata from Uncle
+instrument binary files (.uni files), and delivers that data in a
+structured format to a local or remote hosted relational database built
+on PostgreSQL.
