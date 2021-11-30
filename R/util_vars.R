@@ -145,11 +145,20 @@ spec_tbl_list <- c(
 )
 
 # Expression for generating hover tooltip
-tootip_glue_string <- quote(
+short_tootip_glue_string <- quote(
   glue::glue(
     "<em>Plate Well: {well} </em><br>",
     "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",
+    "<b>Salt: </b> {`BufferSalt_unit_value`}{BufferSalt_unit_name} {`BufferSalt_condition_name`}<br>"
+  )
+)
+
+long_tootip_glue_string <- quote(
+  glue::glue(
+    "<h4><em>Plate Well: {well}</em></h4>",
+    "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",
     "<b>Salt: </b> {`BufferSalt_unit_value`}{BufferSalt_unit_name} {`BufferSalt_condition_name`}<br>",
+    "<br>",
     "<b>Additives: </b> <br>",
     "    <em>Metal: </em>{`MetalSalt_unit_value`}{MetalSalt_unit_name} {`MetalSalt_condition_name`}<br>",
     "    <em>Amino Acid: </em>{`AminoAcid_unit_value`}{AminoAcid_unit_name} {`AminoAcid_condition_name`}<br>",
