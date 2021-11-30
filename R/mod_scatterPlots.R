@@ -36,6 +36,10 @@ scatterPlotsUI <- function(id) {
               shiny::helpText("Activated on click.")
             ),
             spectraSparksUI(ns("spectraSparks"))
+          ),
+          shiny::column(
+            width = 3,
+            conditionsViewerUI(ns("scatter_conditions"))
           )
         )
       ),
@@ -381,6 +385,10 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
         grv$scatter_selected_summary_ids()[["summary_ids"]]
       })
       
+      robj_scatter_hovered <- shiny::reactive({
+        grv$scatter_hover_summary_id()[["summary_ids"]]
+      })
+      
       ##/////////////////////////////////////////
       ##  Spectra viewer module                //
       ##/////////////////////////////////////////
@@ -389,6 +397,16 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
         grv,
         "uncle_summary_id",
         robj_scatter_selected
+      )
+      
+      ##////////////////////////////////////////
+      ##  Conditions viewer module            //
+      ##////////////////////////////////////////
+      conditionsViewerServer(
+        "scatter_conditions",
+        grv,
+        "uncle_summary_id",
+        robj_scatter_hovered
       )
       
     }
