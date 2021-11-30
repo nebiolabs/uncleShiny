@@ -49,8 +49,8 @@ aboutUI <- function(id) {
           shiny::br(),
           shiny::tags$p(
             shiny::tags$span(shiny::tags$em("unclePy ")),
-            "is the backed parser which extracts meaningful experimental
-            results and metdata from Uncle instrument binary files (.uni files),
+            "is the backend parser which extracts meaningful experimental
+            results and metadata from Uncle instrument binary files (.uni files),
             and delivers that data in a structured format to a locally hosted
             relational database built on PostgreSQL."
           ),
@@ -124,7 +124,7 @@ aboutUI <- function(id) {
             "and ",
             shiny::tags$span(
               shiny::tags$a(
-                href = "https://cran.rstudio.com/web/packages/showtext/vignettes/introduction.html",
+                href = "https://github.com/yixuan/showtext",
                 target = "_blank",
                 "showtext"
               )
