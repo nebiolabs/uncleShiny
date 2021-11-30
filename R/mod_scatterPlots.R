@@ -35,7 +35,7 @@ scatterPlotsUI <- function(id) {
               shiny::h3("Spectra Quickview"),
               shiny::helpText("Activated on click.")
             ),
-            spectraSparksUI(ns("spectraSparks"))
+            spectraSparksUI(ns("scatter_sparks"))
           ),
           shiny::column(
             width = 3,
@@ -77,9 +77,11 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({
-          test_data |>
+      munge_module_data <- function(data_input, color_input, palette_input) {
+        if (is.null(data_input)) {
+          munged_data <- NULL
+        } else {
+          munged_data <- data_input |>
             dplyr::mutate(
               Buffer_condition_name = dplyr::if_else(
                 stringr::str_detect(
@@ -90,22 +92,27 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
                 Buffer_condition_name
               )
             ) |> 
-            cbindColors(opts_obj$color_global, opts_obj$palette_global)
+            cbindColors(color_input, palette_input)
+        }
+        
+        return(munged_data)
+      }
+      
+      if (use_testing_mode) {
+        module_data <- shiny::reactive({
+          test_data |>
+            munge_module_data(
+              color_input = opts_obj$color_global,
+              palette_input = opts_obj$palette_global
+            )
         })
       } else {
         module_data <- shiny::reactive({
           grv$robj_collected_data() |> 
-            dplyr::mutate(
-              Buffer_condition_name = dplyr::if_else(
-                stringr::str_detect(
-                  Buffer_condition_name,
-                  "(Neutral Buffer)|(NB)"
-                ),
-                "Neutral Buffer",
-                Buffer_condition_name
-              )
-            ) |> 
-            cbindColors(opts_obj$color_global, opts_obj$palette_global)
+            munge_module_data(
+              color_input = opts_obj$color_global,
+              palette_input = opts_obj$palette_global
+            )
         })
       }
       module_SharedData <- shiny::reactive({
@@ -243,11 +250,11 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##  Scatter clicked plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Scatter plot click event data
-      grv$scatter_click_event <- shiny::debounce(shiny::reactive({
+      grv$scatter_click_event <- shiny::reactive({
         plotly::event_data(event = "plotly_click", source = "scatter")
-      }), 500)
+      })
       # Scatter plot clicked summary_id (key) and well_ids (customdata)
-      grv$scatter_click_summary_id <- shiny::debounce(shiny::reactive({
+      grv$scatter_click_summary_id <- shiny::reactive({
         shiny::req(grv$scatter_click_event())
         df <- grv$scatter_click_event()
         if (rlang::is_list(df[["key"]])) {
@@ -260,17 +267,17 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
           summary_ids = bit64::as.integer64.character(df[["key"]]),
           well_ids = bit64::as.integer64.character(df[["customdata"]])
         )
-      }), 500)
+      })
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Scatter plot hover event data
-      grv$scatter_hover_event <- shiny::debounce(shiny::reactive({
+      grv$scatter_hover_event <- shiny::reactive({
         plotly::event_data(event = "plotly_hover", source = "scatter")
-      }), 500)
+      })
       # Scatter plot hover summary_id (key) and well_id (customdata)
-      grv$scatter_hover_summary_id <- shiny::debounce(shiny::reactive({
+      grv$scatter_hover_summary_id <- shiny::reactive({
         shiny::req(grv$scatter_hover_event())
         df <- grv$scatter_hover_event()
         if (rlang::is_list(df[["key"]])) {
@@ -283,7 +290,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
           summary_ids = bit64::as.integer64.character(df[["key"]]),
           well_ids = bit64::as.integer64.character(df[["customdata"]])
         )
-      }), 500)
+      })
       
       
       
@@ -376,7 +383,12 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##////////////////////////////////////////
       ##  Sparkline module                    //
       ##////////////////////////////////////////
-      spectraSparksServer("spectraSparks", grv, opts_obj, "click")
+      spectraSparksServer(
+        "scatter_sparks",
+        grv,
+        opts_obj,
+        "click"
+      )
       
       ##----------------------------------------
       ##  Reactive selection                  --
