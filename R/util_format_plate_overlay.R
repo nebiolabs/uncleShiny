@@ -3,7 +3,7 @@
 ##  Format data for interactive plate layout                              --
 ##--------------------------------------------------------------------------
 
-formatPlateOverlay <- function(df) {
+format_plate_overlay <- function(df) {
   df |>
     tidyr::separate(
       col = well,

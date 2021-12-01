@@ -92,7 +92,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
                 Buffer_condition_name
               )
             ) |> 
-            cbindColors(color_input, palette_input)
+            cbind_colors(color_input, palette_input)
         }
         
         return(munged_data)

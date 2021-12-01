@@ -24,7 +24,7 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   }
   
   # color palette to use for geom_area fills
-  sparklineColors <- mycolors(palette_name, 6)
+  sparklineColors <- make_palette(palette_name, 6)
   
   
   ##-----------------------------------------

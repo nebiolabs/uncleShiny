@@ -3,7 +3,7 @@
 ##  Custom categorical palette generator                                  --
 ##--------------------------------------------------------------------------
 
-mycolors <- function(palette, n) {
+make_palette <- function(palette, n) {
   paln <- palnList[[palette]]
   if(palette == "Default") {
     return(NULL)

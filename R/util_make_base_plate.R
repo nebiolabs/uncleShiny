@@ -3,7 +3,7 @@
 ##  Generate a base plate for layout                                      --
 ##--------------------------------------------------------------------------
 
-makeBasePlate <- function(format = c(96, 384, 81)) {
+make_base_plate <- function(format = c(96, 384, 81)) {
   if (missing(format)) {
     format <- 96
   }

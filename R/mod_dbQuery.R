@@ -73,7 +73,7 @@ dbQueryServer <- function(id, grv, dbobj) {
       # Reactive object of available products
       grv$robj_products <- shiny::eventReactive(input$bttn_refresh, {
         shiny::req(dbobj)
-        getQuery(dbobj, sql_queries$products)
+        get_query(dbobj, sql_queries$products)
       })
       
       # Update choices for product selection
@@ -104,7 +104,7 @@ dbQueryServer <- function(id, grv, dbobj) {
       grv$robj_experiment_sets <- shiny::eventReactive(
         input$product_selection, {
           shiny::req(grv$robj_products())
-          getQuery(
+          get_query(
             dbobj,
             sql_queries$experiment_sets,
             input = input$product_selection
@@ -121,7 +121,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         sets <- grv$robj_experiment_sets() |> 
           dplyr::pull(exp_set_id) |> 
           unique()
-        getQuery(dbobj, sql_queries$experiments, input = sets)
+        get_query(dbobj, sql_queries$experiments, input = sets)
       })
       
       # Update choices for experiment set selection
@@ -173,7 +173,7 @@ dbQueryServer <- function(id, grv, dbobj) {
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive object of data collected from server matching selection
       grv$robj_collected_data <- shiny::eventReactive(input$bttn_collect, {
-        summary_data <- getQuery(
+        summary_data <- get_query(
           dbobj,
           sql_queries$summary_data,
           input = input$experiment_set_selection
@@ -201,12 +201,12 @@ dbQueryServer <- function(id, grv, dbobj) {
         
         # vector of distinct groups for tooltip variable check
         condition_groups <- dplyr::pull(
-          getQuery(dbobj, sql_queries$condition_groups),
+          get_query(dbobj, sql_queries$condition_groups),
           name
         )
         
         # Base table for condition and unit join manipulations; join on well_id
-        conditions_units <- getQuery(
+        conditions_units <- get_query(
           dbobj,
           sql_queries$conditions_units,
           input = input$experiment_set_selection
@@ -227,7 +227,7 @@ dbQueryServer <- function(id, grv, dbobj) {
         return(
           nest_spectra(summary_cond_unit_join, spec_tbls) |> 
             add_missing_tooltip_vars(condition_groups) |> 
-            normalizeSpectra()
+            normalize_spectra()
         )
       })
       

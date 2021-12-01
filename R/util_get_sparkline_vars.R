@@ -1,3 +1,8 @@
+
+##--------------------------------------------------------------------------
+##  Retrieve available variables for sparkline plots                      --
+##--------------------------------------------------------------------------
+
 get_sparkline_vars <- function(df) {
   source("R/util_vars.R", local = TRUE)
   spec_list <- spec_vars

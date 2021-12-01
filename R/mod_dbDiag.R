@@ -321,7 +321,7 @@ dbDiagServer <- function(id, dbobj) {
         c(input$bttn_get_products, input$bttn_run_all),
         ignoreInit = TRUE, {
         if (db_is_valid()) {
-          getQuery(dbobj, query_products)
+          get_query(dbobj, query_products)
         }
       })
       
@@ -348,7 +348,7 @@ dbDiagServer <- function(id, dbobj) {
             backgroundColor = DT::styleEqual(
               levels = sort(unique(diag_products()$product_id)),
               values = purrr::map_chr(
-                mycolors(input$palette1, length(unique(diag_products()$product_id))),
+                make_palette(input$palette1, length(unique(diag_products()$product_id))),
                 paste0,
                 "90"
               )
@@ -365,7 +365,7 @@ dbDiagServer <- function(id, dbobj) {
         c(input$bttn_get_exp_sets, input$bttn_run_all),
         ignoreInit = TRUE, {
         if (db_is_valid()) {
-          getQuery(dbobj, query_exp_sets)
+          get_query(dbobj, query_exp_sets)
         }
       })
       
@@ -395,7 +395,7 @@ dbDiagServer <- function(id, dbobj) {
             backgroundColor = DT::styleEqual(
               levels = sort(unique(diag_exp_sets()$product_id)),
               values = purrr::map_chr(
-                mycolors(input$palette1, length(unique(diag_exp_sets()$product_id))),
+                make_palette(input$palette1, length(unique(diag_exp_sets()$product_id))),
                 paste0,
                 "90"
               )
@@ -410,7 +410,7 @@ dbDiagServer <- function(id, dbobj) {
                 )
               ),
               values = purrr::map_chr(
-                mycolors(
+                make_palette(
                   input$palette2,
                   length(
                     unique(
@@ -434,7 +434,7 @@ dbDiagServer <- function(id, dbobj) {
         c(input$bttn_get_exps, input$bttn_run_all),
         ignoreInit = TRUE, {
         if (db_is_valid()) {
-          getQuery(dbobj, query_exps)
+          get_query(dbobj, query_exps)
         }
       })
       
@@ -457,7 +457,7 @@ dbDiagServer <- function(id, dbobj) {
                 )
               ),
               values = purrr::map_chr(
-                mycolors(
+                make_palette(
                   input$palette2,
                   length(
                     unique(
@@ -487,7 +487,7 @@ dbDiagServer <- function(id, dbobj) {
         shiny::req(input$filter_exps)
           if (db_is_valid() & shiny::isTruthy(input$filter_exps)) {
             input <- bit64::as.integer64.character(input$filter_exps)
-            getQuery(dbobj, query_spectra, input = input)
+            get_query(dbobj, query_spectra, input = input)
           }
         })
       
