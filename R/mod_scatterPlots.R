@@ -116,6 +116,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
         })
       }
       module_SharedData <- shiny::reactive({
+        opts_obj$color_highlight
         crosstalk::SharedData$new(module_data(), key = ~uncle_summary_id)
       })
       
@@ -209,9 +210,15 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
             legend = legendList
           ) |>
           plotly::highlight(
-            on = "plotly_selected", off = "plotly_deselect",
-            opacityDim = 0.15,
-            selected = plotly::attrs_selected(showlegend = FALSE)
+            on = opts_obj$mode_highlight_on,
+            off = opts_obj$mode_highlight_off,
+            color = opts_obj$color_highlight,
+            opacityDim = 0.42,
+            selected = plotly::attrs_selected(
+              showlegend = TRUE,
+              opacity = 1
+            ),
+            debounce = 100
           ) |>
           plotly::config(displaylogo = FALSE)# |> 
           # plotly::event_register("plotly_selected") |> 
