@@ -64,6 +64,34 @@ plotOptsUI <- function(id) {
           value = 0.5,
           step = 0.1,
           ticks = TRUE
+        ),
+        ##----------------------
+        ##  Highlight mode    --
+        ##----------------------
+        shiny::radioButtons(
+          ns("mode_highlight"),
+          label = "Point highlighting mode:",
+          choices = c(
+            "Click+Drag" = "plotly_selected",
+            "Click" = "plotly_click",
+            "Hover" = "plotly_hover"
+          ),
+          selected = "plotly_selected",
+          inline = TRUE
+        ),
+        ##-----------------------
+        ##  Highlight color    --
+        ##-----------------------
+        shiny::radioButtons(
+          ns("color_highlight"),
+          label = "Point highlighting color:",
+          choices = c(
+            "Palette" = "none",
+            "Red" = "red",
+            "Green" = "green"
+          ),
+          selected = "none",
+          inline = TRUE
         )
       ),
       ##----------------------------------------
@@ -286,7 +314,31 @@ plotOptsServer <- function(id, opts_obj, grv) {
           2000
         )
       })
-
+      
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Functionality selections            <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        opts_obj$mode_highlight_on <- input$mode_highlight
+        
+        opts_obj$mode_highlight_off <- switch(
+          input$mode_highlight,
+          "plotly_selected" = "plotly_deselect",
+          "plotly_click" = "plotly_doubleclick",
+          "plotly_hover" = "plotly_doubleclick"
+        )
+      })
+      
+      shiny::observe({
+        opts_obj$color_highlight <- switch(
+          input$color_highlight,
+          "none" = NULL,
+          "red" = "red",
+          "green" = "green"
+        )
+      })
+      
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  X var selections                    <<
