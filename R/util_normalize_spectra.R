@@ -3,7 +3,7 @@
 ##  Spectra self-normalization function (0 to 1)                          --
 ##--------------------------------------------------------------------------
 
-normalizeSpectra <- function(df) {
+normalize_spectra <- function(df) {
     df |> dplyr::mutate(dplyr::across(
       .cols = tidyselect::contains("spec"),
       .fns = function(cols) {

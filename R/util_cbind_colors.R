@@ -3,7 +3,7 @@
 ##  Hardcode color hex values into dataframe                              --
 ##--------------------------------------------------------------------------
 
-cbindColors <- function(df, color_var, palette_name) {
+cbind_colors <- function(df, color_var, palette_name) {
   the_length <- length(unique(df[[color_var]]))
   cat(paste0("The length of the palette is ", the_length,".\n"))
   df |> 
@@ -19,7 +19,7 @@ cbindColors <- function(df, color_var, palette_name) {
     ) |> 
     dplyr::group_by(.data[[color_var]]) |> 
     dplyr::mutate(
-      color_hex = mycolors(
+      color_hex = make_palette(
         palette_name,
         # length(unique(df[[color_var]]))
         the_length

@@ -64,7 +64,7 @@ ggscatter <- function(data, x_var, y_var, label = NULL,
       # Hardcoded color palette; see R/func_paletteGenerator.R
       ggplot2::scale_color_identity(
         name = color_var,
-        breaks = mycolors(
+        breaks = make_palette(
           palette_name,
           length(unique(data_static[[color_var]]))
         ),
@@ -75,7 +75,7 @@ ggscatter <- function(data, x_var, y_var, label = NULL,
     p <- p +
       # Color palette; see R/func_paletteGenerator.R
       ggplot2::scale_color_manual(
-        values = mycolors(
+        values = make_palette(
           palette_name,
           length(unique(data_static[[color_var]]))
         )

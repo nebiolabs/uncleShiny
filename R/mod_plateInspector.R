@@ -50,8 +50,8 @@ plateInspectorServer <- function(id, grv) {
               c("well_id"),
               .fns = bit64::as.character.integer64
             )) |> 
-            formatPlateOverlay()
-            # cbindColors(opts_obj$color_global, opts_obj$palette_global)
+            format_plate_overlay()
+            # cbind_colors(opts_obj$color_global, opts_obj$palette_global)
         })
       } else {
         module_data <- shiny::reactive({
@@ -70,8 +70,8 @@ plateInspectorServer <- function(id, grv) {
               c("well_id"),
               .fns = bit64::as.character.integer64
             )) |> 
-            formatPlateOverlay()
-            # cbindColors(opts_obj$color_global, opts_obj$palette_global)
+            format_plate_overlay()
+            # cbind_colors(opts_obj$color_global, opts_obj$palette_global)
         })
       }
       
@@ -83,7 +83,7 @@ plateInspectorServer <- function(id, grv) {
           module_data(),
           function(df, nm) {
             output[[paste0(nm, "_plot")]] <- plotly::renderPlotly({
-              buildPlateLayout(
+              build_plate_layout(
                 format = 96, overlay_data = df,
                 source = paste0(nm, "_source"), customdata = "well_id"
               )

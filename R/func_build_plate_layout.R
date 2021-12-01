@@ -3,9 +3,9 @@
 ##  Construct plate layout with plotly                                    --
 ##--------------------------------------------------------------------------
 
-buildPlateLayout <- function(format = NULL, overlay_data = NULL, 
+build_plate_layout <- function(format = NULL, overlay_data = NULL, 
                               source = NULL, customdata = "well") {
-  base_plate <- makeBasePlate(format = format)
+  base_plate <- make_base_plate(format = format)
   
   if (is.null(overlay_data)) {
     overlay_data <- dplyr::slice_sample(base_plate, n = 24)
