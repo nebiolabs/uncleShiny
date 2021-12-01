@@ -26,7 +26,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("color_global"),
-          "Color Points By:",
+          "Color points by:",
           choices = colorvarChoices,
           selected = "buffer"
         ),
@@ -79,7 +79,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("yvar1"),
-          "Y Variable:",
+          "Y variable:",
           choices = yvarChoices,
           selected = "PdI"
         ),
@@ -105,7 +105,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("xvar1"),
-          "X Variable:",
+          "X variable:",
           choices = xvarChoices,
           selected = "Z_D"
         ),
@@ -148,7 +148,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("yvar2"),
-          "Y Variable:",
+          "Y variable:",
           choices = yvarChoices,
           selected = "Tagg266"
         ),
@@ -174,7 +174,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("xvar2"),
-          "X Variable:",
+          "X variable:",
           choices = xvarChoices,
           selected = "Tm1"
         ),
@@ -217,7 +217,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("color_zoom"),
-          "Color Points By:",
+          "Color points by:",
           choices = colorvarChoices,
           selected = "buffer"
         ),
@@ -226,7 +226,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("yvar3"),
-          "Y Variable:",
+          "Y variable:",
           choices = yvarChoices,
           selected = "Tagg266"
         ),
@@ -235,7 +235,7 @@ plotOptsUI <- function(id) {
         ##-----------------------
         shiny::selectInput(
           ns("xvar3"),
-          "X Variable:",
+          "X variable:",
           choices = xvarChoices,
           selected = "Z_D"
         ),
