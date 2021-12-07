@@ -39,7 +39,14 @@ scatterPlotsUI <- function(id) {
           ),
           shiny::column(
             width = 3,
-            conditionsViewerUI(ns("scatter_conditions"))
+            ##----------------------------------------
+            ##  Condition viewer                    --
+            ##----------------------------------------
+            conditionsViewerUI(ns("scatter_conditions")),
+            ##-----------------------------------------
+            ##  Wordcloud                            --
+            ##-----------------------------------------
+            wordcloudUI(ns("scatter_wordcloud"))
           )
         )
       ),
@@ -413,6 +420,16 @@ scatterPlotsServer <- function(id, grv) {
       conditionsViewerServer(
         "scatter_conditions",
         shiny::reactive({grv$scatter$hovered$data})
+      )
+      
+      ##////////////////////////////////////////
+      ##  Wordcloud module                    //
+      ##////////////////////////////////////////
+      wordcloudServer(
+        "scatter_wordcloud",
+        grv,
+        "uncle_summary_id",
+        robj_scatter_selected
       )
     }
   )
