@@ -26,7 +26,7 @@ scatterPlotsUI <- function(id) {
             plotly::plotlyOutput(
               ns("plot_scatter"),
               width = "100%",
-              height = "500"
+              height = "400px"
             ),
             ##----------------------------------------
             ##  Spectra sparklines                  --
