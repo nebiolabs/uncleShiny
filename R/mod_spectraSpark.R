@@ -15,7 +15,7 @@ spectraSparksUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-spectraSparksServer <- function(id, grv, opts_obj, event_type) {
+spectraSparksServer <- function(id, grv, event_type) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
@@ -68,7 +68,7 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
             x_var = ..3,
             y_var = ..4,
             summary_var = ..5,
-            palette_name = shiny::isolate(opts_obj$palette_global),
+            palette_name = shiny::isolate(grv$scatter_opts$palette_global),
             color_n = ..6,
             alpha = 0.6
           )
@@ -113,7 +113,7 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
       #       x_var = ..3,
       #       y_var = ..4,
       #       summary_var = ..5,
-      #       palette_name = opts_obj$palette_global,
+      #       palette_name = grv$scatter_opts$palette_global,
       #       color_n = ..6,
       #       alpha = 0.6
       #     )

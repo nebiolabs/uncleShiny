@@ -44,7 +44,7 @@ function(input, output, session) {
   ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ##  Scatter plot options                >>
   ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  scatter_opts <- shiny::reactiveValues()
+  grv$scatter_opts <- shiny::reactiveValues()
   
   
   
@@ -76,12 +76,12 @@ function(input, output, session) {
   ##////////////////////////////////////////
   ##  Scatter options module              //
   ##////////////////////////////////////////
-  plotOptsServer("opts_scatter", scatter_opts, grv)
+  plotOptsServer("opts_scatter", grv$scatter_opts)
   
   ##////////////////////////////////////////
   ##  Scatter plots module                //
   ##////////////////////////////////////////
-  scatterPlotsServer("scatter", scatter_opts, grv)
+  scatterPlotsServer("scatter", grv)
   
   ##////////////////////////////////////////
   ##  Plate inspector module              //

@@ -73,7 +73,7 @@ scatterPlotsUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-scatterPlotsServer <- function(id, opts_obj, grv) {
+scatterPlotsServer <- function(id, grv) { # find opts_obj
   shiny::moduleServer(
     id,
     function(input, output, session) {
@@ -102,21 +102,21 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
         module_data <- shiny::reactive({
           test_data |>
             munge_module_data(
-              color_input = opts_obj$color_global,
-              palette_input = opts_obj$palette_global
+              color_input = grv$scatter_opts$color_global,
+              palette_input = grv$scatter_opts$palette_global
             )
         })
       } else {
         module_data <- shiny::reactive({
           grv$robj_collected_data() |> 
             munge_module_data(
-              color_input = opts_obj$color_global,
-              palette_input = opts_obj$palette_global
+              color_input = grv$scatter_opts$color_global,
+              palette_input = grv$scatter_opts$palette_global
             )
         })
       }
       module_SharedData <- shiny::reactive({
-        opts_obj$color_highlight
+        grv$scatter_opts$color_highlight
         crosstalk::SharedData$new(module_data(), key = ~uncle_summary_id)
       })
       
@@ -128,18 +128,18 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       plot_DLS <- shiny::reactive({
         ggscatter(
           data = module_SharedData(),
-          x_var = opts_obj$xvar1,
-          y_var = opts_obj$yvar1,
-          color_var = opts_obj$color_global,
+          x_var = grv$scatter_opts$xvar1,
+          y_var = grv$scatter_opts$yvar1,
+          color_var = grv$scatter_opts$color_global,
           color_encoded = FALSE,
-          palette_name = opts_obj$palette_global,
-          size = opts_obj$size_points(),
-          alpha = opts_obj$alpha_points(),
-          show_vert_guides = opts_obj$show_guides_v1,
-          vert_guides = opts_obj$guides_v1(),
-          show_horiz_guides = opts_obj$show_guides_h1,
-          horiz_guides = opts_obj$guides_h1(),
-          x_is_log = opts_obj$xvar1_is_log,
+          palette_name = grv$scatter_opts$palette_global,
+          size = grv$scatter_opts$size_points(),
+          alpha = grv$scatter_opts$alpha_points(),
+          show_vert_guides = grv$scatter_opts$show_guides_v1,
+          vert_guides = grv$scatter_opts$guides_v1(),
+          show_horiz_guides = grv$scatter_opts$show_guides_h1,
+          horiz_guides = grv$scatter_opts$guides_h1(),
+          x_is_log = grv$scatter_opts$xvar1_is_log,
           custom_data = "well_id",
           show_legend = FALSE
         )
@@ -153,18 +153,18 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       plot_SLS_DSF <- shiny::reactive({
         ggscatter(
           data = module_SharedData(),
-          x_var = opts_obj$xvar2,
-          y_var = opts_obj$yvar2,
-          color_var = opts_obj$color_global,
+          x_var = grv$scatter_opts$xvar2,
+          y_var = grv$scatter_opts$yvar2,
+          color_var = grv$scatter_opts$color_global,
           color_encoded = FALSE,
-          palette_name = opts_obj$palette_global,
-          size = opts_obj$size_points(),
-          alpha = opts_obj$alpha_points(),
-          show_vert_guides = opts_obj$show_guides_v2,
-          vert_guides = opts_obj$guides_v2(),
-          show_horiz_guides = opts_obj$show_guides_h2,
-          horiz_guides = opts_obj$guides_h2(),
-          x_is_log = opts_obj$xvar2_is_log,
+          palette_name = grv$scatter_opts$palette_global,
+          size = grv$scatter_opts$size_points(),
+          alpha = grv$scatter_opts$alpha_points(),
+          show_vert_guides = grv$scatter_opts$show_guides_v2,
+          vert_guides = grv$scatter_opts$guides_v2(),
+          show_horiz_guides = grv$scatter_opts$show_guides_h2,
+          horiz_guides = grv$scatter_opts$guides_h2(),
+          x_is_log = grv$scatter_opts$xvar2_is_log,
           custom_data = "well_id",
           show_legend = TRUE
         )
@@ -210,9 +210,9 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
             legend = legendList
           ) |>
           plotly::highlight(
-            on = opts_obj$mode_highlight_on,
-            off = opts_obj$mode_highlight_off,
-            color = opts_obj$color_highlight,
+            on = grv$scatter_opts$mode_highlight_on,
+            off = grv$scatter_opts$mode_highlight_off,
+            color = grv$scatter_opts$color_highlight,
             opacityDim = 0.42,
             selected = plotly::attrs_selected(
               showlegend = TRUE,
@@ -358,19 +358,19 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       plot_zoom <- shiny::reactive({
         ggscatter(
           data = grv$robj_selected_data(),
-          x_var = opts_obj$xvar3,
-          y_var = opts_obj$yvar3,
+          x_var = grv$scatter_opts$xvar3,
+          y_var = grv$scatter_opts$yvar3,
           label = "well",
-          color_var = opts_obj$color_zoom,
+          color_var = grv$scatter_opts$color_zoom,
           color_encoded = TRUE,
-          palette_name = opts_obj$palette_global,
-          size = opts_obj$size_points(),
-          alpha = opts_obj$alpha_points(),
-          # show_vert_guides = opts_obj$show_guides_v2,
-          # vert_guides = opts_obj$guides_v2(),
-          # show_horiz_guides = opts_obj$show_guides_h2,
-          # horiz_guides = opts_obj$guides_h2(),
-          x_is_log = opts_obj$xvar3_is_log,
+          palette_name = grv$scatter_opts$palette_global,
+          size = grv$scatter_opts$size_points(),
+          alpha = grv$scatter_opts$alpha_points(),
+          # show_vert_guides = grv$scatter_opts$show_guides_v2,
+          # vert_guides = grv$scatter_opts$guides_v2(),
+          # show_horiz_guides = grv$scatter_opts$show_guides_h2,
+          # horiz_guides = grv$scatter_opts$guides_h2(),
+          x_is_log = grv$scatter_opts$xvar3_is_log,
           custom_data = "well_id",
           show_legend = FALSE
         )
@@ -404,7 +404,6 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       spectraSparksServer(
         "scatter_sparks",
         grv,
-        opts_obj,
         "click"
       )
       

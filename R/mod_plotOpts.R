@@ -284,7 +284,7 @@ plotOptsUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-plotOptsServer <- function(id, opts_obj, grv) {
+plotOptsServer <- function(id, opts_obj) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
