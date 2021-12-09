@@ -77,6 +77,9 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      
+      grv$scatter <- shiny::reactiveValues()
+      
       munge_module_data <- function(data_input, color_input, palette_input) {
         if (is.null(data_input)) {
           munged_data <- NULL
@@ -233,120 +236,111 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected plotly event        <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      # Scatter plot selected event data
       shiny::observe({
-        grv$scatter_selected_event <- plotly::event_data(
+        # similar to a debounce to delay repeat invalidation/evaluation
+        # shiny::invalidateLater(1000, session)
+        
+        # plotly callback
+        event <- plotly::event_data(
           event = "plotly_selected",
           source = "scatter"
         )
-      })
-      # Scatter plot selected summary_ids (key) and well_ids (customdata)
-      shiny::observe({
-        shiny::req(grv$scatter_selected_event)
-        # shiny::invalidateLater(1000, session)
         
-        if (rlang::is_list(grv$scatter_selected_event[["key"]])) {
-          grv$scatter_selected_event[["key"]] <- as.character(
-            unlist(grv$scatter_selected_event[["key"]])
-          )
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["key"]])) {
+          event[["key"]] <- as.character(unlist(event[["key"]]))
         }
-        if (rlang::is_list(grv$scatter_selected_event[["customdata"]])) {
-          grv$scatter_selected_event[["customdata"]] <- as.character(
-            unlist(grv$scatter_selected_event[["customdata"]])
-          )
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
         }
         
-        grv$scatter_selected_summary_ids <- list(
-          summary_ids = bit64::as.integer64.character(
-            grv$scatter_selected_event[["key"]]
-          ),
-          well_ids = bit64::as.integer64.character(
-            grv$scatter_selected_event[["customdata"]]
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$scatter$selected <- NULL
+        } else {
+          grv$scatter$selected <- list(
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
-        )
-      })
+        }
+      }, label = "scatter_selected")
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter clicked plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      # Scatter plot click event data
       shiny::observe({
-        grv$scatter_click_event <- plotly::event_data(
+        # similar to a debounce to delay repeat invalidation/evaluation
+        # shiny::invalidateLater(1000, session)
+        
+        # plotly callback
+        event <- plotly::event_data(
           event = "plotly_click",
           source = "scatter"
         )
-      })
-      # Scatter plot clicked summary_id (key) and well_ids (customdata)
-      shiny::observe({
-        shiny::req(grv$scatter_click_event)
-        # shiny::invalidateLater(1000, session)
         
-        if (rlang::is_list(grv$scatter_click_event[["key"]])) {
-          grv$scatter_click_event[["key"]] <- as.character(
-            unlist(grv$scatter_click_event[["key"]])
-          )
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["key"]])) {
+          event[["key"]] <- as.character(unlist(event[["key"]]))
         }
-        if (rlang::is_list(grv$scatter_click_event[["customdata"]])) {
-          grv$scatter_click_event[["customdata"]] <- as.character(
-            unlist(grv$scatter_click_event[["customdata"]])
-          )
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
         }
         
-        grv$scatter_click_summary_id <- list(
-          summary_ids = bit64::as.integer64.character(
-            grv$scatter_click_event[["key"]]
-          ),
-          well_ids = bit64::as.integer64.character(
-            grv$scatter_click_event[["customdata"]]
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$scatter$clicked <- NULL
+        } else {
+          grv$scatter$clicked <- list(
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
-        )
-      })
+        }
+      }, label = "scatter_clicked")
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      # Scatter plot hover event data
       shiny::observe({
-        grv$scatter_hover_event <- plotly::event_data(
+        # similar to a debounce to delay repeat invalidation/evaluation
+        # shiny::invalidateLater(1000, session)
+        
+        # plotly callback
+        event <- plotly::event_data(
           event = "plotly_hover",
           source = "scatter"
         )
-      })
-      # Scatter plot hover summary_id (key) and well_id (customdata)
-      shiny::observe({
-        shiny::req(grv$scatter_hover_event)
-        # shiny::invalidateLater(1000, session)
         
-        if (rlang::is_list(grv$scatter_hover_event[["key"]])) {
-          grv$scatter_hover_event[["key"]] <- as.character(
-            unlist(grv$scatter_hover_event[["key"]])
-          )
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["key"]])) {
+          event[["key"]] <- as.character(unlist(event[["key"]]))
         }
-        if (rlang::is_list(grv$scatter_hover_event[["customdata"]])) {
-          grv$scatter_hover_event[["customdata"]] <- as.character(
-            unlist(grv$scatter_hover_event[["customdata"]])
-          )
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
         }
         
-        grv$scatter_hover_summary_id <- list(
-          summary_ids = bit64::as.integer64.character(
-            grv$scatter_hover_event[["key"]]
-          ),
-          well_ids = bit64::as.integer64.character(
-            grv$scatter_hover_event[["customdata"]]
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$scatter$hovered <- NULL
+        } else {
+          grv$scatter$hovered <- list(
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
-        )
-      })
+        }
+      }, label = "scatter_hovered")
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected data                <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       grv$robj_selected_data <- shiny::reactive({
-        shiny::req(module_data(), grv$scatter_selected_summary_ids)
+        shiny::req(module_data(), grv$scatter$selected)
         dplyr::filter(
           module_data(),
           uncle_summary_id %in%
-            grv$scatter_selected_summary_ids[["summary_ids"]]
+            grv$scatter$selected[["summary_ids"]]
         )
       })
       
@@ -412,11 +406,11 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##  Reactive selection                  --
       ##----------------------------------------
       robj_scatter_selected <- shiny::reactive({
-        grv$scatter_selected_summary_ids[["summary_ids"]]
+        grv$scatter$selected[["summary_ids"]]
       })
       
       robj_scatter_hovered <- shiny::reactive({
-        grv$scatter_hover_summary_id[["summary_ids"]]
+        grv$scatter$hovered[["summary_ids"]]
       })
       
       

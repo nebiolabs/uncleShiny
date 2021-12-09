@@ -67,7 +67,7 @@ spectraViewerServer <- function(id, grv, select_var, select_vals) {
       
       if (use_testing_mode) {
         module_data <- shiny::reactive({
-          # shiny::req(grv$scatter_selected_summary_ids())
+          # shiny::req(grv$scatter$selected)
           test_data |> 
             dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
             dplyr::filter(
@@ -76,7 +76,7 @@ spectraViewerServer <- function(id, grv, select_var, select_vals) {
         })
       } else {
         module_data <- shiny::reactive({
-          # shiny::req(grv$scatter_selected_summary_ids())
+          # shiny::req(grv$scatter$selected)
           grv$robj_collected_data() |> 
             dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
             dplyr::filter(

@@ -26,9 +26,9 @@ spectraSparksServer <- function(id, grv, event_type) {
       }
       
       if (event_type == "click") {
-        event <- quote(grv$scatter_click_summary_id)
+        event <- quote(grv$scatter$clicked)
       } else if (event_type == "hover") {
-        event <- quote(grv$scatter_hover_summary_id)
+        event <- quote(grv$scatter$hovered)
       } else {
         stop("Sparkline module event_type argument error.")
       }
