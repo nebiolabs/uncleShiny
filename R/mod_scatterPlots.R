@@ -339,8 +339,17 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
         shiny::req(module_data(), grv$scatter$selected)
         dplyr::filter(
           module_data(),
-          uncle_summary_id %in%
-            grv$scatter$selected[["summary_ids"]]
+          uncle_summary_id %in% grv$scatter$selected[["summary_ids"]]
+        )
+      })
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter hovered data                <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        shiny::req(module_data(), grv$scatter$hovered)
+        grv$scatter$hovered$data <- dplyr::filter(
+          module_data(),
+          uncle_summary_id %in% grv$scatter$hovered[["summary_ids"]]
         )
       })
       
@@ -430,9 +439,7 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##////////////////////////////////////////
       conditionsViewerServer(
         "scatter_conditions",
-        grv,
-        "uncle_summary_id",
-        robj_scatter_hovered
+        shiny::reactive({grv$scatter$hovered$data})
       )
     }
   )
