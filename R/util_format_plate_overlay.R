@@ -11,7 +11,7 @@ format_plate_overlay <- function(df) {
       sep = "(?<=^[A-H]{1})(?=\\d+$)",
       remove = FALSE
     ) |>
-    dplyr::select(!c(tidyselect::contains("spec"), "residuals")) |>
+    dplyr::select(!c("residuals")) |>
     dplyr::group_split(exp_set_id) |>
     {
       \(l) rlang::set_names(
