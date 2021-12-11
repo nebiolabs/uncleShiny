@@ -87,7 +87,7 @@ scatterPlotsUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-scatterPlotsServer <- function(id, grv) { # find opts_obj
+scatterPlotsServer <- function(id, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
@@ -96,9 +96,9 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       
       munge_module_data <- function(data_input, color_input, palette_input) {
         if (is.null(data_input)) {
-          munged_data <- NULL
+          NULL
         } else {
-          munged_data <- data_input |>
+          data_input |>
             dplyr::mutate(
               Buffer_condition_name = dplyr::if_else(
                 stringr::str_detect(
@@ -111,8 +111,6 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
             ) |> 
             cbind_colors(color_input, palette_input)
         }
-        
-        return(munged_data)
       }
       
       # if (use_testing_mode) {
@@ -157,6 +155,7 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##-----------------------------------------
       # Reactive object of DLS plot
       plot_DLS <- shiny::reactive({
+        shiny::req(module_SharedData())
         ggscatter(
           data = module_SharedData(),
           x_var = grv$scatter_opts$xvar1,
@@ -182,6 +181,7 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##-----------------------------------------
       # Reactive object of SLS & DSF plot
       plot_SLS_DSF <- shiny::reactive({
+        shiny::req(module_SharedData())
         ggscatter(
           data = module_SharedData(),
           x_var = grv$scatter_opts$xvar2,
@@ -207,6 +207,7 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##-----------------------------------------
       # Plotly subplot output rendering
       output$plot_scatter <- plotly::renderPlotly({
+        shiny::req(module_SharedData())
         plotly::subplot(
           plot_DLS() |>
             plotly::ggplotly(source = "scatter", tooltip = "text") |> 
@@ -224,20 +225,6 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
           margin = 0.04
         ) |>
           plotly::layout(
-            # annotations = list(
-            #   list(
-            #     x = 0.45, xref = "paper", xanchor = "right",
-            #     y = 1, yref = "paper",
-            #     text = "Plot L", font = list(size = 18),
-            #     showarrow = F
-            #   ),
-            #   list(
-            #     x = 1, xref = "paper", xanchor = "right",
-            #     y = 1, yref = "paper",
-            #     text = "Plot R", font = list(size = 18),
-            #     showarrow = F
-            #   )
-            # ),
             legend = legendList
           ) |>
           plotly::highlight(
@@ -252,7 +239,8 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
             debounce = 100
           ) |>
           plotly::config(displaylogo = FALSE)# |> 
-          # plotly::event_register("plotly_selected") |> 
+          # plotly::event_register("plotly_selected") |>
+          # plotly::event_register("plotly_click") |> 
           # plotly::event_register("plotly_hover")
       })
       
@@ -332,7 +320,6 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       shiny::observe({
         # similar to a debounce to delay repeat invalidation/evaluation
-        # shiny::invalidateLater(1000, session)
         
         # plotly callback
         event <- plotly::event_data(

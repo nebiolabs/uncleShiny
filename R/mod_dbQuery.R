@@ -28,11 +28,9 @@ dbQueryUI <- function(id) {
       "Select product:",
       choices = NULL
     ),
-    # shiny::br(),
     shiny::helpText("Products with correspoding Uncle datasets
                     are listed in the dropdown menu above. Select one to view
                     experiments associated with that product."),
-    # shiny::textOutput(ns("raw_product_selection")),
     shiny::br(),
     shiny::br(),
     shiny::selectInput(
@@ -41,11 +39,9 @@ dbQueryUI <- function(id) {
       choices = NULL,
       multiple = TRUE
     ),
-    # shiny::br(),
     shiny::helpText("Once a product is selected, associated Uncle experiments
                     will be listed in the dropdown above. Select one (or
                     multiple) experiment(s) for visualization and analysis."),
-    # shiny::textOutput(ns("raw_experiment_set_selection")),
     shiny::br(),
     shiny::br(),
     shiny::actionButton(
@@ -56,7 +52,6 @@ dbQueryUI <- function(id) {
     shiny::br(),
     shiny::helpText("Once a selection of experiments has been made,
                     click to request/load the data from ebase.")#,
-    # shiny::textOutput(ns("raw_bttn_collect"))
   )
 }
 
