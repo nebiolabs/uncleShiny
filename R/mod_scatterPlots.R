@@ -358,6 +358,9 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
             well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
         }
+        # if (rlang::is_empty(grv$scatter$hovered[["summary_ids"]])) {
+        #   cat("Notice, that empty vector error happened again on hover.\n")
+        # }
       }, label = "scatter_hovered")
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -388,10 +391,14 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       shiny::observe({
         shiny::req(module_data(), grv$scatter$hovered)
-        grv$scatter$hovered$data <- dplyr::filter(
-          module_data(),
-          uncle_summary_id %in% grv$scatter$hovered[["summary_ids"]]
-        )
+        if (rlang::is_empty(grv$scatter$hovered[["summary_ids"]])) {
+          grv$scatter$hovered$data <- NULL
+        } else {
+          grv$scatter$hovered$data <- dplyr::filter(
+            module_data(),
+            uncle_summary_id %in% grv$scatter$hovered[["summary_ids"]]
+          )
+        }
       }, label = "scatter_hovered_data")
       
       # Output for testing
