@@ -35,7 +35,21 @@ scatterPlotsUI <- function(id) {
               shiny::h3("Spectra Quickview"),
               shiny::helpText("Activated on click.")
             ),
-            spectraSparksUI(ns("scatter_sparks"))
+            spectraSparksUI(ns("scatter_sparks")),
+            # Output for testing -----------------------------------------------
+            # TODO remove before merge
+            shiny::fluidRow(shiny::verbatimTextOutput(ns("test_module_data"))),
+            shiny::fluidRow(
+              shiny::column(
+                width = 6,
+                shiny::verbatimTextOutput(ns("test_hovered"))
+              ),
+              shiny::column(
+                width = 6,
+                shiny::verbatimTextOutput(ns("test_selected"))
+              )
+            )
+            # End section of UI to remove --------------------------------------
           ),
           shiny::column(
             width = 3,
@@ -101,23 +115,37 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
         return(munged_data)
       }
       
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({
-          test_data |>
-            munge_module_data(
-              color_input = grv$scatter_opts$color_global,
-              palette_input = grv$scatter_opts$palette_global
-            )
-        })
-      } else {
-        module_data <- shiny::reactive({
-          grv$robj_collected_data() |> 
-            munge_module_data(
-              color_input = grv$scatter_opts$color_global,
-              palette_input = grv$scatter_opts$palette_global
-            )
-        })
-      }
+      # if (use_testing_mode) {
+      #   module_data <- shiny::reactive({
+      #     test_data |>
+      #       munge_module_data(
+      #         color_input = grv$scatter_opts$color_global,
+      #         palette_input = grv$scatter_opts$palette_global
+      #       )
+      #   })
+      # } else {
+      #   module_data <- shiny::reactive({
+      #     grv$data() |> 
+      #       munge_module_data(
+      #         color_input = grv$scatter_opts$color_global,
+      #         palette_input = grv$scatter_opts$palette_global
+      #       )
+      #   })
+      # }
+      module_data <- shiny::reactive({
+        grv$data() |> 
+          munge_module_data(
+            color_input = grv$scatter_opts$color_global,
+            palette_input = grv$scatter_opts$palette_global
+          )
+      })
+      
+      # Output for testing
+      # TODO remove before merge
+      output$test_module_data <- shiny::renderPrint({
+        module_data()
+      })
+      
       module_SharedData <- shiny::reactive({
         grv$scatter_opts$color_highlight
         crosstalk::SharedData$new(module_data(), key = ~uncle_summary_id)
@@ -335,13 +363,26 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected data                <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      grv$robj_selected_data <- shiny::reactive({
+      shiny::observe({
         shiny::req(module_data(), grv$scatter$selected)
-        dplyr::filter(
+        grv$scatter$selected$data <- dplyr::filter(
           module_data(),
           uncle_summary_id %in% grv$scatter$selected[["summary_ids"]]
         )
+      }, label = "scatter_selected_data")
+      
+      # Output for testing
+      # TODO remove before merge
+      output$test_selected <- shiny::renderPrint({
+        # grv$scatter$selected$data
+        # plotly::event_data(
+        #   event = "plotly_selected",
+        #   source = "scatter"
+        # )
+        grv$scatter$selected
       })
+      
+      
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered data                <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -351,6 +392,17 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
           module_data(),
           uncle_summary_id %in% grv$scatter$hovered[["summary_ids"]]
         )
+      }, label = "scatter_hovered_data")
+      
+      # Output for testing
+      # TODO remove before merge
+      output$test_hovered <- shiny::renderPrint({
+        # grv$scatter$hovered$data
+        # plotly::event_data(
+        #   event = "plotly_hover",
+        #   source = "scatter"
+        # )
+        grv$scatter$hovered
       })
       
       
@@ -360,7 +412,7 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       # Reactive object of SLS & DSF plot
       plot_zoom <- shiny::reactive({
         ggscatter(
-          data = grv$robj_selected_data(),
+          data = grv$scatter$selected$data,
           x_var = grv$scatter_opts$xvar3,
           y_var = grv$scatter_opts$yvar3,
           label = "well",
@@ -411,26 +463,12 @@ scatterPlotsServer <- function(id, grv) { # find opts_obj
       )
       
       
-      ##----------------------------------------
-      ##  Reactive selection                  --
-      ##----------------------------------------
-      robj_scatter_selected <- shiny::reactive({
-        grv$scatter$selected[["summary_ids"]]
-      })
-      
-      robj_scatter_hovered <- shiny::reactive({
-        grv$scatter$hovered[["summary_ids"]]
-      })
-      
-      
       ##/////////////////////////////////////////
       ##  Spectra viewer module                //
       ##/////////////////////////////////////////
       spectraViewerServer(
         "scatter_ridgeline",
-        grv,
-        "uncle_summary_id",
-        robj_scatter_selected
+        shiny::reactive({grv$scatter$selected$data})
       )
       
       

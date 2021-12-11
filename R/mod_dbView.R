@@ -160,6 +160,13 @@ dbViewServer <- function(id, grv) {
         )
       })
       
+      shiny::observe({
+        if (use_testing_mode) {
+          grv$dbquery$state_bttn_collect <- 
+            grv$dbquery$state_bttn_collect + 1
+        }
+      })
+      
       # Render summary data table for collected selection
       output$table_collected_data <- DT::renderDT({
         shiny::req(grv$data())

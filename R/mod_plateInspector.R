@@ -59,17 +59,21 @@ plateInspectorServer <- function(id, grv) {
       ##----------------------------------------
       ##  Data instance for module            --
       ##----------------------------------------
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({
-          test_data |>
-            munge_module_data()
-        })
-      } else {
-        module_data <- shiny::reactive({
-          grv$robj_collected_data() |>
-            munge_module_data()
-        })
-      }
+      # if (use_testing_mode) {
+      #   module_data <- shiny::reactive({
+      #     test_data |>
+      #       munge_module_data()
+      #   })
+      # } else {
+      #   module_data <- shiny::reactive({
+      #     grv$data() |>
+      #       munge_module_data()
+      #   })
+      # }
+      module_data <- shiny::reactive({
+        grv$data() |>
+          munge_module_data()
+      })
       
       ##-----------------------------------------
       ##  Dynamic outputs                      --

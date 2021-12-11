@@ -19,11 +19,12 @@ spectraSparksServer <- function(id, grv, event_type) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({test_data})
-      } else {
-        module_data <- shiny::reactive({grv$robj_collected_data()})
-      }
+      # if (use_testing_mode) {
+      #   module_data <- shiny::reactive({test_data})
+      # } else {
+      #   module_data <- shiny::reactive({grv$data()})
+      # }
+      module_data <- shiny::reactive({grv$data()})
       
       if (event_type == "click") {
         event <- quote(grv$scatter$clicked)
