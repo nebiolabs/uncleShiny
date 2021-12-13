@@ -69,9 +69,9 @@ dbViewServer <- function(id, grv) {
     function(input, output, session) {
       # Render products table for db inspection
       output$table_products_available <- DT::renderDT({
-        shiny::req(grv$robj_products())
+        shiny::req(grv$dbquery$products)
         DT::datatable(
-          data = grv$robj_products(),
+          data = grv$dbquery$products,
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
@@ -95,12 +95,13 @@ dbViewServer <- function(id, grv) {
       
       # Render experiment sets table for db inspection
       output$table_experiment_sets_available <- DT::renderDT({
-        data_with_urls <- grv$robj_experiment_sets() |> 
+        shiny::req(grv$dbquery$exp_sets)
+        
+        data_with_urls <- grv$dbquery$exp_sets |> 
           dplyr::mutate(benchling_url = glue::glue(
             "<a href='{benchling_url}' target='_blank'>click to open</a>"
           ))
         
-        shiny::req(grv$robj_experiment_sets())
         DT::datatable(
           data = data_with_urls,
           selection = "none",
@@ -127,9 +128,9 @@ dbViewServer <- function(id, grv) {
       
       # Render experiments table for db inspection
       output$table_experiments_available <- DT::renderDT({
-        shiny::req(grv$robj_experiments())
+        shiny::req(grv$dbquery$exps)
         DT::datatable(
-          data = grv$robj_experiments(),
+          data = grv$dbquery$exps,
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(
@@ -152,19 +153,26 @@ dbViewServer <- function(id, grv) {
       })
       
       # On data collection, switch to the collection tab
-      shiny::observeEvent(grv$state_bttn_collect, {
+      shiny::observeEvent(grv$dbquery$state_bttn_collect, {
         shiny::updateTabsetPanel(
           inputId = "db_tbls",
           selected = "collection"
         )
       })
       
+      shiny::observe({
+        if (use_testing_mode) {
+          grv$dbquery$state_bttn_collect <- 
+            grv$dbquery$state_bttn_collect + 1
+        }
+      })
+      
       # Render summary data table for collected selection
       output$table_collected_data <- DT::renderDT({
-        shiny::req(grv$robj_collected_data())
+        shiny::req(grv$data())
         DT::datatable(
           data = dplyr::select(
-            grv$robj_collected_data(),
+            grv$data(),
             -tidyselect::contains("residuals"), -tidyselect::contains("spec")
           ),
           selection = "none",

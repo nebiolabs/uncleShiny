@@ -15,20 +15,16 @@ spectraSparksUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-spectraSparksServer <- function(id, grv, opts_obj, event_type) {
+spectraSparksServer <- function(id, grv, event_type) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({test_data})
-      } else {
-        module_data <- shiny::reactive({grv$robj_collected_data()})
-      }
+      module_data <- shiny::reactive({grv$data()})
       
       if (event_type == "click") {
-        event <- quote(grv$scatter_click_summary_id())
+        event <- quote(grv$scatter$clicked)
       } else if (event_type == "hover") {
-        event <- quote(grv$scatter_hover_summary_id())
+        event <- quote(grv$scatter$hovered)
       } else {
         stop("Sparkline module event_type argument error.")
       }
@@ -68,7 +64,7 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
             x_var = ..3,
             y_var = ..4,
             summary_var = ..5,
-            palette_name = shiny::isolate(opts_obj$palette_global),
+            palette_name = shiny::isolate(grv$scatter_opts$palette_global),
             color_n = ..6,
             alpha = 0.6
           )
@@ -113,7 +109,7 @@ spectraSparksServer <- function(id, grv, opts_obj, event_type) {
       #       x_var = ..3,
       #       y_var = ..4,
       #       summary_var = ..5,
-      #       palette_name = opts_obj$palette_global,
+      #       palette_name = grv$scatter_opts$palette_global,
       #       color_n = ..6,
       #       alpha = 0.6
       #     )

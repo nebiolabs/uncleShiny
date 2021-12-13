@@ -6,12 +6,14 @@
 ggridgeline <- function(data, spec_type, dls_type = "intensity", 
                         sort_var, color_var, palette_name = "Set2",
                         show_legend = TRUE, alpha = 0.6) {
-  # source("R/util_vars.R", local = TRUE)
   if (!(spec_type %in% c("dls", "corr", "sls", "dsf"))) {
     stop("Warning: invalid spec_type; use 'dls', 'corr', 'sls' or 'dsf'.")
   }
   if (!(dls_type %in% c("intensity", "mass"))) {
     stop("Warning: invalid dls_type; use 'intensity' or 'mass'.")
+  }
+  if (is.null(data)) {
+    stop("Nothing is selected.")
   }
   
   ##----------------------------------------
@@ -50,8 +52,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##  Data factor manipulation            --
   ##----------------------------------------
   plot_data <- data |> 
-    dplyr::mutate(well_id = bit64::as.character.integer64(well_id)) |> 
+    # dplyr::mutate(well_id = bit64::as.character.integer64(well_id)) |>
     dplyr::mutate(well_id = forcats::fct_reorder(well_id, .data[[sort_var]]))
+  
   
   ##----------------------------------------
   ##  Ridgeline formatting                --
@@ -81,7 +84,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
     switch_list <- as.list(rlang::set_names(
       glue::glue_data(
         plot_data,
-        "{well}_{plate}({bit64::as.character.integer64(exp_set_id)})",
+        "{well}_{plate}({exp_set_id})",
       ),
       nm = plot_data[["well_id"]]
     ))

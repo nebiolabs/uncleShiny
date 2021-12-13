@@ -73,15 +73,18 @@ scatterPlotsUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-scatterPlotsServer <- function(id, opts_obj, grv) {
+scatterPlotsServer <- function(id, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      
+      grv$scatter <- shiny::reactiveValues()
+      
       munge_module_data <- function(data_input, color_input, palette_input) {
         if (is.null(data_input)) {
-          munged_data <- NULL
+          NULL
         } else {
-          munged_data <- data_input |>
+          data_input |>
             dplyr::mutate(
               Buffer_condition_name = dplyr::if_else(
                 stringr::str_detect(
@@ -94,29 +97,18 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
             ) |> 
             cbind_colors(color_input, palette_input)
         }
-        
-        return(munged_data)
       }
       
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({
-          test_data |>
-            munge_module_data(
-              color_input = opts_obj$color_global,
-              palette_input = opts_obj$palette_global
-            )
-        })
-      } else {
-        module_data <- shiny::reactive({
-          grv$robj_collected_data() |> 
-            munge_module_data(
-              color_input = opts_obj$color_global,
-              palette_input = opts_obj$palette_global
-            )
-        })
-      }
+      module_data <- shiny::reactive({
+        grv$data() |> 
+          munge_module_data(
+            color_input = grv$scatter_opts$color_global,
+            palette_input = grv$scatter_opts$palette_global
+          )
+      })
+      
       module_SharedData <- shiny::reactive({
-        opts_obj$color_highlight
+        grv$scatter_opts$color_highlight
         crosstalk::SharedData$new(module_data(), key = ~uncle_summary_id)
       })
       
@@ -126,20 +118,21 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##-----------------------------------------
       # Reactive object of DLS plot
       plot_DLS <- shiny::reactive({
+        shiny::req(module_SharedData())
         ggscatter(
           data = module_SharedData(),
-          x_var = opts_obj$xvar1,
-          y_var = opts_obj$yvar1,
-          color_var = opts_obj$color_global,
+          x_var = grv$scatter_opts$xvar1,
+          y_var = grv$scatter_opts$yvar1,
+          color_var = grv$scatter_opts$color_global,
           color_encoded = FALSE,
-          palette_name = opts_obj$palette_global,
-          size = opts_obj$size_points(),
-          alpha = opts_obj$alpha_points(),
-          show_vert_guides = opts_obj$show_guides_v1,
-          vert_guides = opts_obj$guides_v1(),
-          show_horiz_guides = opts_obj$show_guides_h1,
-          horiz_guides = opts_obj$guides_h1(),
-          x_is_log = opts_obj$xvar1_is_log,
+          palette_name = grv$scatter_opts$palette_global,
+          size = grv$scatter_opts$size_points(),
+          alpha = grv$scatter_opts$alpha_points(),
+          show_vert_guides = grv$scatter_opts$show_guides_v1,
+          vert_guides = grv$scatter_opts$guides_v1(),
+          show_horiz_guides = grv$scatter_opts$show_guides_h1,
+          horiz_guides = grv$scatter_opts$guides_h1(),
+          x_is_log = grv$scatter_opts$xvar1_is_log,
           custom_data = "well_id",
           show_legend = FALSE
         )
@@ -151,20 +144,21 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##-----------------------------------------
       # Reactive object of SLS & DSF plot
       plot_SLS_DSF <- shiny::reactive({
+        shiny::req(module_SharedData())
         ggscatter(
           data = module_SharedData(),
-          x_var = opts_obj$xvar2,
-          y_var = opts_obj$yvar2,
-          color_var = opts_obj$color_global,
+          x_var = grv$scatter_opts$xvar2,
+          y_var = grv$scatter_opts$yvar2,
+          color_var = grv$scatter_opts$color_global,
           color_encoded = FALSE,
-          palette_name = opts_obj$palette_global,
-          size = opts_obj$size_points(),
-          alpha = opts_obj$alpha_points(),
-          show_vert_guides = opts_obj$show_guides_v2,
-          vert_guides = opts_obj$guides_v2(),
-          show_horiz_guides = opts_obj$show_guides_h2,
-          horiz_guides = opts_obj$guides_h2(),
-          x_is_log = opts_obj$xvar2_is_log,
+          palette_name = grv$scatter_opts$palette_global,
+          size = grv$scatter_opts$size_points(),
+          alpha = grv$scatter_opts$alpha_points(),
+          show_vert_guides = grv$scatter_opts$show_guides_v2,
+          vert_guides = grv$scatter_opts$guides_v2(),
+          show_horiz_guides = grv$scatter_opts$show_guides_h2,
+          horiz_guides = grv$scatter_opts$guides_h2(),
+          x_is_log = grv$scatter_opts$xvar2_is_log,
           custom_data = "well_id",
           show_legend = TRUE
         )
@@ -176,6 +170,7 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##-----------------------------------------
       # Plotly subplot output rendering
       output$plot_scatter <- plotly::renderPlotly({
+        shiny::req(module_SharedData())
         plotly::subplot(
           plot_DLS() |>
             plotly::ggplotly(source = "scatter", tooltip = "text") |> 
@@ -193,26 +188,12 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
           margin = 0.04
         ) |>
           plotly::layout(
-            # annotations = list(
-            #   list(
-            #     x = 0.45, xref = "paper", xanchor = "right",
-            #     y = 1, yref = "paper",
-            #     text = "Plot L", font = list(size = 18),
-            #     showarrow = F
-            #   ),
-            #   list(
-            #     x = 1, xref = "paper", xanchor = "right",
-            #     y = 1, yref = "paper",
-            #     text = "Plot R", font = list(size = 18),
-            #     showarrow = F
-            #   )
-            # ),
             legend = legendList
           ) |>
           plotly::highlight(
-            on = opts_obj$mode_highlight_on,
-            off = opts_obj$mode_highlight_off,
-            color = opts_obj$color_highlight,
+            on = grv$scatter_opts$mode_highlight_on,
+            off = grv$scatter_opts$mode_highlight_off,
+            color = grv$scatter_opts$color_highlight,
             opacityDim = 0.42,
             selected = plotly::attrs_selected(
               showlegend = TRUE,
@@ -221,7 +202,8 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
             debounce = 100
           ) |>
           plotly::config(displaylogo = FALSE)# |> 
-          # plotly::event_register("plotly_selected") |> 
+          # plotly::event_register("plotly_selected") |>
+          # plotly::event_register("plotly_click") |> 
           # plotly::event_register("plotly_hover")
       })
       
@@ -233,85 +215,131 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected plotly event        <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      # Scatter plot selected event data
-      grv$scatter_selected_event <- shiny::debounce(shiny::reactive({
-        plotly::event_data(event = "plotly_selected", source = "scatter")
-      }), 100)
-      # Scatter plot selected summary_ids (key) and well_ids (customdata)
-      grv$scatter_selected_summary_ids <- shiny::debounce(shiny::reactive({
-        shiny::req(grv$scatter_selected_event())
-        df <- grv$scatter_selected_event()
-        if (rlang::is_list(df[["key"]])) {
-          df[["key"]] <- as.character(unlist(df[["key"]]))
-        }
-        if (rlang::is_list(df[["customdata"]])) {
-          df[["customdata"]] <- as.character(unlist(df[["customdata"]]))
-        }
-        list(
-          summary_ids = bit64::as.integer64.character(df[["key"]]),
-          well_ids = bit64::as.integer64.character(df[["customdata"]])
+      shiny::observe({
+        # similar to a debounce to delay repeat invalidation/evaluation
+        # shiny::invalidateLater(1000, session)
+        
+        # plotly callback
+        event <- plotly::event_data(
+          event = "plotly_selected",
+          source = "scatter"
         )
-      }), 100)
+        
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["key"]])) {
+          event[["key"]] <- as.character(unlist(event[["key"]]))
+        }
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
+        }
+        
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$scatter$selected <- NULL
+        } else {
+          grv$scatter$selected <- list(
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            well_ids = bit64::as.integer64.character(event[["customdata"]])
+          )
+        }
+      }, label = "scatter_selected")
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter clicked plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      # Scatter plot click event data
-      grv$scatter_click_event <- shiny::reactive({
-        plotly::event_data(event = "plotly_click", source = "scatter")
-      })
-      # Scatter plot clicked summary_id (key) and well_ids (customdata)
-      grv$scatter_click_summary_id <- shiny::reactive({
-        shiny::req(grv$scatter_click_event())
-        df <- grv$scatter_click_event()
-        if (rlang::is_list(df[["key"]])) {
-          df[["key"]] <- as.character(unlist(df[["key"]]))
-        }
-        if (rlang::is_list(df[["customdata"]])) {
-          df[["customdata"]] <- as.character(unlist(df[["customdata"]]))
-        }
-        list(
-          summary_ids = bit64::as.integer64.character(df[["key"]]),
-          well_ids = bit64::as.integer64.character(df[["customdata"]])
+      shiny::observe({
+        # similar to a debounce to delay repeat invalidation/evaluation
+        # shiny::invalidateLater(1000, session)
+        
+        # plotly callback
+        event <- plotly::event_data(
+          event = "plotly_click",
+          source = "scatter"
         )
-      })
+        
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["key"]])) {
+          event[["key"]] <- as.character(unlist(event[["key"]]))
+        }
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
+        }
+        
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$scatter$clicked <- NULL
+        } else {
+          grv$scatter$clicked <- list(
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            well_ids = bit64::as.integer64.character(event[["customdata"]])
+          )
+        }
+      }, label = "scatter_clicked")
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      # Scatter plot hover event data
-      grv$scatter_hover_event <- shiny::reactive({
-        plotly::event_data(event = "plotly_hover", source = "scatter")
-      })
-      # Scatter plot hover summary_id (key) and well_id (customdata)
-      grv$scatter_hover_summary_id <- shiny::reactive({
-        shiny::req(grv$scatter_hover_event())
-        df <- grv$scatter_hover_event()
-        if (rlang::is_list(df[["key"]])) {
-          df[["key"]] <- as.character(unlist(df[["key"]]))
-        }
-        if (rlang::is_list(df[["customdata"]])) {
-          df[["customdata"]] <- as.character(unlist(df[["customdata"]]))
-        }
-        list(
-          summary_ids = bit64::as.integer64.character(df[["key"]]),
-          well_ids = bit64::as.integer64.character(df[["customdata"]])
+      shiny::observe({
+        # similar to a debounce to delay repeat invalidation/evaluation
+        
+        # plotly callback
+        event <- plotly::event_data(
+          event = "plotly_hover",
+          source = "scatter"
         )
-      })
-      
-      
+        
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["key"]])) {
+          event[["key"]] <- as.character(unlist(event[["key"]]))
+        }
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
+        }
+        
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$scatter$hovered <- NULL
+        } else {
+          grv$scatter$hovered <- list(
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            well_ids = bit64::as.integer64.character(event[["customdata"]])
+          )
+        }
+        # if (rlang::is_empty(grv$scatter$hovered[["summary_ids"]])) {
+        #   cat("Notice, that empty vector error happened again on hover.\n")
+        # }
+      }, label = "scatter_hovered")
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected data                <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      grv$robj_selected_data <- shiny::reactive({
-        shiny::req(module_data(), grv$scatter_selected_summary_ids())
-        dplyr::filter(
+      shiny::observe({
+        shiny::req(module_data(), grv$scatter$selected)
+        grv$scatter$selected$data <- dplyr::filter(
           module_data(),
-          uncle_summary_id %in%
-            grv$scatter_selected_summary_ids()[["summary_ids"]]
+          uncle_summary_id %in% grv$scatter$selected[["summary_ids"]]
         )
-      })
+      }, label = "scatter_selected_data")
+      
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter hovered data                <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        shiny::req(module_data(), grv$scatter$hovered)
+        if (rlang::is_empty(grv$scatter$hovered[["summary_ids"]])) {
+          grv$scatter$hovered$data <- NULL
+        } else {
+          grv$scatter$hovered$data <- dplyr::filter(
+            module_data(),
+            uncle_summary_id %in% grv$scatter$hovered[["summary_ids"]]
+          )
+        }
+      }, label = "scatter_hovered_data")
+      
       
       ##-----------------------------------------
       ##  Zoom Plot (selected callback)        --
@@ -319,24 +347,25 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       # Reactive object of SLS & DSF plot
       plot_zoom <- shiny::reactive({
         ggscatter(
-          data = grv$robj_selected_data(),
-          x_var = opts_obj$xvar3,
-          y_var = opts_obj$yvar3,
+          data = grv$scatter$selected$data,
+          x_var = grv$scatter_opts$xvar3,
+          y_var = grv$scatter_opts$yvar3,
           label = "well",
-          color_var = opts_obj$color_zoom,
+          color_var = grv$scatter_opts$color_zoom,
           color_encoded = TRUE,
-          palette_name = opts_obj$palette_global,
-          size = opts_obj$size_points(),
-          alpha = opts_obj$alpha_points(),
-          # show_vert_guides = opts_obj$show_guides_v2,
-          # vert_guides = opts_obj$guides_v2(),
-          # show_horiz_guides = opts_obj$show_guides_h2,
-          # horiz_guides = opts_obj$guides_h2(),
-          x_is_log = opts_obj$xvar3_is_log,
+          palette_name = grv$scatter_opts$palette_global,
+          size = grv$scatter_opts$size_points(),
+          alpha = grv$scatter_opts$alpha_points(),
+          # show_vert_guides = grv$scatter_opts$show_guides_v2,
+          # vert_guides = grv$scatter_opts$guides_v2(),
+          # show_horiz_guides = grv$scatter_opts$show_guides_h2,
+          # horiz_guides = grv$scatter_opts$guides_h2(),
+          x_is_log = grv$scatter_opts$xvar3_is_log,
           custom_data = "well_id",
           show_legend = FALSE
         )
       })
+      
       
       ##----------------------------------------
       ##  Zoom Plotly Output                  --
@@ -359,75 +388,32 @@ scatterPlotsServer <- function(id, opts_obj, grv) {
       })
       
       
-      
-      
-      # ##----------------------------------------
-      # ##  Test outputs                        --
-      # ##----------------------------------------
-      # # Testing - selected print
-      # output$test_selected_summary_ids <- shiny::renderPrint({
-      #   shiny::req(grv$scatter_selected_summary_ids())
-      #   grv$scatter_selected_summary_ids()
-      # })
-      # # Testing - clicked print
-      # output$test_click_summary_id <- shiny::renderPrint({
-      #   shiny::req(grv$scatter_click_summary_id())
-      #   grv$scatter_click_summary_id()
-      # })
-      # # Testing - hover print
-      # output$test_hover_summary_id <- shiny::renderPrint({
-      #   shiny::req(grv$scatter_hover_summary_id())
-      #   grv$scatter_hover_summary_id()
-      # })
-      # 
-      # # # Testing - SharedData group id
-      # # output$data_shared_group <- renderPrint({
-      # #   data_shared$groupName()
-      # # })
-      
-      
-      
       ##////////////////////////////////////////
       ##  Sparkline module                    //
       ##////////////////////////////////////////
       spectraSparksServer(
         "scatter_sparks",
         grv,
-        opts_obj,
         "click"
       )
       
-      ##----------------------------------------
-      ##  Reactive selection                  --
-      ##----------------------------------------
-      robj_scatter_selected <- shiny::reactive({
-        grv$scatter_selected_summary_ids()[["summary_ids"]]
-      })
-      
-      robj_scatter_hovered <- shiny::reactive({
-        grv$scatter_hover_summary_id()[["summary_ids"]]
-      })
       
       ##/////////////////////////////////////////
       ##  Spectra viewer module                //
       ##/////////////////////////////////////////
       spectraViewerServer(
         "scatter_ridgeline",
-        grv,
-        "uncle_summary_id",
-        robj_scatter_selected
+        shiny::reactive({grv$scatter$selected$data})
       )
+      
       
       ##////////////////////////////////////////
       ##  Conditions viewer module            //
       ##////////////////////////////////////////
       conditionsViewerServer(
         "scatter_conditions",
-        grv,
-        "uncle_summary_id",
-        robj_scatter_hovered
+        shiny::reactive({grv$scatter$hovered$data})
       )
-      
     }
   )
 }

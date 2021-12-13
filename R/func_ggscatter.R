@@ -44,7 +44,7 @@ ggscatter <- function(data, x_var, y_var, label = NULL,
       x = .data[[x_var]],
       y = .data[[y_var]],
       # customdata is a special plotly field to be passed on in event_data calls
-      customdata = bit64::as.character.integer64(.data[[custom_data]]),
+      customdata = .data[[custom_data]],
       # aesthetic used as the tooltip; assigned in plotly::ggplotly(tooltip = .)
       text = eval(short_tootip_glue_string)
     )

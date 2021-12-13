@@ -16,6 +16,22 @@ function(input, output, session) {
   ))
   
   
+  ##-------------------------------------------------------
+  ##  SHARED VALUES                                      --
+  ##-------------------------------------------------------
+  
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ##  Global                              >>
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  # Instantiates a global reactive values object to share amongst modules;
+  # is is passed as an argument to the moduleServer functions
+  grv <- shiny::reactiveValues()
+  
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ##  Scatter plot options                >>
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  grv$scatter_opts <- shiny::reactiveValues()
+  
   
   ##-------------------------------------------------------
   ##  TESTING                                            --
@@ -24,28 +40,12 @@ function(input, output, session) {
   # callModule(profvis::profvis_server, "profiler")
   
   # Navigate directly to plots when in testing mode
-  if (use_testing_mode) {
-    updateNavbarPage(inputId = "dashboard_navbar", selected = "tab_scatter")
-  }
-  
-  
-  
-  ##-------------------------------------------------------
-  ##  SHARED VALUES                                      --
-  ##-------------------------------------------------------
-
-  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  ##  Global                              >>
-  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  # Instantiates a global reactive values object to share amongst modules;
-  # is is passed as an argument to the moduleServer functions
-  grv <- shiny::reactiveValues()
-
-  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  ##  Scatter plot options                >>
-  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  scatter_opts <- shiny::reactiveValues()
-  
+  shiny::observe({
+    if (use_testing_mode) {
+      grv$data <- shiny::reactive({test_data})
+      updateNavbarPage(inputId = "dashboard_navbar", selected = "tab_scatter")
+    }
+  })
   
   
   ##-------------------------------------------------------
@@ -76,17 +76,20 @@ function(input, output, session) {
   ##////////////////////////////////////////
   ##  Scatter options module              //
   ##////////////////////////////////////////
-  plotOptsServer("opts_scatter", scatter_opts, grv)
+  plotOptsServer("opts_scatter", grv$scatter_opts)
   
   ##////////////////////////////////////////
   ##  Scatter plots module                //
   ##////////////////////////////////////////
-  scatterPlotsServer("scatter", scatter_opts, grv)
+  scatterPlotsServer("scatter", grv)
   
   ##////////////////////////////////////////
   ##  Plate inspector module              //
   ##////////////////////////////////////////
-  plateInspectorServer("inspector", grv)
+  plateInspectorServer(
+    "inspector",
+    grv
+  )
   
   
   

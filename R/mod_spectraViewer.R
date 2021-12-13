@@ -56,34 +56,29 @@ spectraViewerUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-spectraViewerServer <- function(id, grv, select_var, select_vals) {
+spectraViewerServer <- function(id, robj_data) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      
+      munge_module_data <- function(data_input) {
+        unnest_conflicts <- c("created_at", "updated_at")
+        
+        if (is.null(data_input)) {
+          NULL
+        } else {
+          data_input |> 
+            dplyr::select(-tidyselect::any_of(unnest_conflicts))
+        }
+      }
+      
       ##----------------------------------------
       ##  Data instance for module            --
       ##----------------------------------------
-      unnest_conflicts <- c("created_at", "updated_at")
-      
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({
-          # shiny::req(grv$scatter_selected_summary_ids())
-          test_data |> 
-            dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
-            dplyr::filter(
-              .data[[select_var]] %in% select_vals()
-            )
-        })
-      } else {
-        module_data <- shiny::reactive({
-          # shiny::req(grv$scatter_selected_summary_ids())
-          grv$robj_collected_data() |> 
-            dplyr::select(-tidyselect::any_of(unnest_conflicts)) |> 
-            dplyr::filter(
-              .data[[select_var]] %in% select_vals()
-            )
-        })
-      }
+      module_data <- shiny::reactive({
+        robj_data() |> 
+          munge_module_data()
+      })
       
       
       ##----------------------------------------

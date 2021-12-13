@@ -30,50 +30,39 @@ plateInspectorServer <- function(id, grv) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      
+      grv$inspector <- shiny::reactiveValues(selected = list())
+      
+      munge_module_data <- function(data_input) {
+        if (is.null(data_input)) {
+          munged_data <- NULL
+        } else {
+          data_input |> 
+            dplyr::mutate(
+              Buffer_condition_name = dplyr::if_else(
+                stringr::str_detect(
+                  Buffer_condition_name,
+                  "(Neutral Buffer)|(NB)"
+                ),
+                "Neutral Buffer",
+                Buffer_condition_name
+              )
+            ) |> 
+            dplyr::mutate(dplyr::across(
+              c("well_id"),
+              .fns = bit64::as.character.integer64
+            )) |> 
+            format_plate_overlay()
+        }
+      }
+      
       ##----------------------------------------
       ##  Data instance for module            --
       ##----------------------------------------
-      if (use_testing_mode) {
-        module_data <- shiny::reactive({
-          test_data |>
-            dplyr::mutate(
-              Buffer_condition_name = dplyr::if_else(
-                stringr::str_detect(
-                  Buffer_condition_name,
-                  "(Neutral Buffer)|(NB)"
-                ),
-                "Neutral Buffer",
-                Buffer_condition_name
-              )
-            ) |> 
-            dplyr::mutate(dplyr::across(
-              c("well_id"),
-              .fns = bit64::as.character.integer64
-            )) |> 
-            format_plate_overlay()
-            # cbind_colors(opts_obj$color_global, opts_obj$palette_global)
-        })
-      } else {
-        module_data <- shiny::reactive({
-          grv$robj_collected_data() |> 
-            dplyr::mutate(
-              Buffer_condition_name = dplyr::if_else(
-                stringr::str_detect(
-                  Buffer_condition_name,
-                  "(Neutral Buffer)|(NB)"
-                ),
-                "Neutral Buffer",
-                Buffer_condition_name
-              )
-            ) |> 
-            dplyr::mutate(dplyr::across(
-              c("well_id"),
-              .fns = bit64::as.character.integer64
-            )) |> 
-            format_plate_overlay()
-            # cbind_colors(opts_obj$color_global, opts_obj$palette_global)
-        })
-      }
+      module_data <- shiny::reactive({
+        grv$data() |>
+          munge_module_data()
+      })
       
       ##-----------------------------------------
       ##  Dynamic outputs                      --
@@ -124,7 +113,6 @@ plateInspectorServer <- function(id, grv) {
       #   )
       #   rlang::inject(shiny::tabsetPanel(!!!unname(tab_list), type = "pills"))
       # })
-      
       output$plate_layouts <- shiny::renderUI({
         ns <- session$ns
         layout_list <- purrr::imap(
@@ -143,9 +131,9 @@ plateInspectorServer <- function(id, grv) {
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Inspector selected plotly event      <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      grv$inspector_selected_event <- shiny::debounce(shiny::reactive({
+      shiny::observe({
         sources <- purrr::map_chr(names(module_data()), paste0, "_source")
-        purrr::map(
+        grv$inspector$selected$event <- purrr::map(
           sources,
           function(plot_source) {
             event <- plotly::event_data(
@@ -161,38 +149,54 @@ plateInspectorServer <- function(id, grv) {
             }
           }
         ) |> purrr::flatten_chr()
-      }), 1000)
+      }, label = "inspector_selected")
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Inspector selected data              <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        shiny::req(module_data())
+        if (rlang::is_empty(grv$inspector$selected$event)) {
+          grv$inspector$selected$data <- NULL
+        } else {
+          grv$inspector$selected$data <- purrr::map_dfr(
+            module_data(),
+            function(df) {
+              dplyr::filter(
+                df,
+                well_id %in% grv$inspector$selected$event
+              )
+            }
+          )
+        }
+      }, label = "inspector_selected_data")
+      
       
       ##----------------------------------------
       ##  Raw selection output                --
       ##----------------------------------------
-      output$inspector_selected <- shiny::renderPrint({
-        shiny::req(grv$inspector_selected_event())
-        event <- grv$inspector_selected_event()
-        if (isTruthy(event)) {
-          print(bit64::as.integer64.character(event))
-        } else {
-          "Nothing is selected."
-        }
-      })
+      # output$inspector_selected <- shiny::renderPrint({
+      #   # shiny::req(grv$inspector$selected$event)
+      #   event <- grv$inspector$selected$event
+      #   # if (isTruthy(event)) {
+      #   #   print(bit64::as.integer64.character(event))
+      #   # } else {
+      #   #   "Nothing is selected."
+      #   # }
+      #   if (rlang::is_empty(event)) {
+      #     print("Nothing is selected.")
+      #   } else {
+      #     print(bit64::as.integer64.character(event))
+      #   }
+      # })
       
-      ##----------------------------------------
-      ##  Reactive selection                  --
-      ##----------------------------------------
-      robj_inspector_selected <- shiny::reactive({
-        bit64::as.integer64.character(
-          grv$inspector_selected_event()
-        )
-      })
       
       ##/////////////////////////////////////////
       ##  Spectra viewer module                //
       ##/////////////////////////////////////////
       spectraViewerServer(
         "inspector_ridgeline",
-        grv,
-        "well_id",
-        robj_inspector_selected
+        shiny::reactive({grv$inspector$selected$data})
       )
     }
   )
