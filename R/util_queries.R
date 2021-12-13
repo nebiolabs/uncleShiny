@@ -33,7 +33,7 @@ sql_queries <- list()
 #
 # Entries from products with matching Uncle experiment_sets
 sql_queries$products <- {
-  "SELECT p.name AS product_name, p.id AS product_id, p.catalog_number
+  "SELECT p.catalog_number, p.name AS product_name, p.id AS product_id 
   FROM products p
   WHERE EXISTS (SELECT *
                 FROM uncle_experiment_sets exp_sets
@@ -47,9 +47,9 @@ sql_queries$products <- {
 ##--------------------------------------------------------
 # Experiment sets for user-selected product {input}
 sql_queries$experiment_sets <-  {
-  "SELECT id AS exp_set_id, product_id,
-    CONCAT(exp_type, '_', plate_generation) AS plate, well_set_id, 
-    processing_status AS status, benchling_url, notes
+  "SELECT product_id, CONCAT(exp_type, '_', plate_generation) AS plate,
+    id AS exp_set_id, well_set_id, processing_status AS status, 
+    benchling_url, notes
   FROM uncle_experiment_sets
   WHERE product_id = {input}"
 }
