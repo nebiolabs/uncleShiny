@@ -32,7 +32,7 @@ library(plotly)
 library(DT)
 library(cowplot)
 library(ggridges)
-library(wordcloud2)
+library(ggwordcloud)
 
 # Programming and debugging
 library(rlang)
