@@ -29,7 +29,6 @@ cbind_colors <- function(df, color_var, palette_name) {
     dplyr::mutate(
       color_hex = make_palette(
         palette_name,
-        # length(unique(df[[color_var]]))
         the_length
       )[dplyr::cur_group_id()]
     ) |> 

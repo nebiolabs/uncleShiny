@@ -56,9 +56,7 @@ if (use_testing_mode) {
       ~"dls_temperature",
       .cols = tidyselect::any_of(c("temperature"))
     )
-}# else {
-#   test_data <- NULL
-# }
+}
 
 
 ##-----------------------------------------
