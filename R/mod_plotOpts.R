@@ -47,10 +47,10 @@ plotOptsUI <- function(id) {
         shiny::sliderInput(
           ns("size_points"),
           label = "Size of points:",
-          min = 1,
-          max = 5,
-          value = 2,
-          step = 0.5,
+          min = 0.4,
+          max = 3,
+          value = 1.8,
+          step = 0.2,
           ticks = TRUE
         ),
         ##-----------------------
@@ -59,10 +59,10 @@ plotOptsUI <- function(id) {
         shiny::sliderInput(
           ns("alpha_points"),
           label = "Opacity of points:",
-          min = 0.1,
+          min = 0.05,
           max = 1,
-          value = 0.5,
-          step = 0.1,
+          value = 0.75,
+          step = 0.05,
           ticks = TRUE
         ),
         ##----------------------

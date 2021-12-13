@@ -12,7 +12,6 @@ conditionsViewerUI <- function(id) {
     shiny::h3("Full Conditions"),
     shiny::helpText("Activated on hover."),
     shiny::br(),
-    shiny::br(),
     shiny::htmlOutput(ns("conditions_html"))
   )
 }

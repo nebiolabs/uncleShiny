@@ -26,23 +26,29 @@ scatterPlotsUI <- function(id) {
             plotly::plotlyOutput(
               ns("plot_scatter"),
               width = "100%",
-              height = "500"
-            ),
-            ##----------------------------------------
-            ##  Spectra sparklines                  --
-            ##----------------------------------------
-            shiny::fluidRow(
-              shiny::h3("Spectra Quickview"),
-              shiny::helpText("Activated on click.")
-            ),
-            spectraSparksUI(ns("scatter_sparks"))
+              height = "400px"
+            )
           ),
           shiny::column(
             width = 3,
             ##----------------------------------------
             ##  Condition viewer                    --
             ##----------------------------------------
-            conditionsViewerUI(ns("scatter_conditions")),
+            conditionsViewerUI(ns("scatter_conditions"))
+          )
+        ),
+        shiny::fluidRow(
+          shiny::column(
+            width = 9,
+            ##----------------------------------------
+            ##  Spectra sparklines                  --
+            ##----------------------------------------
+            shiny::h3("Spectra Quickview"),
+            shiny::helpText("Activated on click."),
+            spectraSparksUI(ns("scatter_sparks"))
+          ),
+          shiny::column(
+            width = 3,
             ##-----------------------------------------
             ##  Wordcloud                            --
             ##-----------------------------------------
@@ -427,9 +433,7 @@ scatterPlotsServer <- function(id, grv) {
       ##////////////////////////////////////////
       wordcloudServer(
         "scatter_wordcloud",
-        grv,
-        "uncle_summary_id",
-        robj_scatter_selected
+        shiny::reactive({grv$scatter$selected$data})
       )
     }
   )
