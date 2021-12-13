@@ -40,10 +40,12 @@ function(input, output, session) {
   # callModule(profvis::profvis_server, "profiler")
   
   # Navigate directly to plots when in testing mode
-  if (use_testing_mode) {
-    grv$data <- shiny::reactive({test_data})
-    updateNavbarPage(inputId = "dashboard_navbar", selected = "tab_scatter")
-  }
+  shiny::observe({
+    if (use_testing_mode) {
+      grv$data <- shiny::reactive({test_data})
+      updateNavbarPage(inputId = "dashboard_navbar", selected = "tab_scatter")
+    }
+  })
   
   
   ##-------------------------------------------------------
