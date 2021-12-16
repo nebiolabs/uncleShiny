@@ -69,7 +69,23 @@
           ##----------------------------------------
           shiny::sidebarPanel(
             width = 2,
-            plotOptsUI("opts_scatter")
+            shiny::tabsetPanel(
+              # id = "sidebarPanel_scatter",
+              type = "pills",
+              selected = "tab_opts_scatter",
+              shiny::tabPanel(
+                title = "Filters",
+                icon = shiny::icon("filter"),
+                value = "tab_data_filters",
+                "Module goes here."
+              ),
+              shiny::tabPanel(
+                title = "Options",
+                icon = shiny::icon("palette"),
+                value = "tab_opts_scatter",
+                plotOptsUI("opts_scatter")
+              )
+            )
           ),
           ##----------------------------------------
           ##  Main panel                          --
