@@ -71,13 +71,13 @@
             width = 2,
             shiny::tabsetPanel(
               # id = "sidebarPanel_scatter",
-              type = "pills",
+              type = "tabs",
               selected = "tab_opts_scatter",
               shiny::tabPanel(
                 title = "Filters",
                 icon = shiny::icon("filter"),
                 value = "tab_data_filters",
-                "Module goes here."
+                dataFiltersUI("filters")
               ),
               shiny::tabPanel(
                 title = "Options",
