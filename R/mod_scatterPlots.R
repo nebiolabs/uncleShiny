@@ -113,7 +113,7 @@ scatterPlotsServer <- function(id, grv) {
       }
       
       module_data <- shiny::reactive({
-        grv$data() |> 
+        grv$data_filtered() |> 
           munge_module_data(
             color_input = grv$scatter_opts$color_global,
             palette_input = grv$scatter_opts$palette_global
