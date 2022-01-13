@@ -56,25 +56,42 @@ dataFiltersServer <- function(id, grv) {
     id,
     function(input, output, session) {
       
+      ##-----------------------------------------
+      ##  Button and filter logic              --
+      ##-----------------------------------------
+      
+      ##----------------------
+      ##  Button counter    --
+      ##----------------------
       counter <- shiny::reactiveVal(value = 0, label = "bttn_counter")
       
-      shiny::observeEvent(input$bttn_apply_filters, {
-        counter(counter() + 1)
+      ##-----------------------
+      ##  Initial state      --
+      ##-----------------------
+      shiny::observe({
+        if (counter() == 0) {
+          grv$data_filtered <- grv$data
+        }
       })
       
+      ##-----------------------
+      ##  Apply filters      --
+      ##-----------------------
+      shiny::observeEvent(input$bttn_apply_filters, {
+        counter(counter() + 1)
+        grv$data_filtered <- shiny::reactive({
+          grv$data() |>
+            dplyr::filter(Z_D <= shiny::isolate(input$filter_Z_D))
+        })
+      })
+      
+      ##-----------------------
+      ##  Reset filters      --
+      ##-----------------------
       shiny::observeEvent(input$bttn_reset_filters, {
         counter(0)
       })
       
-      shiny::observe({
-        if (counter() == 0) {
-          grv$data_filtered <- grv$data
-        } else {
-          grv$data_filtered <- shiny::reactive({
-            grv$data() |> 
-              dplyr::filter(Z_D <= input$filter_Z_D)
-          })
-        }
       })
     }
   )
