@@ -10,14 +10,36 @@ dataFiltersUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::h3("Data Filters"),
+    shiny::helpText(
+      "These filters alter the underlying data used for creating plots
+      and can be used to remove unwanted data points for a less cluttered
+      and more informative analysis."
+    ),
+    shiny::br(),
+    shiny::br(),
+    shiny::actionButton(
+      ns("bttn_update_filters"),
+      "Update",
+      width = "30%"
+    ),
     shiny::actionButton(
       ns("bttn_apply_filters"),
-      "Apply Filters"
+      "Apply",
+      width = "30%"
     ),
     shiny::actionButton(
       ns("bttn_reset_filters"),
-      "Reset Filters"
+      "Reset",
+      width = "30%"
     ),
+    shiny::br(),
+    shiny::br(),
+    shiny::helpText(
+      "Select your filters from the panels below and use the buttons above
+      to apply or remove them."
+    ),
+    shiny::br(),
+    shiny::br(),
     shiny::tabsetPanel(
       type = "pills",
       ##-----------------------------------------
@@ -26,7 +48,12 @@ dataFiltersUI <- function(id) {
       shiny::tabPanel(
         title = NULL,#"Conditions",
         value = "filters_conditions",
-        icon = shiny::icon("flask")
+        icon = shiny::icon("flask"),
+        shiny::h4("Condition Filters"),
+        shiny::helpText("Anything selected will be excluded."),
+        shiny::br(),
+        shiny::br(),
+        shiny::uiOutput(ns("condition_filters_UI"))
       ),
       ##-----------------------------------------
       ##  Numeric Filters                      --
@@ -35,9 +62,10 @@ dataFiltersUI <- function(id) {
         title = NULL,#"Numeric",
         value = "filters_numeric",
         icon = shiny::icon("columns"),
-        ##-----------------------
-        ##  DLS                --
-        ##-----------------------
+        shiny::h4("Numeric Filters"),
+        shiny::helpText("Only values in the selected range are included."),
+        shiny::br(),
+        shiny::br(),
         shiny::numericInput(
           ns("filter_Z_D"),
           "Avg. Z Dia.",
@@ -45,7 +73,8 @@ dataFiltersUI <- function(id) {
           min = 0.01,
           max = 1000,
           step = 10
-        )
+        ),
+        shiny::uiOutput(ns("numeric_filters_UI"))
       )
     )
   )
@@ -90,6 +119,88 @@ dataFiltersServer <- function(id, grv) {
       ##-----------------------
       shiny::observeEvent(input$bttn_reset_filters, {
         counter(0)
+      })
+      
+      
+      ##----------------------------------------
+      ##  Variables to filter on              --
+      ##----------------------------------------
+      
+      ##----------------------
+      ##  Conditions        --
+      ##----------------------
+      condition_filters_list <- c(
+        "Buffer" = "Buffer_condition_name",
+        "pH" = "pH_unit_value",
+        "Buffer Salt" = "BufferSalt_condition_name",
+        "ReducingAgent" = "ReducingAgent_condition_name",
+        "Sugar" = "Sugar_condition_name",
+        "Plate Type" = "plate",
+        "Exp. Set ID" = "exp_set_id",
+        "Notes" = "notes",
+        "Exp. ID" = "exp_id",
+        "Well" = "well",
+        "Instrument" = "instrument"
+      )
+      
+      ##-----------------------
+      ##  Numeric            --
+      ##-----------------------
+      numeric_filters_list <- c(
+        "Tm" = "Tm1",
+        "Tagg @ 266nm" = "Tagg266",
+        "Tagg @ 473nm" = "Tagg473",
+        "Polydispersity Index" = "PdI",
+        "Z Diameter (nm)" = "Z_D",
+        "Peak 1 Diameter (nm)" = "peak1_D",
+        "pH" = "pH_unit_value"
+      )
+      
+      
+      ##-----------------------------------------
+      ##  Dynamic UI generation                --
+      ##-----------------------------------------
+      
+      ##----------------------
+      ##  Conditions        --
+      ##----------------------
+      output$condition_filters_UI <- shiny::renderUI({
+        ns <- session$ns
+        UI_list <- purrr::imap(
+          condition_filters_list,
+          function(var, nm) {
+            shiny::selectInput(
+              ns(paste("filter", var, sep = "_")),
+              nm,
+              choices = NULL,
+              multiple = TRUE,
+              width = "100%"
+            )
+          }
+        )
+        rlang::inject(shiny::tagList(!!!unname(UI_list)))
+      })
+      
+      ##-----------------------
+      ##  Numeric            --
+      ##-----------------------
+      output$numeric_filters_UI <- shiny::renderUI({
+        ns <- session$ns
+        UI_list <- purrr::imap(
+          numeric_filters_list,
+          function(var, nm) {
+            shiny::sliderInput(
+              ns(paste("filter", var, sep = "_")),
+              nm,
+              min = 0.0001,
+              max = 1000,
+              value = c(0.0001, 1000),
+              ticks = TRUE,
+              width = "100%"
+            )
+          }
+        )
+        rlang::inject(shiny::tagList(!!!unname(UI_list)))
       })
       
       })
