@@ -203,7 +203,31 @@ dataFiltersServer <- function(id, grv) {
         rlang::inject(shiny::tagList(!!!unname(UI_list)))
       })
       
+      ##-----------------------------------------
+      ##  Dynamic UI update                    --
+      ##-----------------------------------------
+      
+      ##----------------------
+      ##  Conditions        --
+      ##----------------------
+      shiny::observeEvent(input$bttn_update_filters, {
+        purrr::iwalk(
+          condition_filters_list,
+          function(var, nm) {
+            shiny::updateSelectInput(
+              session = session,
+              inputId = paste("filter", var, sep = "_"),
+              choices = unique(grv$data()[[var]])
+            )
+          }
+        )
       })
+      
+      ##-----------------------
+      ##  Numeric            --
+      ##-----------------------
+      
+      
     }
   )
 }
