@@ -32,6 +32,17 @@ function(input, output, session) {
   ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   grv$scatter_opts <- shiny::reactiveValues()
   
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ##  Scatter plot filters                >>
+  ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  grv$scatter_filters <- shiny::reactiveValues()
+  # I'm not sure this is needed..
+  # the filters are different than the plot options,
+  # and don't need to be accessed individually.
+  # I think the best route will be to just take data in,
+  # apply filters to transform or do nothing in initial state,
+  # and return the data back out to replace the global reactive used for plots.
+  
   
   ##-------------------------------------------------------
   ##  TESTING                                            --
@@ -77,6 +88,11 @@ function(input, output, session) {
   ##  Scatter options module              //
   ##////////////////////////////////////////
   plotOptsServer("opts_scatter", grv$scatter_opts)
+  
+  ##////////////////////////////////////////
+  ##  Scatter filters module              //
+  ##////////////////////////////////////////
+  dataFiltersServer("filters", grv)
   
   ##////////////////////////////////////////
   ##  Scatter plots module                //
