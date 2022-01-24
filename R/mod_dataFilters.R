@@ -18,19 +18,16 @@ dataFiltersUI <- function(id) {
     shiny::br(),
     shiny::br(),
     shiny::actionButton(
-      ns("bttn_update_filters"),
-      "Update",
-      width = "30%"
-    ),
-    shiny::actionButton(
       ns("bttn_apply_filters"),
-      "Apply",
-      width = "30%"
+      label = "Apply Filters",
+      icon = shiny::icon("check"),
+      width = "45%"
     ),
     shiny::actionButton(
       ns("bttn_reset_filters"),
-      "Reset",
-      width = "30%"
+      label = "Remove Filters",
+      icon = shiny::icon("minus-circle"),
+      width = "45%"
     ),
     shiny::br(),
     shiny::br(),
@@ -40,41 +37,52 @@ dataFiltersUI <- function(id) {
     ),
     shiny::br(),
     shiny::br(),
+    shiny::verbatimTextOutput(ns("counters")),
     shiny::tabsetPanel(
       type = "pills",
       ##-----------------------------------------
       ##  Condition Filters                    --
       ##-----------------------------------------
       shiny::tabPanel(
-        title = NULL,#"Conditions",
+        title = "Conditions",
         value = "filters_conditions",
         icon = shiny::icon("flask"),
         shiny::h4("Condition Filters"),
+        shiny::actionButton(
+          ns("bttn_update_filters_conditions"),
+          label = "Refresh Options",
+          icon = shiny::icon("sync-alt"),
+          width = "100%"
+        ),
+        shiny::br(),
+        shiny::br(),
         shiny::helpText("Anything selected will be excluded."),
         shiny::br(),
         shiny::br(),
-        shiny::uiOutput(ns("condition_filters_UI"))
+        shiny::uiOutput(ns("condition_filters_UI")),
+        shiny::verbatimTextOutput(ns("conditions"))
       ),
       ##-----------------------------------------
       ##  Numeric Filters                      --
       ##-----------------------------------------
       shiny::tabPanel(
-        title = NULL,#"Numeric",
+        title = "Numeric",
         value = "filters_numeric",
         icon = shiny::icon("columns"),
         shiny::h4("Numeric Filters"),
+        shiny::actionButton(
+          ns("bttn_update_filters_numeric"),
+          label = "Refresh Options",
+          icon = shiny::icon("sync-alt"),
+          width = "100%"
+        ),
+        shiny::br(),
+        shiny::br(),
         shiny::helpText("Only values in the selected range are included."),
         shiny::br(),
         shiny::br(),
-        shiny::numericInput(
-          ns("filter_Z_D"),
-          "Avg. Z Dia.",
-          value = 50,
-          min = 0.01,
-          max = 1000,
-          step = 10
-        ),
-        shiny::uiOutput(ns("numeric_filters_UI"))
+        shiny::uiOutput(ns("numeric_filters_UI")),
+        shiny::verbatimTextOutput(ns("numeric"))
       )
     )
   )
@@ -85,6 +93,41 @@ dataFiltersServer <- function(id, grv) {
     id,
     function(input, output, session) {
       
+      ##----------------------------------------
+      ##  Variables to filter on              --
+      ##----------------------------------------
+      
+      ##----------------------
+      ##  Conditions        --
+      ##----------------------
+      condition_filters_list <- c(
+        "Buffer" = "Buffer_condition_name",
+        "pH" = "pH_unit_value",
+        "Buffer Salt" = "BufferSalt_condition_name",
+        "ReducingAgent" = "ReducingAgent_condition_name",
+        "Sugar" = "Sugar_condition_name"#,
+        # "Plate Type" = "plate",
+        # "Exp. Set ID" = "exp_set_id",
+        # "Notes" = "notes",
+        # "Exp. ID" = "exp_id",
+        # "Well" = "well",
+        # "Instrument" = "instrument"
+      )
+      
+      ##-----------------------
+      ##  Numeric            --
+      ##-----------------------
+      numeric_filters_list <- c(
+        "Tm" = "Tm1",
+        "Tagg @ 266nm" = "Tagg266",
+        "Tagg @ 473nm" = "Tagg473",
+        "Polydispersity Index" = "PdI",
+        "Z Diameter (nm)" = "Z_D",
+        "Peak 1 Diameter (nm)" = "peak1_D"
+        # "pH" = "pH_unit_value"
+      )
+      
+      
       ##-----------------------------------------
       ##  Button and filter logic              --
       ##-----------------------------------------
@@ -92,7 +135,9 @@ dataFiltersServer <- function(id, grv) {
       ##----------------------
       ##  Button counter    --
       ##----------------------
-      counter <- shiny::reactiveVal(value = 0, label = "bttn_counter")
+      counter <- shiny::reactiveVal(value = 0)
+      counter_conditions <- shiny::reactiveVal(value = 0)
+      counter_numeric <- shiny::reactiveVal(value = 0)
       
       ##-----------------------
       ##  Initial state      --
@@ -106,21 +151,26 @@ dataFiltersServer <- function(id, grv) {
       ##-----------------------
       ##  Apply filters      --
       ##-----------------------
+      # Update filter counters
       shiny::observeEvent(input$bttn_apply_filters, {
         counter(counter() + 1)
-        grv$data_filtered <- shiny::reactive({
-          grv$data() |>
-            dplyr::filter(Z_D <= shiny::isolate(input$filter_Z_D))
-        })
       })
       
-      ##-----------------------
-      ##  Reset filters      --
-      ##-----------------------
-      shiny::observeEvent(input$bttn_reset_filters, {
-        counter(0)
+      shiny::observeEvent(input$bttn_update_filters_conditions, {
+        counter_conditions(counter_conditions() + 1)
+      })
+
+      shiny::observeEvent(input$bttn_update_filters_numeric, {
+        counter_numeric(counter_numeric() + 1)
       })
       
+      output$counters <- shiny::renderPrint({
+        list(
+          "Main" = counter(),
+          "Conditions" = counter_conditions(),
+          "Numeric" = counter_numeric()
+        )
+      })
       
       ##----------------------------------------
       ##  Variables to filter on              --
@@ -144,17 +194,11 @@ dataFiltersServer <- function(id, grv) {
       )
       
       ##-----------------------
-      ##  Numeric            --
+      ##  Reset filters      --
       ##-----------------------
-      numeric_filters_list <- c(
-        "Tm" = "Tm1",
-        "Tagg @ 266nm" = "Tagg266",
-        "Tagg @ 473nm" = "Tagg473",
-        "Polydispersity Index" = "PdI",
-        "Z Diameter (nm)" = "Z_D",
-        "Peak 1 Diameter (nm)" = "peak1_D",
-        "pH" = "pH_unit_value"
-      )
+      shiny::observeEvent(input$bttn_reset_filters, {
+        counter(0)
+      })
       
       
       ##-----------------------------------------
