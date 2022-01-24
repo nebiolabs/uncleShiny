@@ -172,25 +172,55 @@ dataFiltersServer <- function(id, grv) {
         )
       })
       
-      ##----------------------------------------
-      ##  Variables to filter on              --
-      ##----------------------------------------
-      
-      ##----------------------
-      ##  Conditions        --
-      ##----------------------
-      condition_filters_list <- c(
-        "Buffer" = "Buffer_condition_name",
-        "pH" = "pH_unit_value",
-        "Buffer Salt" = "BufferSalt_condition_name",
-        "ReducingAgent" = "ReducingAgent_condition_name",
-        "Sugar" = "Sugar_condition_name",
-        "Plate Type" = "plate",
-        "Exp. Set ID" = "exp_set_id",
-        "Notes" = "notes",
-        "Exp. ID" = "exp_id",
-        "Well" = "well",
-        "Instrument" = "instrument"
+      # Apply filters if they have been updated to match current data
+      shiny::observeEvent(input$bttn_apply_filters,
+        {
+          if (counter_conditions() == 0) {
+            filtered_conditions <- shiny::isolate(grv$data())
+          } else {
+            filtered_conditions <- purrr::map(
+              condition_filters_list,
+              function(var) {
+                # cat(input[[paste("filter", var, sep = "_")]])
+                dplyr::filter(
+                  shiny::isolate(grv$data()),
+                  is.na(.data[[var]]) |
+                    .data[[var]] %in%
+                    shiny::isolate(input[[paste("filter", var, sep = "_")]])
+                )
+              }
+            ) |>
+              purrr::reduce(.f = dplyr::inner_join)
+          }
+          
+          print(tibble::as_tibble(filtered_conditions))
+          
+          if (counter_numeric() == 0) {
+            numeric_conditions <- shiny::isolate(grv$data())
+          } else {
+            numeric_conditions <- purrr::map(
+              numeric_filters_list,
+              function(var) {
+                cat(input[[paste("filter", var, sep = "_")]])
+                dplyr::filter(
+                  shiny::isolate(grv$data()),
+                  dplyr::between(
+                    .data[[var]],
+                    shiny::isolate(input[[paste("filter", var, "min", sep = "_")]]),
+                    shiny::isolate(input[[paste("filter", var, "max", sep = "_")]])
+                  )
+                )
+              }
+            ) |>
+              purrr::reduce(.f = dplyr::inner_join)
+          }
+          
+          print(tibble::as_tibble(numeric_conditions))
+          
+          grv$data_filtered <- shiny::eventReactive(input$bttn_apply_filters, {
+            dplyr::inner_join(filtered_conditions, numeric_conditions)
+          })
+        }
       )
       
       ##-----------------------
