@@ -98,6 +98,7 @@ plateInspectorServer <- function(id, grv) {
       ##-----------------------------------------
       ##  Dynamic UI generation                --
       ##-----------------------------------------
+      ## Outputs a tab for each plate.. I don't like this layout as much.
       # output$plate_tabs <- shiny::renderUI({
       #   ns <- session$ns
       #   tab_list <- purrr::imap(
@@ -113,6 +114,7 @@ plateInspectorServer <- function(id, grv) {
       #   )
       #   rlang::inject(shiny::tabsetPanel(!!!unname(tab_list), type = "pills"))
       # })
+      # This outputs just a set of plate plots and provides a better overview.
       output$plate_layouts <- shiny::renderUI({
         ns <- session$ns
         layout_list <- purrr::imap(
