@@ -226,6 +226,10 @@ dataFiltersServer <- function(id, grv) {
       ##-----------------------
       ##  Reset filters      --
       ##-----------------------
+      shiny::observeEvent(grv$data(), {
+        counter(0)
+      }, ignoreInit = TRUE)
+      
       shiny::observeEvent(input$bttn_reset_filters, {
         counter(0)
       })
