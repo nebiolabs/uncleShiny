@@ -184,19 +184,43 @@ dataFiltersServer <- function(id, grv) {
       ##-----------------------
       ##  Numeric            --
       ##-----------------------
+      # output$numeric_filters_UI <- shiny::renderUI({
+      #   ns <- session$ns
+      #   UI_list <- purrr::imap(
+      #     numeric_filters_list,
+      #     function(var, nm) {
+      #       shiny::sliderInput(
+      #         ns(paste("filter", var, sep = "_")),
+      #         nm,
+      #         min = 0.0001,
+      #         max = 1000,
+      #         value = c(0.0001, 1000),
+      #         ticks = TRUE,
+      #         width = "100%"
+      #       )
+      #     }
+      #   )
+      #   rlang::inject(shiny::tagList(!!!unname(UI_list)))
+      # })
       output$numeric_filters_UI <- shiny::renderUI({
         ns <- session$ns
         UI_list <- purrr::imap(
           numeric_filters_list,
           function(var, nm) {
-            shiny::sliderInput(
-              ns(paste("filter", var, sep = "_")),
-              nm,
-              min = 0.0001,
-              max = 1000,
-              value = c(0.0001, 1000),
-              ticks = TRUE,
-              width = "100%"
+            shiny::tagList(
+              shiny::h5(nm),
+              shiny::splitLayout(
+                shiny::numericInput(
+                  ns(paste("filter", var, "min", sep = "_")),
+                  label = "min",
+                  value = 0.0001
+                ),
+                shiny::numericInput(
+                  ns(paste("filter", var, "max", sep = "_")),
+                  label = "max",
+                  value = 1000
+                )
+              )
             )
           }
         )
@@ -210,23 +234,72 @@ dataFiltersServer <- function(id, grv) {
       ##----------------------
       ##  Conditions        --
       ##----------------------
-      shiny::observeEvent(input$bttn_update_filters, {
+      shiny::observeEvent(input$bttn_update_filters_conditions, {
         purrr::iwalk(
           condition_filters_list,
           function(var, nm) {
             shiny::updateSelectInput(
               session = session,
               inputId = paste("filter", var, sep = "_"),
-              choices = unique(grv$data()[[var]])
+              choices = unique(grv$data()[[var]]),
+              selected = unique(grv$data()[[var]])
             )
           }
+        )
+      })
+      
+      output$conditions <- shiny::renderPrint({
+        purrr::map(
+          condition_filters_list,
+          function(var) input[[paste("filter", var, sep = "_")]]
         )
       })
       
       ##-----------------------
       ##  Numeric            --
       ##-----------------------
+      # shiny::observeEvent(input$bttn_update_filters_numeric, {
+      #   purrr::iwalk(
+      #     numeric_filters_list,
+      #     function(var, nm) {
+      #       shiny::updateSliderInput(
+      #         session = session,
+      #         inputId = paste("filter", var, sep = "_"),
+      #         min = round(min(as.numeric(grv$data()[[var]]), na.rm = TRUE), 1),
+      #         max = round(max(as.numeric(grv$data()[[var]]), na.rm = TRUE), 1),
+      #         value = round(range(as.numeric(grv$data()[[var]]), na.rm = TRUE), 1)
+      #       )
+      #     }
+      #   )
+      # })
+      shiny::observeEvent(input$bttn_update_filters_numeric, {
+        purrr::iwalk(
+          numeric_filters_list,
+          function(var, nm) {
+            shiny::updateNumericInput(
+              session = session,
+              inputId = paste("filter", var, "min", sep = "_"),
+              value = round(min(as.numeric(grv$data()[[var]]), na.rm = TRUE), 1)
+            )
+            shiny::updateNumericInput(
+              session = session,
+              inputId = paste("filter", var, "max", sep = "_"),
+              value = round(max(as.numeric(grv$data()[[var]]), na.rm = TRUE), 1)
+            )
+          }
+        )
+      })
       
+      output$numeric <- shiny::renderPrint({
+        purrr::map(
+          numeric_filters_list,
+          function(var) 
+            c(
+              input[[paste("filter", var, "min", sep = "_")]],
+              input[[paste("filter", var, "max", sep = "_")]]
+            )
+        )
+      })
       
     }
   )
