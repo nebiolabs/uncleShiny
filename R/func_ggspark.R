@@ -36,6 +36,11 @@ ggspark <- function(data, spec_var, spec_name, x_var, y_var, summary_var,
   } else {
     spec_df <- NULL
   }
+  
+  # If spectra are missing in the database, plot a NULL plot..
+  if (identical(spec_df[[1]], numeric(0))) {
+    return(ggplot2::geom_blank())
+  }
 
   # x intercept
   if (is.na(summary_var)) {
