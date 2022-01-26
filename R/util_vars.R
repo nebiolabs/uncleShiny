@@ -3,30 +3,17 @@
 ##  Global variables                                                      --
 ##--------------------------------------------------------------------------
 
+
+##--------------------------------------------------------
+##  GENERAL                                             --
+##--------------------------------------------------------
 wellOrder <- purrr::map2_chr(rep(c(LETTERS[1:8]), 12), purrr::flatten_chr(purrr::map(c(1:12), rep, 8)), paste0)
 uniOrder <- purrr::map2_chr(rep(c(LETTERS[1:16]), 3), purrr::flatten_chr(purrr::map(c(1:3), rep, 16)), paste0)
 
-## TODO update for tooltip variable check
-# tooltipVars <- c(
-#   "buffer",
-#   "Buffer_unit_value",
-#   "pH", 
-#   "salt",
-#   "salt_mM",
-#   "additive1",
-#   "additive1_conc",
-#   "additive1_unit",
-#   "additive2",
-#   "additive2_conc",
-#   "additive2_unit", 
-#   "DTT_mM",
-#   "TCEP_mM",
-#   "glycerol",
-#   "albumin",
-#   "albumin_mgml",
-#   "comment"
-# )
 
+##--------------------------------------------------------
+##  PLOT OPTIONS                                        --
+##--------------------------------------------------------
 xvarChoices <- c(
   "Tagg @ 266nm" = "Tagg266",
   "Tagg @ 473nm" = "Tagg473",
@@ -73,7 +60,6 @@ colorvarChoices <- c(
   "Well" = "well",
   "Instrument" = "instrument"
 )
-
 
 palnList <- list(
   "Set1" = 9,
@@ -184,6 +170,10 @@ spec_tbl_list <- c(
   specTm = "uncle_dsfs"
 )
 
+
+##--------------------------------------------------------
+##  TOOLTIPS                                            --
+##--------------------------------------------------------
 # Expression for generating hover tooltip
 short_tootip_glue_string <- quote(
   glue::glue(
@@ -193,6 +183,7 @@ short_tootip_glue_string <- quote(
   )
 )
 
+# Expression for generating conditions module summary
 long_tootip_glue_string <- quote(
   glue::glue(
     "<h4><em>Plate Well: {well}</em></h4>",
