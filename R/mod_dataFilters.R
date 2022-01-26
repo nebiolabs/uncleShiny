@@ -90,41 +90,6 @@ dataFiltersServer <- function(id, grv) {
     id,
     function(input, output, session) {
       
-      ##----------------------------------------
-      ##  Variables to filter on              --
-      ##----------------------------------------
-      
-      ##----------------------
-      ##  Conditions        --
-      ##----------------------
-      condition_filters_list <- c(
-        "Buffer" = "Buffer_condition_name",
-        "pH" = "pH_unit_value",
-        "Buffer Salt" = "BufferSalt_condition_name",
-        "ReducingAgent" = "ReducingAgent_condition_name",
-        "Sugar" = "Sugar_condition_name"#,
-        # "Plate Type" = "plate",
-        # "Exp. Set ID" = "exp_set_id",
-        # "Notes" = "notes",
-        # "Exp. ID" = "exp_id",
-        # "Well" = "well",
-        # "Instrument" = "instrument"
-      )
-      
-      ##-----------------------
-      ##  Numeric            --
-      ##-----------------------
-      numeric_filters_list <- c(
-        "Tm" = "Tm1",
-        "Tagg @ 266nm" = "Tagg266",
-        "Tagg @ 473nm" = "Tagg473",
-        "Polydispersity Index" = "PdI",
-        "Z Diameter (nm)" = "Z_D",
-        "Peak 1 Diameter (nm)" = "peak1_D"
-        # "pH" = "pH_unit_value"
-      )
-      
-      
       ##-----------------------------------------
       ##  Button and filter logic              --
       ##-----------------------------------------

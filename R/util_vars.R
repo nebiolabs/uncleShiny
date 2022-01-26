@@ -95,6 +95,46 @@ palnList <- list(
 )
 palChoices <- names(palnList)
 
+
+##--------------------------------------------------------
+##  FILTER OPTIONS                                      --
+##--------------------------------------------------------
+
+##----------------------------------------
+##  Conditions                          --
+##----------------------------------------
+condition_filters_list <- c(
+  "Buffer" = "Buffer_condition_name",
+  "pH" = "pH_unit_value",
+  "Buffer Salt" = "BufferSalt_condition_name",
+  "ReducingAgent" = "ReducingAgent_condition_name",
+  "Sugar" = "Sugar_condition_name",
+  "Plate Type" = "plate",
+  # "Exp. Set ID" = "exp_set_id",
+  "Notes" = "notes"
+  # "Exp. ID" = "exp_id",
+  # "Well" = "well",
+  # "Instrument" = "instrument"
+)
+
+
+##-----------------------------------------
+##  Numeric                              --
+##-----------------------------------------
+numeric_filters_list <- c(
+  "Tm" = "Tm1",
+  "Tagg @ 266nm" = "Tagg266",
+  "Tagg @ 473nm" = "Tagg473",
+  "Polydispersity Index" = "PdI",
+  "Z Diameter (nm)" = "Z_D",
+  "Peak 1 Diameter (nm)" = "peak1_D"
+)
+
+
+
+##-------------------------------------------------------
+##  SPECTRA                                            --
+##-------------------------------------------------------
 # Spectra to plot in the sparkline QuickView..
 spec_vars <- c(# previously specList
   "Correlation Function" = "specDLS_C",
