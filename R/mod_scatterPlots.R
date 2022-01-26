@@ -31,9 +31,9 @@ scatterPlotsUI <- function(id) {
           ),
           shiny::column(
             width = 3,
-            ##----------------------------------------
-            ##  Condition viewer                    --
-            ##----------------------------------------
+            ##-----------------------------------------
+            ##  Scatter conditions viewer            --
+            ##-----------------------------------------
             conditionsViewerUI(ns("scatter_conditions"))
           )
         ),
@@ -71,10 +71,17 @@ scatterPlotsUI <- function(id) {
               ns("plot_zoom"),
               width = "100%",
               height = "400px"
-            )
+            ),
+            ##----------------------------------------
+            ##  Zoom conditions viewer              --
+            ##----------------------------------------
+            conditionsViewerUI(ns("zoom_conditions"))
           ),
           shiny::column(
             width = 8,
+            ##-----------------------------------------
+            ##  Ridgeline plots                      --
+            ##-----------------------------------------
             spectraViewerUI(ns("scatter_ridgeline"))
           )
         )
@@ -92,6 +99,8 @@ scatterPlotsServer <- function(id, grv) {
     function(input, output, session) {
       
       grv$scatter <- shiny::reactiveValues()
+      
+      grv$zoom <- shiny::reactiveValues()
       
       munge_module_data <- function(data_input, color_input, palette_input) {
         if (is.null(data_input)) {
@@ -186,14 +195,14 @@ scatterPlotsServer <- function(id, grv) {
         shiny::req(module_SharedData())
         plotly::subplot(
           plot_DLS() |>
-            plotly::ggplotly(source = "scatter", tooltip = "text") |> 
+            plotly::ggplotly(source = "S", tooltip = "text") |> 
             plotly::event_register("plotly_selected") |>
-            plotly::event_register("plotly_click") |> 
+            plotly::event_register("plotly_click") |>
             plotly::event_register("plotly_hover"),
           plot_SLS_DSF() |>
-            plotly::ggplotly(source = "scatter", tooltip = "text") |>
+            plotly::ggplotly(source = "S", tooltip = "text") |>
             plotly::event_register("plotly_selected") |>
-            plotly::event_register("plotly_click") |> 
+            plotly::event_register("plotly_click") |>
             plotly::event_register("plotly_hover"),
           nrows = 1,
           titleX = TRUE,
@@ -214,16 +223,12 @@ scatterPlotsServer <- function(id, grv) {
             ),
             debounce = 100
           ) |>
-          plotly::config(displaylogo = FALSE)# |> 
-          # plotly::event_register("plotly_selected") |>
-          # plotly::event_register("plotly_click") |> 
-          # plotly::event_register("plotly_hover")
+          plotly::config(displaylogo = FALSE) |> 
+          plotly::event_register("plotly_selected") |>
+          plotly::event_register("plotly_click") |>
+          plotly::event_register("plotly_hover")
       })
       
-      
-      ##-----------------------------------------
-      ##  Plotly Callbacks                     --
-      ##-----------------------------------------
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected plotly event        <<
@@ -235,7 +240,7 @@ scatterPlotsServer <- function(id, grv) {
         # plotly callback
         event <- plotly::event_data(
           event = "plotly_selected",
-          source = "scatter"
+          source = "S"
         )
         
         # sometimes selection returns a list if points overlap which is
@@ -252,11 +257,12 @@ scatterPlotsServer <- function(id, grv) {
           grv$scatter$selected <- NULL
         } else {
           grv$scatter$selected <- list(
-            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            summary_ids = event[["key"]],
             well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
         }
       }, label = "scatter_selected")
+      
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter clicked plotly event         <<
@@ -268,7 +274,7 @@ scatterPlotsServer <- function(id, grv) {
         # plotly callback
         event <- plotly::event_data(
           event = "plotly_click",
-          source = "scatter"
+          source = "S"
         )
         
         # sometimes selection returns a list if points overlap which is
@@ -285,11 +291,12 @@ scatterPlotsServer <- function(id, grv) {
           grv$scatter$clicked <- NULL
         } else {
           grv$scatter$clicked <- list(
-            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            summary_ids = event[["key"]],
             well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
         }
       }, label = "scatter_clicked")
+      
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered plotly event         <<
@@ -300,7 +307,7 @@ scatterPlotsServer <- function(id, grv) {
         # plotly callback
         event <- plotly::event_data(
           event = "plotly_hover",
-          source = "scatter"
+          source = "S"
         )
         
         # sometimes selection returns a list if points overlap which is
@@ -317,7 +324,7 @@ scatterPlotsServer <- function(id, grv) {
           grv$scatter$hovered <- NULL
         } else {
           grv$scatter$hovered <- list(
-            summary_ids = bit64::as.integer64.character(event[["key"]]),
+            summary_ids = event[["key"]],
             well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
         }
@@ -325,6 +332,7 @@ scatterPlotsServer <- function(id, grv) {
         #   cat("Notice, that empty vector error happened again on hover.\n")
         # }
       }, label = "scatter_hovered")
+      
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected data                <<
@@ -374,7 +382,7 @@ scatterPlotsServer <- function(id, grv) {
           # show_horiz_guides = grv$scatter_opts$show_guides_h2,
           # horiz_guides = grv$scatter_opts$guides_h2(),
           x_is_log = grv$scatter_opts$xvar3_is_log,
-          custom_data = "well_id",
+          custom_data = "uncle_summary_id",
           show_legend = FALSE
         )
       })
@@ -386,7 +394,7 @@ scatterPlotsServer <- function(id, grv) {
       # Plotly subplot output rendering
       output$plot_zoom <- plotly::renderPlotly({
         plot_zoom() |> 
-        plotly::ggplotly(source = "zoom", tooltip = "text") |>
+        plotly::ggplotly(source = "Z", tooltip = "text") |>
           plotly::layout(
             legend = legendList
           ) |>
@@ -399,6 +407,70 @@ scatterPlotsServer <- function(id, grv) {
           plotly::event_register("plotly_selected") |> 
           plotly::event_register("plotly_hover")
       })
+      
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Zoom hovered plotly event            <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        # similar to a debounce to delay repeat invalidation/evaluation
+        
+        # plotly callback
+        event <- plotly::event_data(
+          event = "plotly_hover",
+          source = "Z"
+        )
+        
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["key"]])) {
+          event[["key"]] <- as.character(unlist(event[["key"]]))
+        }
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
+        }
+        
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$zoom$hovered <- NULL
+        } else {
+          grv$zoom$hovered <- list(
+            summary_ids = event[["customdata"]]
+          )
+        }
+        # if (rlang::is_empty(grv$zoom$hovered[["summary_ids"]])) {
+        #   cat("Notice, that empty vector error happened again on hover.\n")
+        # }
+      }, label = "zoom_hovered")
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Zoom hovered data                    <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        shiny::req(module_data(), grv$zoom$hovered)
+        if (rlang::is_empty(grv$zoom$hovered[["summary_ids"]])) {
+          grv$zoom$hovered$data <- NULL
+        } else {
+          grv$zoom$hovered$data <- dplyr::filter(
+            module_data(),
+            uncle_summary_id %in% grv$zoom$hovered[["summary_ids"]]
+          )
+        }
+      }, label = "zoom_hovered_data")
+      
+      
+      # output$test_scatter <- shiny::renderPrint({
+      #   list(
+      #     "clicked" = grv$scatter$clicked,
+      #     "hovered" = grv$scatter$hovered
+      #   )
+      # })
+      # 
+      # output$test_zoom <- shiny::renderPrint({
+      #   list(
+      #     "zoom" = grv$zoom$hovered
+      #   )
+      # })
       
       
       ##////////////////////////////////////////
@@ -421,11 +493,16 @@ scatterPlotsServer <- function(id, grv) {
       
       
       ##////////////////////////////////////////
-      ##  Conditions viewer module            //
+      ##  Conditions viewer modules           //
       ##////////////////////////////////////////
       conditionsViewerServer(
         "scatter_conditions",
         shiny::reactive({grv$scatter$hovered$data})
+      )
+      
+      conditionsViewerServer(
+        "zoom_conditions",
+        shiny::reactive({grv$zoom$hovered$data})
       )
       
       ##////////////////////////////////////////
