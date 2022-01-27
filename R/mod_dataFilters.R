@@ -19,13 +19,13 @@ dataFiltersUI <- function(id) {
     shiny::br(),
     shiny::actionButton(
       ns("bttn_apply_filters"),
-      label = "Apply Filters",
+      label = "Apply",
       icon = shiny::icon("check"),
       width = "45%"
     ),
     shiny::actionButton(
       ns("bttn_reset_filters"),
-      label = "Remove Filters",
+      label = "Remove",
       icon = shiny::icon("minus-circle"),
       width = "45%"
     ),
