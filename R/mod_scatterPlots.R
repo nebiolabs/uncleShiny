@@ -44,7 +44,6 @@ scatterPlotsUI <- function(id) {
             ##  Spectra sparklines                  --
             ##----------------------------------------
             shiny::h3("Spectra Quickview"),
-            shiny::helpText("Activated on click."),
             spectraSparksUI(ns("scatter_sparks"))
           ),
           shiny::column(
