@@ -27,11 +27,11 @@ spectraViewerUI <- function(id) {
         shiny::fluidRow(
           shiny::column(
             width = 7,
-            shiny::plotOutput(ns("dls"), height = "800px")
+            shiny::plotOutput(ns("dls"), height = "700px")
           ),
           shiny::column(
             width = 5,
-            shiny::plotOutput(ns("corr"), height = "800px")
+            shiny::plotOutput(ns("corr"), height = "700px")
           )
         )
       ),
@@ -40,11 +40,11 @@ spectraViewerUI <- function(id) {
         shiny::fluidRow(
           shiny::column(
             width = 6,
-            shiny::plotOutput(ns("sls"), height = "800px")
+            shiny::plotOutput(ns("sls"), height = "700px")
           ),
           shiny::column(
             width = 6,
-            shiny::plotOutput(ns("dsf"), height = "800px")
+            shiny::plotOutput(ns("dsf"), height = "700px")
           )
         )
       )
