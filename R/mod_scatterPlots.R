@@ -26,7 +26,7 @@ scatterPlotsUI <- function(id) {
             plotly::plotlyOutput(
               ns("plot_scatter"),
               width = "100%",
-              height = "400px"
+              height = "380px"
             )
           ),
           shiny::column(
@@ -70,7 +70,7 @@ scatterPlotsUI <- function(id) {
             plotly::plotlyOutput(
               ns("plot_zoom"),
               width = "100%",
-              height = "400px"
+              height = "380px"
             ),
             ##----------------------------------------
             ##  Zoom conditions viewer              --
