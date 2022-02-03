@@ -210,7 +210,8 @@ scatterPlotsServer <- function(id, grv) {
           margin = 0.04
         ) |>
           plotly::layout(
-            legend = legendList
+            legend = legendList,
+            dragmode = "select"
           ) |>
           plotly::highlight(
             on = grv$scatter_opts$mode_highlight_on,
@@ -416,7 +417,8 @@ scatterPlotsServer <- function(id, grv) {
         plot_zoom() |> 
         plotly::ggplotly(source = "Z", tooltip = "text") |>
           plotly::layout(
-            legend = legendList
+            legend = legendList,
+            dragmode = "select"
           ) |>
           plotly::highlight(
             on = "plotly_selected", off = "plotly_deselect",
