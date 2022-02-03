@@ -27,7 +27,8 @@ scatterPlotsUI <- function(id) {
               ns("plot_scatter"),
               width = "100%",
               height = "380px"
-            )
+            )#,
+            # shiny::verbatimTextOutput(ns("test_scatter"))
           ),
           shiny::column(
             width = 3,
@@ -71,6 +72,7 @@ scatterPlotsUI <- function(id) {
               width = "100%",
               height = "380px"
             ),
+            # shiny::verbatimTextOutput(ns("test_zoom")),
             ##----------------------------------------
             ##  Zoom conditions viewer              --
             ##----------------------------------------
@@ -116,6 +118,7 @@ scatterPlotsServer <- function(id, grv) {
                 Buffer_condition_name
               )
             ) |> 
+            df_char_int64() |> 
             cbind_colors(color_input, palette_input)
         }
       }
@@ -261,7 +264,7 @@ scatterPlotsServer <- function(id, grv) {
         } else {
           grv$scatter$selected <- list(
             summary_ids = event[["key"]],
-            well_ids = bit64::as.integer64.character(event[["customdata"]])
+            well_ids = event[["customdata"]]
           )
         }
       }, label = "scatter_selected")
@@ -315,7 +318,9 @@ scatterPlotsServer <- function(id, grv) {
           grv$scatter$clicked <- NULL
         } else {
           grv$scatter$clicked <- list(
-            summary_ids = event[["key"]],
+            # these should be converted to int64 as the spark module uses
+            # top-level data that has not been factored for plotting aesthetics
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
             well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
         }
@@ -353,7 +358,7 @@ scatterPlotsServer <- function(id, grv) {
         } else {
           grv$scatter$hovered <- list(
             summary_ids = event[["key"]],
-            well_ids = bit64::as.integer64.character(event[["customdata"]])
+            well_ids = event[["customdata"]]
           )
         }
         # if (rlang::is_empty(grv$scatter$hovered[["summary_ids"]])) {
@@ -439,9 +444,6 @@ scatterPlotsServer <- function(id, grv) {
         
         # sometimes selection returns a list if points overlap which is
         # incompatible with filtering and must be repaired
-        if (rlang::is_list(event[["key"]])) {
-          event[["key"]] <- as.character(unlist(event[["key"]]))
-        }
         if (rlang::is_list(event[["customdata"]])) {
           event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
         }
@@ -475,8 +477,10 @@ scatterPlotsServer <- function(id, grv) {
       }, label = "zoom_hovered_data")
       
       
+      
       # output$test_scatter <- shiny::renderPrint({
       #   list(
+      #     "selected" = grv$scatter$selected,
       #     "clicked" = grv$scatter$clicked,
       #     "hovered" = grv$scatter$hovered
       #   )
