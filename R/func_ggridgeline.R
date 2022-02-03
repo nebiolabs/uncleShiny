@@ -4,17 +4,25 @@
 ##-------------------------------------------------------------------------
 
 ggridgeline <- function(data, spec_type, dls_type = "intensity", 
-                        sort_var, color_var, palette_name = "Set2",
+                        sort_var, color_var, color_encoded = TRUE, palette_name = "Set2",
                         show_legend = TRUE, alpha = 0.6) {
+  if (is.null(data)) {
+    stop("Nothing is selected.")
+  }
   if (!(spec_type %in% c("dls", "corr", "sls", "dsf"))) {
     stop("Warning: invalid spec_type; use 'dls', 'corr', 'sls' or 'dsf'.")
   }
   if (!(dls_type %in% c("intensity", "mass"))) {
     stop("Warning: invalid dls_type; use 'intensity' or 'mass'.")
   }
-  if (is.null(data)) {
-    stop("Nothing is selected.")
+  if (!is.logical(color_encoded)) {
+    stop("Argument color_encoded must be TRUE or FALSE.")
   }
+  
+  if (color_encoded) {
+    color_var <- "color_hex"
+  }
+  
   
   ##----------------------------------------
   ##  Variable switching                  --
@@ -141,9 +149,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       ggplot2::scale_x_log10(limits = c(1, 1000), expand = c(0,0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::annotation_logticks(sides = "b") +
-      ggplot2::scale_fill_manual(
-        values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      ) +
+      # ggplot2::scale_fill_manual(
+      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
+      # ) +
       ggplot2::labs(
         title = glue::glue("DLS ({dls_type} distribution)"),
         subtitle = glue::glue("with {summary_var} overlay in red"),
@@ -189,9 +197,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       ggplot2::scale_x_log10(limits = c(0.000001, 0.1), expand = c(0,0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::annotation_logticks(sides = "b") +
-      ggplot2::scale_color_manual(
-        values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      ) +
+      # ggplot2::scale_color_manual(
+      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
+      # ) +
       ggplot2::theme(
         axis.title.y = ggplot2::element_blank()
       ) +
@@ -249,9 +257,9 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         switch = "y"
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
-      ggplot2::scale_color_manual(
-        values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      ) +
+      # ggplot2::scale_color_manual(
+      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
+      # ) +
       ggplot2::labs(
         title = glue::glue("SLS ({spec_var[[1]]} solid, {spec_var[[2]]} dashed)"),
         subtitle = glue::glue("with {summary_var[[1]]} overlays in red"),
@@ -285,14 +293,43 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         labeller = ggplot2::as_labeller(custom_labeller)
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
-      ggplot2::scale_color_manual(
-        values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      ) +
+      # ggplot2::scale_color_manual(
+      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
+      # ) +
       ggplot2::labs(
         title = glue::glue("NanoDSF"),
         subtitle = glue::glue("with {summary_var} overlays in red"),
         y = "330/350nm fluorescence barycentric mean",
         x = "temperature (°C)"
+      )
+  }
+  
+  
+  ##-----------------------
+  ##  Color aesthetic    --
+  ##-----------------------
+  if (color_encoded) {
+    p <- p +
+      # Hardcoded color palette; see R/func_paletteGenerator.R
+      ggplot2::scale_color_identity(
+        name = color_var,
+        breaks = make_palette(
+          palette_name,
+          length(unique(plot_data[[color_var]]))
+        ),
+        labels = levels(plot_data[[color_var]]),
+        guide = "legend",
+        aesthetics = c("color", "fill")
+      )
+  } else {
+    p <- p +
+      # Color palette; see R/func_paletteGenerator.R
+      ggplot2::scale_color_manual(
+        values = make_palette(
+          palette_name,
+          length(unique(plot_data[[color_var]]))
+        ),
+        aesthetics = c("color", "fill")
       )
   }
   
