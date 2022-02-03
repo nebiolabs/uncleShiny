@@ -4,8 +4,9 @@
 ##-------------------------------------------------------------------------
 
 ggridgeline <- function(data, spec_type, dls_type = "intensity", 
-                        sort_var, color_var, color_encoded = TRUE, palette_name = "Set2",
-                        show_legend = TRUE, alpha = 0.6) {
+                        sort_var, color_var = NA_character_, color_encoded = FALSE,
+                        palette_name = "Set2", show_legend = TRUE,
+                        alpha = 0.6) {
   if (is.null(data)) {
     stop("Nothing is selected.")
   }
@@ -19,8 +20,16 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
     stop("Argument color_encoded must be TRUE or FALSE.")
   }
   
+  if (is.na(color_var)) {
+    color_encoded <- TRUE
+  }
+  
   if (color_encoded) {
     color_var <- "color_hex"
+  }
+  
+  if (!any(colnames(data) == color_var)) {
+    stop("A valid color variable must be provided or encoded as 'color_hex'.")
   }
   
   
