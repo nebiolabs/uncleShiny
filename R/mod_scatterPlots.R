@@ -383,17 +383,23 @@ scatterPlotsServer <- function(id, grv) {
       
       
       ##-----------------------------------------
-      ##  Zoom Plot (selected callback)        --
+      ##  Zoom Plot                            --
       ##-----------------------------------------
       # Reactive object of SLS & DSF plot
       plot_zoom <- shiny::reactive({
+        shiny::req(grv$scatter$selected$data)
         ggscatter(
           data = grv$scatter$selected$data,
+          # data = cbind_colors(
+          #   df = df_char_int64(grv$scatter$selected$data),
+          #   color_var = grv$scatter_opts$color_zoom,
+          #   palette_name = grv$scatter_opts$palette_global
+          # ),
           x_var = grv$scatter_opts$xvar3,
           y_var = grv$scatter_opts$yvar3,
           label = "well",
           color_var = grv$scatter_opts$color_zoom,
-          color_encoded = TRUE,
+          color_encoded = FALSE,
           palette_name = grv$scatter_opts$palette_global,
           size = grv$scatter_opts$size_points(),
           alpha_marker = grv$scatter_opts$alpha_points(),
@@ -404,11 +410,11 @@ scatterPlotsServer <- function(id, grv) {
           # horiz_guides = grv$scatter_opts$guides_h2(),
           x_is_log = grv$scatter_opts$xvar3_is_log,
           custom_data = "uncle_summary_id",
-          show_legend = FALSE
+          show_legend = TRUE
         )
       })
       
-      
+
       ##----------------------------------------
       ##  Zoom Plotly Output                  --
       ##----------------------------------------
