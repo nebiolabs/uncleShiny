@@ -229,6 +229,10 @@ scatterPlotsServer <- function(id, grv) {
       })
       
       
+      ##------------------------
+      ##  Selection callback  --
+      ##------------------------
+      
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected plotly event        <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -262,6 +266,27 @@ scatterPlotsServer <- function(id, grv) {
         }
       }, label = "scatter_selected")
       
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter selected data                <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        shiny::req(module_data(), grv$scatter$selected)
+        grv$scatter$selected$data <- cbind_colors(
+          df = df_char_int64(
+            dplyr::filter(
+              module_data(),
+              uncle_summary_id %in% grv$scatter$selected[["summary_ids"]]
+            )
+          ),
+          color_var = grv$scatter_opts$color_zoom,
+          palette_name = grv$scatter_opts$palette_global
+        )
+      }, label = "scatter_selected_data")
+      
+      
+      ##----------------------
+      ##  Click callback    --
+      ##----------------------
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter clicked plotly event         <<
@@ -297,6 +322,10 @@ scatterPlotsServer <- function(id, grv) {
       }, label = "scatter_clicked")
       
       
+      ##----------------------
+      ##  Hover callback    --
+      ##----------------------
+      
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered plotly event         <<
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -331,19 +360,6 @@ scatterPlotsServer <- function(id, grv) {
         #   cat("Notice, that empty vector error happened again on hover.\n")
         # }
       }, label = "scatter_hovered")
-      
-      
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      ##  Scatter selected data                <<
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      shiny::observe({
-        shiny::req(module_data(), grv$scatter$selected)
-        grv$scatter$selected$data <- dplyr::filter(
-          module_data(),
-          uncle_summary_id %in% grv$scatter$selected[["summary_ids"]]
-        )
-      }, label = "scatter_selected_data")
-      
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered data                <<
