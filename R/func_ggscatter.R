@@ -4,7 +4,7 @@
 ##--------------------------------------------------------------------------
 ggscatter <- function(data, x_var, y_var, label = NULL,
                       color_var, color_encoded = FALSE, palette_name,
-                      size = NULL, alpha = NULL,
+                      size = NULL, alpha_marker = NULL, alpha_label = 1,
                       show_vert_guides = FALSE, vert_guides = c(5,20),
                       show_horiz_guides = FALSE, horiz_guides = c(0,0),
                       x_is_log = FALSE, custom_data = "well_id",
@@ -53,7 +53,7 @@ ggscatter <- function(data, x_var, y_var, label = NULL,
     ggplot2::geom_point(
       ggplot2::aes(color = .data[[color_var]]),
       size = size,
-      alpha = alpha
+      alpha = alpha_marker
     )# +
     # Calling this fixes strange behavior with plotly::ggplotly() axis scaling
     # ggplot2::scale_y_continuous()
@@ -86,9 +86,10 @@ ggscatter <- function(data, x_var, y_var, label = NULL,
   if (shiny::isTruthy(label)) {
     p <- p +
       ggplot2::geom_text(
-        aes(label = .data[[label]]),
+        aes(label = .data[[label]], group = .data[[color_var]]),
         hjust = 0,
-        vjust = 1
+        vjust = 1,
+        alpha = alpha_label
       )
   }
   

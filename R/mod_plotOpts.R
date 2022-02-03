@@ -49,8 +49,8 @@ plotOptsUI <- function(id) {
           label = "Size of points:",
           min = 0.4,
           max = 3,
-          value = 1.8,
-          step = 0.2,
+          value = 1.4,
+          step = 0.1,
           ticks = TRUE
         ),
         ##-----------------------
@@ -61,7 +61,7 @@ plotOptsUI <- function(id) {
           label = "Opacity of points:",
           min = 0.05,
           max = 1,
-          value = 0.75,
+          value = 0.6,
           step = 0.05,
           ticks = TRUE
         ),

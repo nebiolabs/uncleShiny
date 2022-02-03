@@ -26,7 +26,7 @@ scatterPlotsUI <- function(id) {
             plotly::plotlyOutput(
               ns("plot_scatter"),
               width = "100%",
-              height = "400px"
+              height = "380px"
             )
           ),
           shiny::column(
@@ -44,7 +44,6 @@ scatterPlotsUI <- function(id) {
             ##  Spectra sparklines                  --
             ##----------------------------------------
             shiny::h3("Spectra Quickview"),
-            shiny::helpText("Activated on click."),
             spectraSparksUI(ns("scatter_sparks"))
           ),
           shiny::column(
@@ -70,7 +69,7 @@ scatterPlotsUI <- function(id) {
             plotly::plotlyOutput(
               ns("plot_zoom"),
               width = "100%",
-              height = "400px"
+              height = "380px"
             ),
             ##----------------------------------------
             ##  Zoom conditions viewer              --
@@ -117,6 +116,7 @@ scatterPlotsServer <- function(id, grv) {
                 Buffer_condition_name
               )
             ) |> 
+            df_char_int64() |> 
             cbind_colors(color_input, palette_input)
         }
       }
@@ -149,7 +149,7 @@ scatterPlotsServer <- function(id, grv) {
           color_encoded = FALSE,
           palette_name = grv$scatter_opts$palette_global,
           size = grv$scatter_opts$size_points(),
-          alpha = grv$scatter_opts$alpha_points(),
+          alpha_marker = grv$scatter_opts$alpha_points(),
           show_vert_guides = grv$scatter_opts$show_guides_v1,
           vert_guides = grv$scatter_opts$guides_v1(),
           show_horiz_guides = grv$scatter_opts$show_guides_h1,
@@ -175,7 +175,7 @@ scatterPlotsServer <- function(id, grv) {
           color_encoded = FALSE,
           palette_name = grv$scatter_opts$palette_global,
           size = grv$scatter_opts$size_points(),
-          alpha = grv$scatter_opts$alpha_points(),
+          alpha_marker = grv$scatter_opts$alpha_points(),
           show_vert_guides = grv$scatter_opts$show_guides_v2,
           vert_guides = grv$scatter_opts$guides_v2(),
           show_horiz_guides = grv$scatter_opts$show_guides_h2,
@@ -210,7 +210,8 @@ scatterPlotsServer <- function(id, grv) {
           margin = 0.04
         ) |>
           plotly::layout(
-            legend = legendList
+            legend = legendList,
+            dragmode = "select"
           ) |>
           plotly::highlight(
             on = grv$scatter_opts$mode_highlight_on,
@@ -229,6 +230,10 @@ scatterPlotsServer <- function(id, grv) {
           plotly::event_register("plotly_hover")
       })
       
+      
+      ##------------------------
+      ##  Selection callback  --
+      ##------------------------
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter selected plotly event        <<
@@ -258,11 +263,32 @@ scatterPlotsServer <- function(id, grv) {
         } else {
           grv$scatter$selected <- list(
             summary_ids = event[["key"]],
-            well_ids = bit64::as.integer64.character(event[["customdata"]])
+            well_ids = event[["customdata"]]
           )
         }
       }, label = "scatter_selected")
       
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Scatter selected data                <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        shiny::req(module_data(), grv$scatter$selected)
+        grv$scatter$selected$data <- cbind_colors(
+          df = df_char_int64(
+            dplyr::filter(
+              module_data(),
+              uncle_summary_id %in% grv$scatter$selected[["summary_ids"]]
+            )
+          ),
+          color_var = grv$scatter_opts$color_zoom,
+          palette_name = grv$scatter_opts$palette_global
+        )
+      }, label = "scatter_selected_data")
+      
+      
+      ##----------------------
+      ##  Click callback    --
+      ##----------------------
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter clicked plotly event         <<
@@ -291,12 +317,18 @@ scatterPlotsServer <- function(id, grv) {
           grv$scatter$clicked <- NULL
         } else {
           grv$scatter$clicked <- list(
-            summary_ids = event[["key"]],
+            # these should be converted to int64 as the spark module uses
+            # top-level data that has not been factored for plotting aesthetics
+            summary_ids = bit64::as.integer64.character(event[["key"]]),
             well_ids = bit64::as.integer64.character(event[["customdata"]])
           )
         }
       }, label = "scatter_clicked")
       
+      
+      ##----------------------
+      ##  Hover callback    --
+      ##----------------------
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered plotly event         <<
@@ -325,26 +357,13 @@ scatterPlotsServer <- function(id, grv) {
         } else {
           grv$scatter$hovered <- list(
             summary_ids = event[["key"]],
-            well_ids = bit64::as.integer64.character(event[["customdata"]])
+            well_ids = event[["customdata"]]
           )
         }
         # if (rlang::is_empty(grv$scatter$hovered[["summary_ids"]])) {
         #   cat("Notice, that empty vector error happened again on hover.\n")
         # }
       }, label = "scatter_hovered")
-      
-      
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      ##  Scatter selected data                <<
-      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      shiny::observe({
-        shiny::req(module_data(), grv$scatter$selected)
-        grv$scatter$selected$data <- dplyr::filter(
-          module_data(),
-          uncle_summary_id %in% grv$scatter$selected[["summary_ids"]]
-        )
-      }, label = "scatter_selected_data")
-      
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Scatter hovered data                <<
@@ -363,31 +382,33 @@ scatterPlotsServer <- function(id, grv) {
       
       
       ##-----------------------------------------
-      ##  Zoom Plot (selected callback)        --
+      ##  Zoom Plot                            --
       ##-----------------------------------------
       # Reactive object of SLS & DSF plot
       plot_zoom <- shiny::reactive({
+        shiny::req(grv$scatter$selected$data)
         ggscatter(
           data = grv$scatter$selected$data,
           x_var = grv$scatter_opts$xvar3,
           y_var = grv$scatter_opts$yvar3,
           label = "well",
           color_var = grv$scatter_opts$color_zoom,
-          color_encoded = TRUE,
+          color_encoded = FALSE,
           palette_name = grv$scatter_opts$palette_global,
           size = grv$scatter_opts$size_points(),
-          alpha = grv$scatter_opts$alpha_points(),
+          alpha_marker = grv$scatter_opts$alpha_points(),
+          alpha_label = 0.5,
           # show_vert_guides = grv$scatter_opts$show_guides_v2,
           # vert_guides = grv$scatter_opts$guides_v2(),
           # show_horiz_guides = grv$scatter_opts$show_guides_h2,
           # horiz_guides = grv$scatter_opts$guides_h2(),
           x_is_log = grv$scatter_opts$xvar3_is_log,
           custom_data = "uncle_summary_id",
-          show_legend = FALSE
+          show_legend = TRUE
         )
       })
       
-      
+
       ##----------------------------------------
       ##  Zoom Plotly Output                  --
       ##----------------------------------------
@@ -396,7 +417,8 @@ scatterPlotsServer <- function(id, grv) {
         plot_zoom() |> 
         plotly::ggplotly(source = "Z", tooltip = "text") |>
           plotly::layout(
-            legend = legendList
+            legend = legendList,
+            dragmode = "select"
           ) |>
           plotly::highlight(
             on = "plotly_selected", off = "plotly_deselect",
@@ -408,6 +430,65 @@ scatterPlotsServer <- function(id, grv) {
           plotly::event_register("plotly_hover")
       })
       
+      
+      ##-----------------------
+      ##  Select callback    --
+      ##-----------------------
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Zoom selected plotly event          <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      shiny::observe({
+        # similar to a debounce to delay repeat invalidation/evaluation
+        # shiny::invalidateLater(1000, session)
+
+        # plotly callback
+        event <- plotly::event_data(
+          event = "plotly_selected",
+          source = "Z"
+        )
+
+        # sometimes selection returns a list if points overlap which is
+        # incompatible with filtering and must be repaired
+        if (rlang::is_list(event[["customdata"]])) {
+          event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
+        }
+
+        # output of a list containing key and customdata values for selection
+        if (is.null(event)) {
+          grv$zoom$selected <- NULL
+        } else {
+          grv$zoom$selected <- list(
+            summary_ids = event[["customdata"]]
+          )
+        }
+      }, label = "zoom_selected")
+      
+      
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      ##  Zoom selected data                  <<
+      ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      # This should be a local reactive instead of a global reactive inside of
+      # an observer. The logic above is negated by this logic to check for the
+      # presence of a selection event, thus it never plots if there is no event.
+      # If needed elsewhere, make a separate reactiveValues object instead.
+      ridgeline_data <- shiny::reactive({
+        shiny::req(grv$scatter$selected$data)
+        coded_data <- grv$scatter$selected$data
+        if (is.null(grv$zoom$selected)) {
+          coded_data
+        } else {
+          dplyr::filter(
+            coded_data,
+            uncle_summary_id %in% grv$zoom$selected[["summary_ids"]]
+          )
+        }
+      })
+      
+      
+      ##----------------------
+      ##  Hover callback    --
+      ##----------------------
       
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       ##  Zoom hovered plotly event            <<
@@ -423,9 +504,6 @@ scatterPlotsServer <- function(id, grv) {
         
         # sometimes selection returns a list if points overlap which is
         # incompatible with filtering and must be repaired
-        if (rlang::is_list(event[["key"]])) {
-          event[["key"]] <- as.character(unlist(event[["key"]]))
-        }
         if (rlang::is_list(event[["customdata"]])) {
           event[["customdata"]] <- as.character(unlist(event[["customdata"]]))
         }
@@ -459,20 +537,6 @@ scatterPlotsServer <- function(id, grv) {
       }, label = "zoom_hovered_data")
       
       
-      # output$test_scatter <- shiny::renderPrint({
-      #   list(
-      #     "clicked" = grv$scatter$clicked,
-      #     "hovered" = grv$scatter$hovered
-      #   )
-      # })
-      # 
-      # output$test_zoom <- shiny::renderPrint({
-      #   list(
-      #     "zoom" = grv$zoom$hovered
-      #   )
-      # })
-      
-      
       ##////////////////////////////////////////
       ##  Sparkline module                    //
       ##////////////////////////////////////////
@@ -488,7 +552,7 @@ scatterPlotsServer <- function(id, grv) {
       ##/////////////////////////////////////////
       spectraViewerServer(
         "scatter_ridgeline",
-        shiny::reactive({grv$scatter$selected$data})
+        ridgeline_data
       )
       
       

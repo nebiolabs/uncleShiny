@@ -8,7 +8,11 @@
 ##-------------------------------------------------------
 spectraSparksUI <- function(id) {
   ns <- NS(id)
-    shiny::uiOutput(ns("spectra_plots"), inline = TRUE)
+    shiny::tagList(
+      shiny::uiOutput(ns("selected")),
+      shiny::br(),
+      shiny::uiOutput(ns("spectra_plots"), inline = TRUE)
+    )
     # shiny::fluidRow(shiny::plotOutput(ns("spectra_cowplot"), height = "75px"))
 }
 
@@ -29,6 +33,22 @@ spectraSparksServer <- function(id, grv, event_type) {
         stop("Sparkline module event_type argument error.")
       }
       
+      output$selected <- shiny::renderUI({
+        ns <- session$ns
+        if (is.null(eval(event)[["summary_ids"]])) {
+          shiny::helpText(
+            glue::glue("Activated on {event_type}.")
+          )
+        } else {
+          the_row <- module_data()[module_data()[["uncle_summary_id"]] %in% 
+                                                 eval(event)[["summary_ids"]], ]
+          shiny::tags$em(
+            glue::glue("Spectra shown for {the_row[['product_name']]}, ",
+                       "plate {the_row[['plate']]}, well {the_row[['well']]}.")
+          )
+        }
+      })
+      
       data_for_spark <- shiny::reactive({
         req(module_data(), eval(event))
         dplyr::filter(
@@ -47,7 +67,7 @@ spectraSparksServer <- function(id, grv, event_type) {
           function(var) {
             shiny::column(
               width = 2,
-              shiny::plotOutput(ns(var), height = "100px")
+              shiny::plotOutput(ns(var), height = "120px")
             )
           }
         )
