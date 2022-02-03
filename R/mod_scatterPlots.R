@@ -27,8 +27,7 @@ scatterPlotsUI <- function(id) {
               ns("plot_scatter"),
               width = "100%",
               height = "380px"
-            )#,
-            # shiny::verbatimTextOutput(ns("test_scatter"))
+            )
           ),
           shiny::column(
             width = 3,
@@ -72,7 +71,6 @@ scatterPlotsUI <- function(id) {
               width = "100%",
               height = "380px"
             ),
-            # shiny::verbatimTextOutput(ns("test_zoom")),
             ##----------------------------------------
             ##  Zoom conditions viewer              --
             ##----------------------------------------
@@ -390,11 +388,6 @@ scatterPlotsServer <- function(id, grv) {
         shiny::req(grv$scatter$selected$data)
         ggscatter(
           data = grv$scatter$selected$data,
-          # data = cbind_colors(
-          #   df = df_char_int64(grv$scatter$selected$data),
-          #   color_var = grv$scatter_opts$color_zoom,
-          #   palette_name = grv$scatter_opts$palette_global
-          # ),
           x_var = grv$scatter_opts$xvar3,
           y_var = grv$scatter_opts$yvar3,
           label = "well",
@@ -476,14 +469,10 @@ scatterPlotsServer <- function(id, grv) {
       # This should be a local reactive instead of a global reactive inside of
       # an observer. The logic above is negated by this logic to check for the
       # presence of a selection event, thus it never plots if there is no event.
+      # If needed elsewhere, make a separate reactiveValues object instead.
       ridgeline_data <- shiny::reactive({
         shiny::req(grv$scatter$selected$data)
         coded_data <- grv$scatter$selected$data
-        # cbind_colors(
-        #   df = df_char_int64(grv$scatter$selected$data),
-        #   color_var = grv$scatter_opts$color_zoom,
-        #   palette_name = grv$scatter_opts$palette_global
-        # )
         if (is.null(grv$zoom$selected)) {
           coded_data
         } else {
@@ -493,27 +482,6 @@ scatterPlotsServer <- function(id, grv) {
           )
         }
       })
-      # shiny::observe({
-      #   shiny::req(grv$scatter$selected$data)
-      #   coded_data <- cbind_colors(
-      #     df = df_char_int64(grv$scatter$selected$data),
-      #     color_var = grv$scatter_opts$color_zoom,
-      #     palette_name = grv$scatter_opts$palette_global
-      #   )
-      #   cat("From zoom selected data observer..\n")
-      #   print(coded_data)
-      #   if (is.null(grv$zoom$selected)) {
-      #     grv$zoom$selected$data <- coded_data
-      #   } else {
-      #     grv$zoom$selected$data <- dplyr::filter(
-      #       coded_data,
-      #       uncle_summary_id %in% grv$zoom$selected[["summary_ids"]]
-      #     )
-      #   }
-      #   print(grv$zoom$selected$data)
-      #   cat("Are they the same?")
-      #   identical(coded_data, grv$zoom$selected$data)
-      # }, label = "zoom_selected_data")
       
       
       ##----------------------
@@ -565,24 +533,6 @@ scatterPlotsServer <- function(id, grv) {
           )
         }
       }, label = "zoom_hovered_data")
-      
-      
-      
-      # output$test_scatter <- shiny::renderPrint({
-      #   list(
-      #     "selected" = grv$scatter$selected,
-      #     "clicked" = grv$scatter$clicked,
-      #     "hovered" = grv$scatter$hovered
-      #   )
-      # })
-      # 
-      # output$test_zoom <- shiny::renderPrint({
-      #   list(
-      #     "selected" = grv$zoom$selected,
-      #     "hovered" = grv$zoom$hovered,
-      #     "data" = ridgeline_data()
-      #   )
-      # })
       
       
       ##////////////////////////////////////////

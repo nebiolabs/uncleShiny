@@ -149,9 +149,6 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       ggplot2::scale_x_log10(limits = c(1, 1000), expand = c(0,0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::annotation_logticks(sides = "b") +
-      # ggplot2::scale_fill_manual(
-      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      # ) +
       ggplot2::labs(
         title = glue::glue("DLS ({dls_type} distribution)"),
         subtitle = glue::glue("with {summary_var} overlay in red"),
@@ -197,9 +194,6 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
       ggplot2::scale_x_log10(limits = c(0.000001, 0.1), expand = c(0,0)) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
       ggplot2::annotation_logticks(sides = "b") +
-      # ggplot2::scale_color_manual(
-      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      # ) +
       ggplot2::theme(
         axis.title.y = ggplot2::element_blank()
       ) +
@@ -257,9 +251,6 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         switch = "y"
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
-      # ggplot2::scale_color_manual(
-      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      # ) +
       ggplot2::labs(
         title = glue::glue("SLS ({spec_var[[1]]} solid, {spec_var[[2]]} dashed)"),
         subtitle = glue::glue("with {summary_var[[1]]} overlays in red"),
@@ -293,9 +284,6 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         labeller = ggplot2::as_labeller(custom_labeller)
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0.1)) +
-      # ggplot2::scale_color_manual(
-      #   values = make_palette(palette_name, length(unique(plot_data[[color_var]])))
-      # ) +
       ggplot2::labs(
         title = glue::glue("NanoDSF"),
         subtitle = glue::glue("with {summary_var} overlays in red"),
