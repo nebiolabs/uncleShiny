@@ -48,10 +48,7 @@ plateInspectorServer <- function(id, grv) {
                 Buffer_condition_name
               )
             ) |> 
-            dplyr::mutate(dplyr::across(
-              c("well_id"),
-              .fns = bit64::as.character.integer64
-            )) |> 
+            df_char_int64() |> 
             format_plate_overlay()
         }
       }
