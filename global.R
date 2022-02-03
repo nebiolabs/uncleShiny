@@ -95,7 +95,7 @@ theme_light <- bslib::bs_theme(
   bootswatch = "cosmo",
   base_font = rlang::eval_tidy(the_base_font),
   heading_font = rlang::eval_tidy(the_heading_font),
-  font_scale = 0.7,
+  font_scale = 0.6,
   primary = "#586e75",
   secondary = "#eee8d5"
 )
@@ -104,7 +104,7 @@ theme_dark <- bslib::bs_theme(
   bootswatch = "solar",
   base_font = rlang::eval_tidy(the_base_font),
   heading_font = rlang::eval_tidy(the_heading_font),
-  font_scale = 0.7
+  font_scale = 0.6
 )
 
 # Fonts for plots
