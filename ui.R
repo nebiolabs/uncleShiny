@@ -30,11 +30,7 @@
             label = "Dark mode.",
             value = FALSE # set to match the default theme on app load
           )
-        ),
-      shiny::div(
-        style = "display: inline-block",
-        shiny::em("DATA WARNING: The app is currently pointed at ebase dev!")
-      )
+        )
       ),
       ##--------------------------------------------------------
       ##  NAVBAR TAB: DATABASE                                --
