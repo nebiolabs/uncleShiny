@@ -195,7 +195,8 @@ plateInspectorServer <- function(id, grv) {
       ##/////////////////////////////////////////
       spectraViewerServer(
         "inspector_ridgeline",
-        shiny::reactive({grv$inspector$selected$data})
+        shiny::reactive({grv$inspector$selected$data}),
+        palette_name = grv$scatter_opts$palette_global
       )
     }
   )

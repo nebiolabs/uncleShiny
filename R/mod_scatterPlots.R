@@ -552,7 +552,8 @@ scatterPlotsServer <- function(id, grv) {
       ##/////////////////////////////////////////
       spectraViewerServer(
         "scatter_ridgeline",
-        ridgeline_data
+        ridgeline_data,
+        palette_name = grv$scatter_opts$palette_global
       )
       
       
