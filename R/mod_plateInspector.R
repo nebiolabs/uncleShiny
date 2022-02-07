@@ -49,6 +49,7 @@ plateInspectorServer <- function(id, grv) {
               )
             ) |> 
             df_char_int64() |> 
+            cbind_colors("well", "Set2") |> 
             format_plate_overlay()
         }
       }
