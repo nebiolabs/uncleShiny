@@ -56,7 +56,8 @@ spectraViewerUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-spectraViewerServer <- function(id, robj_data) {
+spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
+                                palette_name = "Set2") {
   shiny::moduleServer(
     id,
     function(input, output, session) {
@@ -70,6 +71,10 @@ spectraViewerServer <- function(id, robj_data) {
           data_input |> 
             dplyr::select(-tidyselect::any_of(unnest_conflicts))
         }
+      }
+      
+      if (is.null(robj_color_var)) {
+        robj_color_var <- shiny::reactive({NA_character_})
       }
       
       ##----------------------------------------
@@ -90,8 +95,8 @@ spectraViewerServer <- function(id, robj_data) {
           spec_type = "dls",
           dls_type = input$type_dynamic,
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
+          color_var = robj_color_var(),
+          palette_name = palette_name,
           show_legend = FALSE
         )
       })
@@ -105,8 +110,8 @@ spectraViewerServer <- function(id, robj_data) {
           data = module_data(),
           spec_type = "corr",
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
+          color_var = robj_color_var(),
+          palette_name = palette_name,
           show_legend = FALSE
         )
       })
@@ -120,8 +125,8 @@ spectraViewerServer <- function(id, robj_data) {
           data = module_data(),
           spec_type = "sls",
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
+          color_var = robj_color_var(),
+          palette_name = palette_name,
           show_legend = FALSE
         )
       })
@@ -130,8 +135,8 @@ spectraViewerServer <- function(id, robj_data) {
           data = module_data(),
           spec_type = "dsf",
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
+          color_var = robj_color_var(),
+          palette_name = palette_name,
           show_legend = FALSE
         )
       })
