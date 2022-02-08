@@ -78,6 +78,15 @@ plateInspectorServer <- function(id, grv) {
               input$color_inspector_spectra,
               input$palette_inspector
             ) |>
+            {\(df) 
+              dplyr::mutate(
+                df,
+                tooltip = rlang::eval_tidy(
+                  short_tootip_glue_string,
+                  data = df
+                )
+              )
+            }() |> 
             format_plate_overlay()
         }
       }
@@ -102,7 +111,8 @@ plateInspectorServer <- function(id, grv) {
                 format = 96, overlay_data = df,
                 source = paste0(nm, "_source"), customdata = "well_id",
                 color = input$color_inspector_wells,
-                palette_name = input$palette_inspector
+                palette_name = input$palette_inspector,
+                tooltip = "tooltip"
               )
             })
             output[[paste0(nm, "_selection")]] <- shiny::renderPrint({
