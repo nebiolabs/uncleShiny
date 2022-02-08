@@ -553,7 +553,7 @@ scatterPlotsServer <- function(id, grv) {
       spectraViewerServer(
         "scatter_ridgeline",
         ridgeline_data,
-        palette_name = grv$scatter_opts$palette_global
+        robj_palette_name = shiny::reactive({grv$scatter_opts$palette_global})
       )
       
       

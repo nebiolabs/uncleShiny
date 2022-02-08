@@ -57,7 +57,7 @@ spectraViewerUI <- function(id) {
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
 spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
-                                palette_name = "Set2") {
+                                robj_palette_name = NULL) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
@@ -75,6 +75,10 @@ spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
       
       if (is.null(robj_color_var)) {
         robj_color_var <- shiny::reactive({NA_character_})
+      }
+      
+      if (is.null(robj_palette_name)) {
+        robj_palette_name <- shiny::reactive({"Set2"})
       }
       
       ##----------------------------------------
@@ -96,7 +100,7 @@ spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
           dls_type = input$type_dynamic,
           sort_var = "Z_D",
           color_var = robj_color_var(),
-          palette_name = palette_name,
+          palette_name = robj_palette_name(),
           show_legend = FALSE
         )
       })
@@ -111,7 +115,7 @@ spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
           spec_type = "corr",
           sort_var = "Z_D",
           color_var = robj_color_var(),
-          palette_name = palette_name,
+          palette_name = robj_palette_name(),
           show_legend = FALSE
         )
       })
@@ -126,7 +130,7 @@ spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
           spec_type = "sls",
           sort_var = "Z_D",
           color_var = robj_color_var(),
-          palette_name = palette_name,
+          palette_name = robj_palette_name(),
           show_legend = FALSE
         )
       })
@@ -136,7 +140,7 @@ spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
           spec_type = "dsf",
           sort_var = "Z_D",
           color_var = robj_color_var(),
-          palette_name = palette_name,
+          palette_name = robj_palette_name(),
           show_legend = FALSE
         )
       })
