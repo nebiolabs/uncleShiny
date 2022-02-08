@@ -4,7 +4,9 @@
 ##--------------------------------------------------------------------------
 
 build_plate_layout <- function(format = NULL, overlay_data = NULL, 
-                              source = NULL, customdata = "well") {
+                              source = NULL, customdata = "well",
+                              color = "color_hex", palette_name = "Set2",
+                              tooltip = "well") {
   base_plate <- make_base_plate(format = format)
   
   if (is.null(overlay_data)) {
@@ -20,8 +22,8 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
     marker = list(
       symbol = "circle",
       size = 25,
-      color = "white",
-      opacity = 0,
+      color = NA,
+      opacity = 0.1,
       line = list(
         color = "black",
         width = 2
