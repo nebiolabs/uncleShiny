@@ -5,7 +5,7 @@
 
 build_plate_layout <- function(format = NULL, overlay_data = NULL, 
                               source = NULL, customdata = "well",
-                              color = "color_hex", palette_name = "Set2",
+                              color_var = "color_hex", palette_name = "Set2",
                               tooltip = "well") {
   base_plate <- make_base_plate(format = format)
   
@@ -35,16 +35,9 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
   )
   
   if (shiny::isTruthy(overlay_data)) {
-    palette_colors <- make_palette(
-      palette_name,
-      length(unique(overlay_data[[color]]))
-    )
-    overlay_split <- dplyr::mutate(
-      overlay_data,
-      !!color := forcats::fct_rev(forcats::fct_infreq(.data[[color]]))
-    ) |> 
-      dplyr::group_split(.data[[color]])
-    for (i in seq_along(palette_colors)) {
+    overlay_split <- dplyr::group_split(overlay_data, .data[[color_var]])
+    
+    for (i in seq_along(overlay_split)) {
       p <- plotly::add_trace(
         p,
         data = overlay_split[[i]],
@@ -57,7 +50,7 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
         marker = list(
           symbol = "circle",
           size = 20,
-          color = palette_colors[i],
+          color = unique(overlay_split[[i]][["color_hex"]]),
           opacity = 0.9
         ),
         text = rlang::new_formula(NULL, rlang::sym(tooltip)),

@@ -110,7 +110,7 @@ plateInspectorServer <- function(id, grv) {
               build_plate_layout(
                 format = 96, overlay_data = df,
                 source = paste0(nm, "_source"), customdata = "well_id",
-                color = input$color_inspector_wells,
+                color_var = input$color_inspector_wells,
                 palette_name = input$palette_inspector,
                 tooltip = "tooltip"
               )
