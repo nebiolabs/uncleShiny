@@ -100,7 +100,9 @@ plateInspectorServer <- function(id, grv) {
             output[[paste0(nm, "_plot")]] <- plotly::renderPlotly({
               build_plate_layout(
                 format = 96, overlay_data = df,
-                source = paste0(nm, "_source"), customdata = "well_id"
+                source = paste0(nm, "_source"), customdata = "well_id",
+                color = input$color_inspector_wells,
+                palette_name = input$palette_inspector
               )
             })
             output[[paste0(nm, "_selection")]] <- shiny::renderPrint({
