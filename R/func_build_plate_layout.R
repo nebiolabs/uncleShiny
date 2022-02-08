@@ -66,33 +66,6 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
     }
   }
   
-  # if (shiny::isTruthy(overlay_data)) {
-  #   p <- p |>
-  #     plotly::add_trace(
-  #       data = overlay_data,
-  #       inherit = FALSE,
-  #       type = "scatter",
-  #       mode = "markers",
-  #       x = ~well_number,
-  #       y = ~well_letter,
-  #       color = rlang::new_formula(NULL, rlang::sym(color)),
-  #       showlegend = FALSE,
-  #       marker = list(
-  #         symbol = "circle",
-  #         size = 20,
-  #         opacity = 1
-  #       ),
-  #       text = as.formula(paste0("~", tooltip)),
-  #       hoverinfo = "text",
-  #       customdata = rlang::new_formula(NULL, rlang::sym(customdata)),
-  #       selected = list(
-  #         marker = list(
-  #           color = "red"
-  #         )
-  #       )
-  #     )
-  # }
-  
   p |> 
     plotly::layout(
       modebar = list(
