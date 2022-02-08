@@ -32,12 +32,22 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
     text = ~well,
     hoverinfo = "text",
     source = source
-  ) 
+  )
   
   if (shiny::isTruthy(overlay_data)) {
-    p <- p |>
-      plotly::add_trace(
-        data = overlay_data,
+    palette_colors <- make_palette(
+      palette_name,
+      length(unique(overlay_data[[color]]))
+    )
+    overlay_split <- dplyr::mutate(
+      overlay_data,
+      !!color := forcats::fct_rev(forcats::fct_infreq(.data[[color]]))
+    ) |> 
+      dplyr::group_split(.data[[color]])
+    for (i in seq_along(palette_colors)) {
+      p <- plotly::add_trace(
+        p,
+        data = overlay_split[[i]],
         inherit = FALSE,
         type = "scatter",
         mode = "markers",
@@ -46,20 +56,49 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
         showlegend = FALSE,
         marker = list(
           symbol = "circle",
-          size = 24,
-          color = "lightpurple",
+          size = 20,
+          color = palette_colors[i],
           opacity = 0.9
         ),
-        text = ~well,
+        text = rlang::new_formula(NULL, rlang::sym(tooltip)),
         hoverinfo = "text",
         customdata = rlang::new_formula(NULL, rlang::sym(customdata)),
         selected = list(
           marker = list(
-            color = "lightgreen"
+            color = "red",
+            alpha = 0.5
           )
         )
       )
+    }
   }
+  
+  # if (shiny::isTruthy(overlay_data)) {
+  #   p <- p |>
+  #     plotly::add_trace(
+  #       data = overlay_data,
+  #       inherit = FALSE,
+  #       type = "scatter",
+  #       mode = "markers",
+  #       x = ~well_number,
+  #       y = ~well_letter,
+  #       color = rlang::new_formula(NULL, rlang::sym(color)),
+  #       showlegend = FALSE,
+  #       marker = list(
+  #         symbol = "circle",
+  #         size = 20,
+  #         opacity = 1
+  #       ),
+  #       text = as.formula(paste0("~", tooltip)),
+  #       hoverinfo = "text",
+  #       customdata = rlang::new_formula(NULL, rlang::sym(customdata)),
+  #       selected = list(
+  #         marker = list(
+  #           color = "red"
+  #         )
+  #       )
+  #     )
+  # }
   
   p |> 
     plotly::layout(
