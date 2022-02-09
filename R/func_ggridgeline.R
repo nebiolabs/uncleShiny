@@ -4,8 +4,9 @@
 ##-------------------------------------------------------------------------
 
 ggridgeline <- function(data, spec_type, dls_type = "intensity", 
-                        sort_var, color_var = NA_character_, color_encoded = FALSE,
-                        palette_name = "Set2", show_legend = TRUE,
+                        sort_var, color_var = NA_character_,
+                        palette_name = "Set2", color_encoded = FALSE,
+                        force_encoding = FALSE, show_legend = TRUE,
                         alpha = 0.6) {
   if (is.null(data)) {
     stop("Nothing is selected.")
@@ -22,10 +23,12 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   
   if (is.na(color_var)) {
     color_encoded <- TRUE
+    cat("Ridgeline using encoded colors.\n")
   }
   
   if (color_encoded) {
     color_var <- "color_hex"
+    cat("Color variable is set to `color_hex`.\n")
   }
   
   if (!any(colnames(data) == color_var)) {
@@ -70,7 +73,12 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##----------------------------------------
   plot_data <- data |> 
     # dplyr::mutate(well_id = bit64::as.character.integer64(well_id)) |>
-    dplyr::mutate(well_id = forcats::fct_reorder(well_id, .data[[sort_var]]))
+    dplyr::mutate(well_id = forcats::fct_reorder(well_id, .data[[sort_var]])) 
+  
+  if (color_encoded & force_encoding) {
+    cat("Variable `color_hex` will be recoded.\n")
+    plot_data <- cbind_colors(plot_data, color_var, palette_name)
+  }
   
   
   ##----------------------------------------
@@ -306,6 +314,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
   ##  Color aesthetic    --
   ##-----------------------
   if (color_encoded) {
+    cat("Ridgeline using `scale_color_idenity`.\n")
     p <- p +
       # Hardcoded color palette; see R/func_paletteGenerator.R
       ggplot2::scale_color_identity(
@@ -319,6 +328,7 @@ ggridgeline <- function(data, spec_type, dls_type = "intensity",
         aesthetics = c("color", "fill")
       )
   } else {
+    cat("Ridgeline using `scale_color_manual`.\n")
     p <- p +
       # Color palette; see R/func_paletteGenerator.R
       ggplot2::scale_color_manual(
