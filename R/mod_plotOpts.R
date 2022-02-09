@@ -28,7 +28,7 @@ plotOptsUI <- function(id) {
           ns("color_global"),
           "Color points by:",
           choices = colorvarChoices,
-          selected = "buffer"
+          selected = "Buffer_condition_name"
         ),
         ##-----------------------
         ##  Palette            --
@@ -247,7 +247,7 @@ plotOptsUI <- function(id) {
           ns("color_zoom"),
           "Color points by:",
           choices = colorvarChoices,
-          selected = "buffer"
+          selected = "Buffer_condition_name"
         ),
         ##-----------------------
         ##  Y-var              --
