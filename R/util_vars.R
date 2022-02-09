@@ -183,7 +183,7 @@ spec_tbl_list <- c(
 ##  TOOLTIPS                                            --
 ##--------------------------------------------------------
 # Expression for generating hover tooltip
-short_tootip_glue_string <- quote(
+short_tooltip_glue_string <- quote(
   glue::glue(
     "<em>Plate Well: {well} </em><br>",
     "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",
@@ -192,7 +192,7 @@ short_tootip_glue_string <- quote(
 )
 
 # Expression for generating conditions module summary
-long_tootip_glue_string <- quote(
+long_tooltip_glue_string <- quote(
   glue::glue(
     "<h4><em>Plate Well: {well}</em></h4>",
     "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",

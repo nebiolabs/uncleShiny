@@ -82,7 +82,7 @@ plateInspectorServer <- function(id, grv) {
               dplyr::mutate(
                 df,
                 tooltip = rlang::eval_tidy(
-                  short_tootip_glue_string,
+                  short_tooltip_glue_string,
                   data = df
                 )
               )

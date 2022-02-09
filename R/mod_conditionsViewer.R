@@ -27,7 +27,7 @@ conditionsViewerServer <- function(id, robj_data) {
       output$conditions_html <- shiny::renderText({
         shiny::req(robj_data())
         rlang::eval_tidy(
-          long_tootip_glue_string,
+          long_tooltip_glue_string,
           data = robj_data()
         )
       })
