@@ -56,10 +56,18 @@ spectraViewerUI <- function(id) {
 ##-------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ##-------------------------------------------------------
-spectraViewerServer <- function(id, robj_data) {
+spectraViewerServer <- function(id, robj_data, robj_color_var = NULL,
+                                robj_palette_name = NULL,
+                                force_encoding = FALSE) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
+      
+      if (force_encoding) {
+        show_legend <- TRUE
+      } else {
+        show_legend <- FALSE
+      }
       
       munge_module_data <- function(data_input) {
         unnest_conflicts <- c("created_at", "updated_at")
@@ -70,6 +78,14 @@ spectraViewerServer <- function(id, robj_data) {
           data_input |> 
             dplyr::select(-tidyselect::any_of(unnest_conflicts))
         }
+      }
+      
+      if (is.null(robj_color_var)) {
+        robj_color_var <- shiny::reactive({NA_character_})
+      }
+      
+      if (is.null(robj_palette_name)) {
+        robj_palette_name <- shiny::reactive({"Set2"})
       }
       
       ##----------------------------------------
@@ -90,9 +106,10 @@ spectraViewerServer <- function(id, robj_data) {
           spec_type = "dls",
           dls_type = input$type_dynamic,
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
-          show_legend = FALSE
+          color_var = robj_color_var(),
+          palette_name = robj_palette_name(),
+          force_encoding = force_encoding,
+          show_legend = show_legend
         )
       })
       
@@ -105,9 +122,10 @@ spectraViewerServer <- function(id, robj_data) {
           data = module_data(),
           spec_type = "corr",
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
-          show_legend = FALSE
+          color_var = robj_color_var(),
+          palette_name = robj_palette_name(),
+          force_encoding = force_encoding,
+          show_legend = show_legend
         )
       })
       
@@ -120,9 +138,10 @@ spectraViewerServer <- function(id, robj_data) {
           data = module_data(),
           spec_type = "sls",
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
-          show_legend = FALSE
+          color_var = robj_color_var(),
+          palette_name = robj_palette_name(),
+          force_encoding = force_encoding,
+          show_legend = show_legend
         )
       })
       output$dsf <- renderPlot({
@@ -130,9 +149,10 @@ spectraViewerServer <- function(id, robj_data) {
           data = module_data(),
           spec_type = "dsf",
           sort_var = "Z_D",
-          color_var = "well",
-          palette_name = "Set2",
-          show_legend = FALSE
+          color_var = robj_color_var(),
+          palette_name = robj_palette_name(),
+          force_encoding = force_encoding,
+          show_legend = show_legend
         )
       })
     }

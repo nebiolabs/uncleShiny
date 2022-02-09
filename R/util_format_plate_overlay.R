@@ -21,7 +21,7 @@ format_plate_overlay <- function(df) {
           function(df) {
             paste0(
               "Experiment Set ",
-              bit64::as.character.integer64(unique(df[["exp_set_id"]])),
+              unique(df[["exp_set_id"]]),
               " (",
               unique(df[["plate"]]),
               ")"

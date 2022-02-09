@@ -102,10 +102,7 @@ function(input, output, session) {
   ##////////////////////////////////////////
   ##  Plate inspector module              //
   ##////////////////////////////////////////
-  plateInspectorServer(
-    "inspector",
-    grv
-  )
+  plateInspectorServer("inspector", grv)
   
   
   

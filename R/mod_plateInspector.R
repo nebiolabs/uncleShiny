@@ -12,6 +12,31 @@ plateInspectorUI <- function(id) {
     shiny::sidebarLayout(
       sidebarPanel = shiny::sidebarPanel(
         width = 4,
+        shiny::fluidRow(
+          shiny::selectInput(
+            ns("color_inspector_wells"),
+            "Color wells by:",
+            choices = colorvarChoices,
+            selected = "Buffer_condition_name",
+            width = "25%"
+          ),
+          # shiny::selectInput(
+          #   ns("color_inspector_spectra"),
+          #   "Color spectra by:",
+          #   choices = colorvarChoices,
+          #   selected = "Buffer_condition_name",
+          #   width = "25%"
+          # ),
+          shiny::selectInput(
+            ns("palette_inspector"),
+            shiny::HTML(
+              "<a target='_blank' href='https://colorbrewer2.org'>ColorBrewer</a> Palette:"
+            ),
+            choices = palChoices,
+            selected = "Set2",
+            width = "25%"
+          )
+        ),
         shiny::uiOutput(ns("plate_layouts"))#,
         # shiny::verbatimTextOutput(ns("inspector_selected"))
       ),
@@ -48,10 +73,20 @@ plateInspectorServer <- function(id, grv) {
                 Buffer_condition_name
               )
             ) |> 
-            dplyr::mutate(dplyr::across(
-              c("well_id"),
-              .fns = bit64::as.character.integer64
-            )) |> 
+            df_char_int64() |> 
+            cbind_colors(
+              input$color_inspector_wells,
+              input$palette_inspector
+            ) |>
+            {\(df) 
+              dplyr::mutate(
+                df,
+                tooltip = rlang::eval_tidy(
+                  short_tooltip_glue_string,
+                  data = df
+                )
+              )
+            }() |> 
             format_plate_overlay()
         }
       }
@@ -74,7 +109,10 @@ plateInspectorServer <- function(id, grv) {
             output[[paste0(nm, "_plot")]] <- plotly::renderPlotly({
               build_plate_layout(
                 format = 96, overlay_data = df,
-                source = paste0(nm, "_source"), customdata = "well_id"
+                source = paste0(nm, "_source"), customdata = "well_id",
+                color_var = input$color_inspector_wells,
+                palette_name = input$palette_inspector,
+                tooltip = "tooltip"
               )
             })
             output[[paste0(nm, "_selection")]] <- shiny::renderPrint({
@@ -198,7 +236,9 @@ plateInspectorServer <- function(id, grv) {
       ##/////////////////////////////////////////
       spectraViewerServer(
         "inspector_ridgeline",
-        shiny::reactive({grv$inspector$selected$data})
+        shiny::reactive({grv$inspector$selected$data}),
+        robj_palette_name = shiny::reactive({input$palette_inspector}),
+        force_encoding = FALSE
       )
     }
   )

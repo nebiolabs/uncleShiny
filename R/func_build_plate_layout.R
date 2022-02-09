@@ -4,7 +4,9 @@
 ##--------------------------------------------------------------------------
 
 build_plate_layout <- function(format = NULL, overlay_data = NULL, 
-                              source = NULL, customdata = "well") {
+                              source = NULL, customdata = "well",
+                              color_var = "color_hex", palette_name = "Set2",
+                              tooltip = "well") {
   base_plate <- make_base_plate(format = format)
   
   if (is.null(overlay_data)) {
@@ -20,8 +22,8 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
     marker = list(
       symbol = "circle",
       size = 25,
-      color = "white",
-      opacity = 0,
+      color = NA,
+      opacity = 0.1,
       line = list(
         color = "black",
         width = 2
@@ -30,12 +32,15 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
     text = ~well,
     hoverinfo = "text",
     source = source
-  ) 
+  )
   
   if (shiny::isTruthy(overlay_data)) {
-    p <- p |>
-      plotly::add_trace(
-        data = overlay_data,
+    overlay_split <- dplyr::group_split(overlay_data, .data[[color_var]])
+    
+    for (i in seq_along(overlay_split)) {
+      p <- plotly::add_trace(
+        p,
+        data = overlay_split[[i]],
         inherit = FALSE,
         type = "scatter",
         mode = "markers",
@@ -44,19 +49,21 @@ build_plate_layout <- function(format = NULL, overlay_data = NULL,
         showlegend = FALSE,
         marker = list(
           symbol = "circle",
-          size = 24,
-          color = "lightpurple",
+          size = 20,
+          color = unique(overlay_split[[i]][["color_hex"]]),
           opacity = 0.9
         ),
-        text = ~well,
+        text = rlang::new_formula(NULL, rlang::sym(tooltip)),
         hoverinfo = "text",
         customdata = rlang::new_formula(NULL, rlang::sym(customdata)),
         selected = list(
           marker = list(
-            color = "lightgreen"
+            color = "red",
+            alpha = 0.5
           )
         )
       )
+    }
   }
   
   p |> 
