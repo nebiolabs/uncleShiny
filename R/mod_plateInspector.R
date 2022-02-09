@@ -20,13 +20,13 @@ plateInspectorUI <- function(id) {
             selected = "Buffer_condition_name",
             width = "25%"
           ),
-          shiny::selectInput(
-            ns("color_inspector_spectra"),
-            "Color spectra by:",
-            choices = colorvarChoices,
-            selected = "Buffer_condition_name",
-            width = "25%"
-          ),
+          # shiny::selectInput(
+          #   ns("color_inspector_spectra"),
+          #   "Color spectra by:",
+          #   choices = colorvarChoices,
+          #   selected = "Buffer_condition_name",
+          #   width = "25%"
+          # ),
           shiny::selectInput(
             ns("palette_inspector"),
             shiny::HTML(
@@ -75,7 +75,7 @@ plateInspectorServer <- function(id, grv) {
             ) |> 
             df_char_int64() |> 
             cbind_colors(
-              input$color_inspector_spectra,
+              input$color_inspector_wells,
               input$palette_inspector
             ) |>
             {\(df) 
