@@ -47,10 +47,17 @@ sql_queries$products <- {
 ##--------------------------------------------------------
 # Experiment sets for user-selected product {input}
 sql_queries$experiment_sets <-  {
-  "SELECT product_id, CONCAT(exp_type, '_', plate_generation) AS plate,
-    id AS exp_set_id, well_set_id, processing_status AS status, 
-    benchling_url, notes
-  FROM uncle_experiment_sets
+  "SELECT exp_sets.product_id,
+    CONCAT(types.name, well_sets.uncle_plate_generation) AS plate,
+    well_sets.uncle_plate_type_id AS plate_id,
+    exp_sets.id AS exp_set_id, exp_sets.well_set_id,
+    exp_sets.processing_status AS status, 
+    exp_sets.benchling_url, exp_sets.notes
+  FROM uncle_experiment_sets AS exp_sets
+  INNER JOIN well_sets
+    ON exp_sets.well_set_id = well_sets.id
+  INNER JOIN uncle_plate_types AS types
+    ON well_sets.uncle_plate_type_id = types.id
   WHERE product_id = {input}"
 }
 
@@ -85,7 +92,8 @@ sql_queries$summary_data <- {
     )
   SELECT p.name AS product_name, p.id AS product_id,
     exp_sets.id AS exp_set_id,
-    CONCAT(exp_sets.exp_type, '_', exp_sets.plate_generation) AS plate,
+    CONCAT(types.name, well_sets.uncle_plate_generation) AS plate,
+    well_sets.uncle_plate_type_id AS plate_id,
     exps.id AS exp_id, exps.uncle_instrument_id AS instrument, exp_sets.notes,
     cte_sum.*
   FROM cte_sum
@@ -93,6 +101,10 @@ sql_queries$summary_data <- {
     ON cte_sum.uncle_experiment_id = exps.id
   INNER JOIN uncle_experiment_sets AS exp_sets
     ON exps.uncle_experiment_set_id = exp_sets.id
+  INNER JOIN well_sets
+    ON exp_sets.well_set_id = well_sets.id
+  INNER JOIN uncle_plate_types AS types
+    ON well_sets.uncle_plate_type_id = types.id
   INNER JOIN products AS p
     ON exp_sets.product_id = p.id"
 }

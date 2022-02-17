@@ -204,14 +204,18 @@ dbDiagServer <- function(id, dbobj) {
         
       query_exp_sets <- {
         "SELECT p.id AS product_id,
-          CONCAT(exp_sets.exp_type, '_', exp_sets.plate_generation) AS plate, 
+          CONCAT(types.name, well_sets.uncle_plate_generation) AS plate, 
           COUNT(exps.id) AS n_exps, exp_sets.id AS exp_set_id
         FROM products AS p
         INNER JOIN uncle_experiment_sets AS exp_sets
           ON exp_sets.product_id = p.id
         LEFT JOIN uncle_experiments AS exps
           ON exps.uncle_experiment_set_id = exp_sets.id
-        GROUP BY p.id, exp_sets.id
+        INNER JOIN well_sets
+          ON exp_sets.well_set_id = well_sets.id
+        INNER JOIN uncle_plate_types AS types
+          ON well_sets.uncle_plate_type_id = types.id
+        GROUP BY p.id, exp_sets.id, types.id, well_sets.id
         ORDER BY exp_set_id"
       }
         
