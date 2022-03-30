@@ -41,7 +41,7 @@ aboutUI <- function(id) {
         shiny::headerPanel(""), # just using as a vertical separator
         shiny::fluidRow(
           shiny::tags$a(
-            href = "https://github.com/eric-hunt/unclePy",
+            href = "https://github.com/nebiolabs/unclePy",
             target = "_blank",
             shiny::tags$h3("unclePy")
           ),
@@ -56,7 +56,7 @@ aboutUI <- function(id) {
           ),
           shiny::br(),
           shiny::br(),
-          shiny::helpText("https://github.com/eric-hunt/unclePy")
+          shiny::helpText("https://github.com/nebiolabs/unclePy")
         ),
         ##----------------------
         ##  uncleShiny        --
@@ -64,7 +64,7 @@ aboutUI <- function(id) {
         shiny::headerPanel(""),
         shiny::fluidRow(
           shiny::tags$a(
-            href = "https://github.com/eric-hunt/uncleShiny",
+            href = "https://github.com/nebiolabs/uncleShiny",
             target = "_blank",
             shiny::tags$h3("uncleShiny")
           ),
@@ -133,7 +133,7 @@ aboutUI <- function(id) {
           ),
           shiny::br(),
           shiny::br(),
-          shiny::helpText("https://github.com/eric-hunt/uncleShiny")
+          shiny::helpText("https://github.com/nebiolabs/uncleShiny")
         )
       )
     ),
