@@ -176,7 +176,8 @@ dbQueryServer <- function(id, grv, dbobj) {
             "experiment_condition_id",
             "condition_id",
             "unit_id"
-          )))
+          ))) |> 
+          add_dls_mode()
 
         # uncle_summary_id keys for spectra table query
         summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
