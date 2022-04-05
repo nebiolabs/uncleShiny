@@ -37,7 +37,7 @@ yvarChoices <- c(
   "Tagg @ 473nm" = "Tagg473",
   "Tm" = "Tm1",
   "Polydispersity Index" = "PdI",
-  # "Z Modality" = "mode_Z",
+  "DLS Modality" = "dls_mode",
   "pH" = "pH_unit_value",
   "Buffer" = "Buffer_condition_name"
 )
@@ -121,7 +121,8 @@ numeric_filters_list <- c(
   "Tagg @ 473nm" = "Tagg473",
   "Polydispersity Index" = "PdI",
   "Z Diameter (nm)" = "Z_D",
-  "Peak 1 Diameter (nm)" = "peak1_D"
+  "Peak 1 Diameter (nm)" = "peak1_D",
+  "DLS Modality" = "dls_mode"
 )
 
 
