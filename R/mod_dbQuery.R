@@ -170,14 +170,10 @@ dbQueryServer <- function(id, grv, dbobj) {
             peak1_D = pk_1_mode_diameter,
             PdI = pdi
           ) |>
+          ## not currently used as `residuals` is dropped on import
           # dplyr::mutate(residuals = purrr::map(residuals, parse_float8)) |>
           dplyr::rename(uncle_summary_id = id) |>
-          dplyr::select(!tidyselect::any_of(c(
-            "residuals",
-            "experiment_condition_id",
-            "condition_id",
-            "unit_id"
-          ))) |> 
+          dplyr::select(!tidyselect::any_of(excluded_columns)) |> 
           add_dls_mode()
 
         # uncle_summary_id keys for spectra table query
