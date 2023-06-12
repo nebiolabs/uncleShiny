@@ -95,13 +95,13 @@ dbQueryServer <- function(id, grv, dbobj) {
       ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       # Reactive value of available experiment sets for user-selected product
       shiny::observeEvent(input$product_selection, {
-        shiny::req(dbobj,grv$dbquery$products)
+        shiny::req(dbobj,grv$dbquery$products, input$product_selection != 0)
         grv$dbquery$exp_sets <- get_query(
           dbobj,
           sql_queries$experiment_sets,
           input = input$product_selection
         )
-      })
+      }, ignoreInit = TRUE)
       
       # Update choices for experiment set selection
       shiny::observeEvent(grv$dbquery$exp_sets, {
