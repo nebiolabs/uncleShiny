@@ -18,6 +18,13 @@ character_conversions <- c(
   "well_id"
 )
 
+excluded_columns <- c(
+  "residuals",
+  "experiment_condition_id",
+  "condition_id",
+  "unit_id"
+)
+
 
 ##--------------------------------------------------------
 ##  PLOT OPTIONS                                        --
