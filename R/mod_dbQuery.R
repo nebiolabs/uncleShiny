@@ -191,7 +191,9 @@ dbQueryServer <- function(id, grv, dbobj) {
           sql_queries$conditions_units,
           input = input$experiment_set_selection
         ) |>
-          pivot_conditions()
+          pivot_conditions() |> 
+          add_missing_tooltip_vars(condition_groups) |> 
+          format_vars()
 
         # Join summary data with conditions and units
         summary_cond_unit_join <- purrr::reduce(
@@ -206,7 +208,6 @@ dbQueryServer <- function(id, grv, dbobj) {
         # Join nested spectra tables to summary data and return
         return(
           nest_spectra(summary_cond_unit_join, spec_tbls) |>
-            add_missing_tooltip_vars(condition_groups) |>
             normalize_spectra()
         )
       })
