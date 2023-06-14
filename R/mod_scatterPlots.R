@@ -107,13 +107,13 @@ scatterPlotsServer <- function(id, grv) {
         } else {
           data_input |>
             dplyr::mutate(
-              Buffer_condition_name = dplyr::if_else(
+              Buffer = dplyr::if_else(
                 stringr::str_detect(
-                  Buffer_condition_name,
+                  Buffer,
                   "(Neutral Buffer)|(NB)"
                 ),
                 "Neutral Buffer",
-                Buffer_condition_name
+                Buffer
               )
             ) |> 
             df_char_int64() |> 
