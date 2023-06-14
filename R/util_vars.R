@@ -35,8 +35,8 @@ xvarChoices <- c(
   "Tm" = "Tm1",
   "Z Diameter (nm)" = "Z_D",
   "Peak 1 Diameter (nm)" = "peak1_D",
-  "pH" = "pH_unit_value",
-  "Buffer" = "Buffer_condition_name"
+  "pH" = "pH",
+  "Buffer" = "Buffer"
 )
 
 yvarChoices <- c(
@@ -45,28 +45,23 @@ yvarChoices <- c(
   "Tm" = "Tm1",
   "Polydispersity Index" = "PdI",
   "DLS Modality" = "dls_mode",
-  "pH" = "pH_unit_value",
-  "Buffer" = "Buffer_condition_name"
+  "pH" = "pH",
+  "Buffer" = "Buffer"
 )
 
 colorvarChoices <- c(
-  "Buffer" = "Buffer_condition_name",
-  "pH" = "pH_unit_value",
-  "Buffer Salt" = "BufferSalt_condition_name",
-  "[Buffer Salt]" = "BufferSalt_unit_value",
-  "Metal Salt" = "MetalSalt_condition_name",
-  "[Metal Salt]" = "MetalSalt_unit_value",
-  "Additive" = "Additive_condition_name",
-  "Albumin" = "Albumin_condition_name",
-  "Amino Acid" = "AminoAcid_condition_name",
-  "[Amino Acid]" = "AminoAcid_unit_value",
-  "Chelator" = "Chelator_condition_name",
-  "ReducingAgent" = "ReducingAgent_condition_name",
-  "Sugar" = "Sugar_condition_name",
-  "Surfactant" = "Surfactant_condition_name",
-  "[Surfactant]" = "Surfactant_unit_value",
-  "Thickening Agent" = "ThickeningAgent_condition_name",
-  "[Thickening Agent]" = "ThickeningAgent_unit_value",
+  "Buffer" = "Buffer",
+  "pH" = "pH",
+  "Buffer Salt" = "BufferSalt",
+  "Metal Salt" = "MetalSalt",
+  "Additive" = "Additive",
+  "Albumin" = "Albumin",
+  "Amino Acid" = "AminoAcid",
+  "Chelator" = "Chelator",
+  "ReducingAgent" = "ReducingAgent",
+  "Sugar" = "Sugar",
+  "Surfactant" = "Surfactant",
+  "Thickening Agent" = "ThickeningAgent",
   # "Z Modality" = "mode_Z",
   "Plate Type" = "plate",
   "Exp. Set ID" = "exp_set_id",
@@ -105,11 +100,11 @@ palChoices <- names(palnList)
 ##  Conditions                          --
 ##----------------------------------------
 condition_filters_list <- c(
-  "Buffer" = "Buffer_condition_name",
-  "pH" = "pH_unit_value",
-  "Buffer Salt" = "BufferSalt_condition_name",
-  "ReducingAgent" = "ReducingAgent_condition_name",
-  "Sugar" = "Sugar_condition_name",
+  "Buffer" = "Buffer",
+  "pH" = "pH",
+  "Buffer Salt" = "BufferSalt",
+  "Reducing Agent" = "ReducingAgent",
+  "Sugar" = "Sugar",
   "Plate Type" = "plate",
   # "Exp. Set ID" = "exp_set_id",
   "Notes" = "notes"
@@ -193,9 +188,9 @@ spec_tbl_list <- c(
 # Expression for generating hover tooltip
 short_tooltip_glue_string <- quote(
   glue::glue(
-    "<em>Plate Well: {well} </em><br>",
-    "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",
-    "<b>Salt: </b> {`BufferSalt_unit_value`}{BufferSalt_unit_name} {`BufferSalt_condition_name`}<br>"
+    "<em>Plate Well: {well}</em><br>",
+    "<b>Buffer:</b> {Buffer}, pH {pH}<br>",
+    "<b>Salt:</b> {`BufferSalt`}<br>"
   )
 )
 
@@ -203,19 +198,19 @@ short_tooltip_glue_string <- quote(
 long_tooltip_glue_string <- quote(
   glue::glue(
     "<h4><em>Plate Well: {well}</em></h4>",
-    "<b>Buffer: </b> {Buffer_unit_value}{Buffer_unit_name} {Buffer_condition_name}, pH {pH_unit_value}<br>",
-    "<b>Salt: </b> {`BufferSalt_unit_value`}{BufferSalt_unit_name} {`BufferSalt_condition_name`}<br>",
+    "<b>Buffer:</b> {Buffer}, pH {pH}<br>",
+    "<b>Salt:</b> {`BufferSalt`}<br>",
     "<br>",
-    "<b>Additives: </b> <br>",
-    "    <em>Metal: </em>{`MetalSalt_unit_value`}{MetalSalt_unit_name} {`MetalSalt_condition_name`}<br>",
-    "    <em>Amino Acid: </em>{`AminoAcid_unit_value`}{AminoAcid_unit_name} {`AminoAcid_condition_name`}<br>",
-    "    <em>Sugar: </em>{`Sugar_unit_value`}{Sugar_unit_name} {`Sugar_condition_name`}<br>",
-    "    <em>Surfactant: </em>{`Surfactant_unit_value`}{Surfactant_unit_name} {`Surfactant_condition_name`}<br>",
-    "    <em>Albumin: </em>{`Albumin_unit_value`}{Albumin_unit_name} {`Albumin_condition_name`}<br>",
-    "    <em>Chelator: </em>{`Chelator_unit_value`}{Chelator_unit_name} {`Chelator_condition_name`}<br>",
-    "    <em>Reducing Agent: </em>{`ReducingAgent_unit_value`}{ReducingAgent_unit_name} {`ReducingAgent_condition_name`}<br>",
-    "    <em>Thickener: </em>{`ThickeningAgent_unit_value`}{ThickeningAgent_unit_name} {`ThickeningAgent_condition_name`}<br>",
-    "    <em>General: </em>{`Additive_unit_value`}{Additive_unit_name} {`Additive_condition_name`}<br>",
-    "    <em>Chaperone: </em>{`Chaperone_unit_value`}{Chaperone_unit_name} {`Chaperone_condition_name`}<br>",
+    "<b>Additives:</b><br>",
+    "    <em>Metal:</em> {`MetalSalt`}<br>",
+    "    <em>Amino Acid:</em> {`AminoAcid`}<br>",
+    "    <em>Sugar:</em> {`Sugar`}<br>",
+    "    <em>Surfactant:</em> {`Surfactant`}<br>",
+    "    <em>Albumin:</em> {`Albumin`}<br>",
+    "    <em>Chelator:</em> {`Chelator`}<br>",
+    "    <em>Reducing Agent:</em> {`ReducingAgent`}<br>",
+    "    <em>Thickener:</em> {`ThickeningAgent`}<br>",
+    "    <em>General:</em> {`Additive`}<br>",
+    "    <em>Chaperone:</em> {`Chaperone`}<br>",
   )
 )
