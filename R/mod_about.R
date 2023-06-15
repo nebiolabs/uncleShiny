@@ -10,11 +10,16 @@ aboutUI <- function(id) {
   ns <- shiny::NS(id)
   
   # Please keep sensitive internal information separate when hosting.
-  source("data/mod_about_internal.R", local = TRUE)
+  tryCatch(
+    {source("data/mod_about_internal.R", local = TRUE)},
+    error = \(e) NULL,
+    warning = \(w) NULL
+  )
   
   shiny::tagList(
     shiny::fluidRow(
-      about_internal,
+      tryCatch(about_internal, error = \(e) NULL),
+      # about_internal,
       ##-----------------------------------------
       ##  Source code                          --
       ##-----------------------------------------
