@@ -14,7 +14,7 @@ make_wordcloud_data <- function(df, var_sel) {
       dplyr::mutate(
         pH = stringr::str_c("pH", pH, sep = "_")
       ) |>
-      dplyr::select(tidyselect::any_of(vars = var_sel())) |>
+      dplyr::select(tidyselect::any_of(var_sel)) |>
       tidyr::pivot_longer(
         cols = tidyselect::everything(),
         names_to = "trash",

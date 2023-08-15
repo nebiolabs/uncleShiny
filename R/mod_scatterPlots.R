@@ -51,7 +51,7 @@ scatterPlotsUI <- function(id) {
             ##-----------------------------------------
             ##  Wordcloud                            --
             ##-----------------------------------------
-            # wordcloudUI(ns("scatter_wordcloud"))
+            wordcloudUI(ns("scatter_wordcloud"))
           )
         )
       ),
@@ -576,7 +576,7 @@ scatterPlotsServer <- function(id, grv) {
       wordcloudServer(
         "scatter_wordcloud",
         shiny::reactive({grv$scatter$selected$data}),
-        grv$dbquery$condition_groups
+        grv$condition_groups
       )
     }
   )

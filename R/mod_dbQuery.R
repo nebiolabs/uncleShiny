@@ -72,10 +72,6 @@ dbQueryServer <- function(id, grv, dbobj) {
       shiny::observeEvent(input$bttn_refresh, {
         shiny::req(dbobj)
         grv$dbquery$products <- get_query(dbobj, sql_queries$products)
-        grv$dbquery$condition_groups <- dplyr::pull(
-          get_query(dbobj, sql_queries$condition_groups),
-          name
-        )
       })
       
       # Update choices for product selection
@@ -91,6 +87,17 @@ dbQueryServer <- function(id, grv, dbobj) {
           "product_selection",
           choices = c(" " = 0, updated_choices),
           selected = 0
+        )
+      })
+      
+      ##----------------------------------------
+      ##  Available condition groups          --
+      ##----------------------------------------
+      grv$condition_groups <- shiny::eventReactive(input$bttn_refresh, {
+        shiny::req(dbobj)
+        dplyr::pull(
+          get_query(dbobj, sql_queries$condition_groups),
+          name
         )
       })
       
@@ -196,7 +203,7 @@ dbQueryServer <- function(id, grv, dbobj) {
           input = input$experiment_set_selection
         ) |>
           pivot_conditions() |> 
-          add_missing_tooltip_vars(grv$dbquery$condition_groups) |> 
+          add_missing_tooltip_vars(grv$condition_groups()) |> 
           format_vars()
 
         # Join summary data with conditions and units
