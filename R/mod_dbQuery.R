@@ -72,6 +72,10 @@ dbQueryServer <- function(id, grv, dbobj) {
       shiny::observeEvent(input$bttn_refresh, {
         shiny::req(dbobj)
         grv$dbquery$products <- get_query(dbobj, sql_queries$products)
+        grv$dbquery$condition_groups <- dplyr::pull(
+          get_query(dbobj, sql_queries$condition_groups),
+          name
+        )
       })
       
       # Update choices for product selection
@@ -180,10 +184,10 @@ dbQueryServer <- function(id, grv, dbobj) {
         summary_ids <- summary_data |> dplyr::pull(uncle_summary_id)
 
         # vector of distinct groups for tooltip variable check
-        condition_groups <- dplyr::pull(
-          get_query(dbobj, sql_queries$condition_groups),
-          name
-        )
+        # grv$dbquery$condition_groups <- dplyr::pull(
+        #   get_query(dbobj, sql_queries$condition_groups),
+        #   name
+        # )
 
         # Base table for condition and unit join manipulations; join on well_id
         conditions_units <- get_query(
@@ -192,7 +196,7 @@ dbQueryServer <- function(id, grv, dbobj) {
           input = input$experiment_set_selection
         ) |>
           pivot_conditions() |> 
-          add_missing_tooltip_vars(condition_groups) |> 
+          add_missing_tooltip_vars(grv$dbquery$condition_groups) |> 
           format_vars()
 
         # Join summary data with conditions and units

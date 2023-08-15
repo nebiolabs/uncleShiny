@@ -573,10 +573,12 @@ scatterPlotsServer <- function(id, grv) {
       ##////////////////////////////////////////
       ##  Wordcloud module                    //
       ##////////////////////////////////////////
-      # wordcloudServer(
-      #   "scatter_wordcloud",
-      #   shiny::reactive({grv$scatter$selected$data})
-      # )
+      wordcloudServer(
+        "scatter_wordcloud",
+        shiny::reactive({grv$scatter$selected$data}),
+        grv$dbquery$condition_groups
+      )
     }
   )
+
 }
