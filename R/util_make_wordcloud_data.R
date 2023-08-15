@@ -3,7 +3,7 @@
 ##  Prepare data for creating wordcloud                                  --
 ##-------------------------------------------------------------------------
 
-make_wordcloud_data <- function(df) {
+make_wordcloud_data <- function(df, var_sel) {
   if (is.null(df)) {
     tibble::tibble(
       word = c("nothing", "is", "selected"),
@@ -12,13 +12,9 @@ make_wordcloud_data <- function(df) {
   } else {
     df |>
       dplyr::mutate(
-        pH_condition_name = stringr::str_c(
-          pH_condition_name,
-          pH_unit_value,
-          sep = "_"
-        )
+        pH = stringr::str_c("pH", pH, sep = "_")
       ) |>
-      dplyr::select(tidyselect::contains("condition_name")) |>
+      dplyr::select(tidyselect::any_of(var_sel)) |>
       tidyr::pivot_longer(
         cols = tidyselect::everything(),
         names_to = "trash",

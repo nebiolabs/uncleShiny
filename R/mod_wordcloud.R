@@ -40,7 +40,7 @@ wordcloudUI <- function(id) {
 ## -------------------------------------------------------
 ##  SERVER FUNCTION                                    --
 ## -------------------------------------------------------
-wordcloudServer <- function(id, robj_data) {
+wordcloudServer <- function(id, robj_data, robj_groups) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
@@ -49,7 +49,8 @@ wordcloudServer <- function(id, robj_data) {
       ##  Wordcloud data                      --
       ##----------------------------------------
       wordcloud_data <- shiny::reactive({
-        make_wordcloud_data(robj_data())
+        shiny::req(robj_groups())
+        make_wordcloud_data(robj_data(), robj_groups())
       })
       
       wordcloud_data_filtered <- shiny::debounce(shiny::reactive({
