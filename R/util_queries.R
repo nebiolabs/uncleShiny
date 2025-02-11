@@ -47,7 +47,7 @@ sql_queries$products <- {
 ##--------------------------------------------------------
 # Experiment sets for user-selected product {input}
 sql_queries$experiment_sets <-  {
-  "SELECT exp_sets.product_id,
+  "SELECT exp_sets.product_id, exp_sets.lot_id,
     CONCAT(types.name, well_sets.uncle_plate_generation) AS plate,
     well_sets.uncle_plate_type_id AS plate_id,
     exp_sets.id AS exp_set_id, exp_sets.well_set_id,
@@ -90,7 +90,7 @@ sql_queries$summary_data <- {
                   WHERE exps.uncle_experiment_set_id IN ({input*})
                     AND sum.uncle_experiment_id = exps.id)
     )
-  SELECT p.name AS product_name, p.id AS product_id,
+  SELECT p.name AS product_name, p.id AS product_id, exp_sets.lot_id,
     exp_sets.id AS exp_set_id,
     CONCAT(types.name, well_sets.uncle_plate_generation) AS plate,
     well_sets.uncle_plate_type_id AS plate_id,

@@ -7,8 +7,16 @@
 ##--------------------------------------------------------
 ##  GENERAL                                             --
 ##--------------------------------------------------------
-wellOrder <- purrr::map2_chr(rep(c(LETTERS[1:8]), 12), purrr::flatten_chr(purrr::map(c(1:12), rep, 8)), paste0)
-uniOrder <- purrr::map2_chr(rep(c(LETTERS[1:16]), 3), purrr::flatten_chr(purrr::map(c(1:3), rep, 16)), paste0)
+wellOrder <- purrr::map2_chr(
+  rep(c(LETTERS[1:8]), 12),
+  purrr::flatten_chr(purrr::map(as.character(c(1:12)), rep, 8)),
+  paste0
+)
+uniOrder <- purrr::map2_chr(
+  rep(c(LETTERS[1:16]), 3),
+  purrr::flatten_chr(purrr::map(as.character(c(1:3)), rep, 16)),
+  paste0
+)
 
 character_conversions <- c(
   "exp_set_id",
@@ -57,6 +65,7 @@ colorvarChoices <- c(
   "Additive" = "Additive",
   "Albumin" = "Albumin",
   "Amino Acid" = "AminoAcid",
+  "Chaperone" = "Chaperone",
   "Chelator" = "Chelator",
   "ReducingAgent" = "ReducingAgent",
   "Sugar" = "Sugar",
@@ -105,6 +114,7 @@ condition_filters_list <- c(
   "Buffer Salt" = "BufferSalt",
   "Reducing Agent" = "ReducingAgent",
   "Sugar" = "Sugar",
+  "Chaperone" = "Chaperone",
   "Plate Type" = "plate",
   # "Exp. Set ID" = "exp_set_id",
   "Notes" = "notes"

@@ -52,11 +52,11 @@ use_testing_mode <- FALSE
 if (use_testing_mode) {
   message("TESTING ONE, TWO, THREE. IS THIS THING ON?")
   message("The app is currently in testing mode and will not use real data.")
-  test_data <- readr::read_rds("test/test_data.rds") |>
-    dplyr::rename_with(
-      ~"dls_temperature",
-      .cols = tidyselect::any_of(c("temperature"))
-    )
+  test_data <- readr::read_rds("test/test_data.rds")# |>
+    # dplyr::rename_with(
+      # ~"dls_temperature",
+      # .cols = tidyselect::any_of(c("temperature"))
+    # )
 }
 
 
