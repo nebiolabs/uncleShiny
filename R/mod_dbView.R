@@ -97,13 +97,8 @@ dbViewServer <- function(id, grv) {
       output$table_experiment_sets_available <- DT::renderDT({
         shiny::req(grv$dbquery$exp_sets)
         
-        data_with_urls <- grv$dbquery$exp_sets |> 
-          dplyr::mutate(benchling_url = glue::glue(
-            "<a href='{benchling_url}' target='_blank'>click to open</a>"
-          ))
-        
         DT::datatable(
-          data = data_with_urls,
+          data = grv$dbquery$exp_sets,
           selection = "none",
           # extensions = c("FixedColumns"),
           options = list(

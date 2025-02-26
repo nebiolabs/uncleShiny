@@ -52,7 +52,7 @@ sql_queries$experiment_sets <-  {
     well_sets.uncle_plate_type_id AS plate_id,
     exp_sets.id AS exp_set_id, exp_sets.well_set_id,
     exp_sets.processing_status AS status, 
-    exp_sets.benchling_url, exp_sets.notes
+    exp_sets.notes
   FROM uncle_experiment_sets AS exp_sets
   INNER JOIN well_sets
     ON exp_sets.well_set_id = well_sets.id
